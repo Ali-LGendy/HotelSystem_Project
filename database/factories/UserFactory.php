@@ -29,6 +29,15 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'client',
+            'last_login_at' => now()->subDays(rand(1, 30)), 
+            'national_id' => $this->faker->unique()->numerify('##############'),
+            'avatar_img' => $this->faker->imageUrl(100, 100, 'people'), 
+            'country' => $this->faker->country(),
+            'gender' => $this->faker->randomElement(['male', 'female']),
+            'is_banned' => false,
+            'is_approved' => true, 
+            'manager_id' => null,
         ];
     }
 

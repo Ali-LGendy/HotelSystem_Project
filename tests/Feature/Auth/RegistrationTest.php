@@ -17,8 +17,6 @@ test('new users can register', function () {
         'gender'=>'male',
         'national_id' => 12345678912345,
     ]);
-    dump($response->exception);
-
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
 });

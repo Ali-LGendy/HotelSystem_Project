@@ -22,6 +22,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'national_id',
+        'role',
+        'national_id',
+        'avatar_img',
+        'country',
+        'gender',
+        'is_banned',
+        'is_approved',
+        'manager_id',
     ];
 
     /**
@@ -46,4 +55,37 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function managedRoom(): HasMany
+    {
+        return $this->hasMany(Room::class);
+    }
+
+    public function managedFloor(): HasMany
+    {
+        return $this->hasMany(Floor::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function reservations(): HasMany // for both client and receptionist // check it
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    // self relation // check it
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id', 'id');
+    }
+
+    public function subOrdinates(): HasMany
+    {
+        return $this->hasMany(User::class, 'manager_id', 'id');
+    }
+
+
 }

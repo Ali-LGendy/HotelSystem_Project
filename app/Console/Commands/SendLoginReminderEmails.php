@@ -29,7 +29,6 @@ class SendLoginReminderEmails extends Command
     public function handle()
     {
         $users = User::where('last_login_at', '<', Carbon::now()->subMonth())
-                    ->orWhereNull('last_login_at') // Include users who never logged in // extra
                     ->get();
 
         foreach ($users as $user) {

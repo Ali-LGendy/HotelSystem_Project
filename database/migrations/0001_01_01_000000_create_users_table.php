@@ -19,17 +19,17 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-        
+
             // extra User Details
             $table->timestamp('last_login_at')->nullable();
             $table->enum('role', ['admin', 'manager', 'receptionist', 'client'])->default('client');
-            $table->string('national_id')->unique();
+            $table->string('national_id')->nullable()->unique();
             $table->string('avatar_img')->nullable();
             $table->string('country')->nullable();
             $table->enum('gender', ['male', 'female']);
             $table->boolean('is_banned')->default(false);
             $table->boolean('is_approved')->default(false);
-        
+
             // Manager Relationship
             $table->foreignId('manager_id')->nullable()->constrained('users')->onDelete('set null');
         });

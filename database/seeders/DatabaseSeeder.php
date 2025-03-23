@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
         ]);
         $this->call([
             RolesAndPermissionsSeeder::class,
+            //  RoomSeeder::class, // Uncommented if needed
+            //  ReservationSeeder::class,
         ]);
         $this->call([AdminSeeder::class]);
 
@@ -29,3 +31,5 @@ class DatabaseSeeder extends Seeder
 
     }
 }
+ // RoomSeeder::class, // Uncommented if needed
+            // ReservationSeeder::class,

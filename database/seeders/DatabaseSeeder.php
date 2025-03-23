@@ -30,24 +30,23 @@ class DatabaseSeeder extends Seeder
         User::factory(3)->create(['role' => 'manager']);
         User::factory(5)->create(['role' => 'receptionist']);
         User::factory(15)->create(['role' => 'client']);
-        
+
         // Create floors and rooms
         $floors = Floor::factory(5)->create();
-        
+
         // Create rooms for each floor
         foreach ($floors as $floor) {
             Room::factory(6)->create([
                 'floor_id' => $floor->id,
-                'manager_id' => $floor->manager_id
+                'manager_id' => $floor->manager_id,
             ]);
         }
-        
+
         // Create reservations
         Reservation::factory(10)->create(); // Pending
         Reservation::factory(8)->confirmed()->create(); // Confirmed
         Reservation::factory(5)->checkedIn()->create(); // Checked in
     }
 }
- // RoomSeeder::class, // Uncommented if needed
-            // ReservationSeeder::class,
-}
+// RoomSeeder::class, // Uncommented if needed
+// ReservationSeeder::class,

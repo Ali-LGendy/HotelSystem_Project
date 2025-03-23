@@ -15,7 +15,7 @@ class GreetingApprovedClient extends Notification implements ShouldQueue
      * Create a new notification instance.
      */
     public $user;
-    
+
     public function __construct($user)
     {
         $this->user = $user;
@@ -57,37 +57,36 @@ class GreetingApprovedClient extends Notification implements ShouldQueue
         ];
     }
 
+    //     public function approveUser($id)
+    // {
+    //     // Find the user by ID
+    //     $user = User::findOrFail($id);
 
-//     public function approveUser($id)
-// {
-//     // Find the user by ID
-//     $user = User::findOrFail($id);
+    //     // Update the user's approval status
+    //     $user->is_approved = true;
+    //     $user->save();
 
-//     // Update the user's approval status
-//     $user->is_approved = true;
-//     $user->save();
+    //     // Send the notification (Queued!)
+    //     $user->notify(new GreetingApprovedClient($user));
 
-//     // Send the notification (Queued!)
-//     $user->notify(new GreetingApprovedClient($user));
+    //     return response()->json(['message' => 'User approved and notified successfully!']);
+    // }
 
-//     return response()->json(['message' => 'User approved and notified successfully!']);
-// }
+    // public function approveUser($userId)
+    // {
+    //     $user = User::findOrFail($userId);
 
-// public function approveUser($userId)
-// {
-//     $user = User::findOrFail($userId);
-    
-//     if (!$user->is_approved) {
-//         $user->is_approved = true;
-//         $user->save();
+    //     if (!$user->is_approved) {
+    //         $user->is_approved = true;
+    //         $user->save();
 
-//         // Send Notification (Queued & Stored in Database)
-//         $user->notify(new WelcomeEmailNotification($user));
+    //         // Send Notification (Queued & Stored in Database)
+    //         $user->notify(new WelcomeEmailNotification($user));
 
-//         return response()->json(['message' => 'User approved. Welcome email sent and notification stored.']);
-//     }
+    //         return response()->json(['message' => 'User approved. Welcome email sent and notification stored.']);
+    //     }
 
-//     return response()->json(['message' => 'User is already approved.']);
-// }
+    //     return response()->json(['message' => 'User is already approved.']);
+    // }
 
 }

@@ -3,6 +3,7 @@ import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import   Select  from '@/Components/ui/input/Select.vue'; // Import the new Select component
 import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -12,15 +13,21 @@ const form = useForm({
     name: '',
     email: '',
     password: '',
+    gender: '',
     password_confirmation: '',
-    national_id: '',
+    avatar_image: '',
+    country: '  '
 });
 
 const submit = () => {
     form.post(route('register'), {
+        forceFormData: true, // Ensures the file is sent correctly
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+
+const countries = ["USA", "UK", "Canada", "Germany", "France"];
 </script>
 
 <template>
@@ -31,20 +38,54 @@ const submit = () => {
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
-                    <Input id="name" type="text" required autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Full name" />
+                    <Input id="name" type="text" autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Full name" />
                     <InputError :message="form.errors.name" />
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
-                    <Input id="email" type="email" required :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@example.com" />
+                    <Input id="email" type="email" :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@example.com" />
                     <InputError :message="form.errors.email" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="national_id">National ID</Label>
-                    <Input id="national_id" type="text" required autofocus :tabindex="1" autocomplete="national_id" v-model="form.national_id" placeholder="##############" />
-                    <InputError :message="form.errors.national_id" />
+                    <Label for="avatar_image">Avatar Image</Label>
+                    <Input 
+                        id="avatar_image" 
+                        type="file" 
+                        name="avatar_image" 
+                        :tabindex="1" 
+                        @change="form.avatar_image = $event.target.files[0]" 
+                    />
+                    <InputError :message="form.errors.avatar_image" />
+                                    
+                </div>
+                        
+                <div class="grid gap-3">
+                    <Label for="gender">Gender</Label>
+
+                    <div class="flex gap-10 ps-16">
+                        <div class="flex gap-3">
+                            <Input id="male" type="radio" name="gender" value="male" v-model="form.gender" />
+                            <Label for="male">Male</Label>
+                        </div>
+                        <div class="flex gap-3">
+                            <Input id="female" type="radio" name="gender" value="female" v-model="form.gender" />
+                            <Label for="female">Female</Label>
+                        </div>
+                    </div>
+                    
+                    <InputError :message="form.errors.gender" />
+                </div>
+                        
+                <div class="grid gap-3">
+                    <Label for="country">Country</Label>
+                    <Select v-model="form.country" id="country">
+                        <option v-for="country in countries" :key="country" :value="country">
+                            {{ country }}
+                        </option>
+                    </Select>
+                    <InputError :message="form.errors.country" />
                 </div>
 
                 <div class="grid gap-2">
@@ -52,7 +93,6 @@ const submit = () => {
                     <Input
                         id="password"
                         type="password"
-                        required
                         :tabindex="3"
                         autocomplete="new-password"
                         v-model="form.password"
@@ -66,7 +106,6 @@ const submit = () => {
                     <Input
                         id="password_confirmation"
                         type="password"
-                        required
                         :tabindex="4"
                         autocomplete="new-password"
                         v-model="form.password_confirmation"

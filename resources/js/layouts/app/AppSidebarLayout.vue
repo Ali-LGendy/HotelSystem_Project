@@ -7,6 +7,7 @@ import type { BreadcrumbItemType } from '@/types';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
+    menuLinks?: { name: string; route: string }[];
 }
 
 withDefaults(defineProps<Props>(), {
@@ -16,7 +17,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <AppShell variant="sidebar">
-        <AppSidebar />
+        <AppSidebar :menuLinks="menuLinks || []" />
         <AppContent variant="sidebar">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <slot />

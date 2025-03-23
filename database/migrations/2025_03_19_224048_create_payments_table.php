@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('stripe_payment_id');
             $table->unsignedInteger('amount');
             $table->enum('status', ['pending', 'paid', 'failed'])->default('pending');
-            
+
             $table->timestamps();
         });
     }

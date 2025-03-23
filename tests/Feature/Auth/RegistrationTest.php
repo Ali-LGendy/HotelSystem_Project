@@ -19,7 +19,7 @@ test('registration screen can be rendered', function () {
 
 test('new users can register', function () {
     $this->withoutExceptionHandling(); // Show actual errors
-    
+
     Role::create(['name' => 'client', 'guard_name' => 'web']);
 
     // Fake an empty file (bypasses actual image generation)

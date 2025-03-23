@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reservation extends Model
 {
-    protected $fillable = 
-    [
+    use HasFactory;
+
+    protected $fillable = [
         'accompany_number',
         'price_paid',
         'check_in_date',
@@ -18,23 +22,24 @@ class Reservation extends Model
         'receptionist_id',
     ];
 
-    public function client(): belongsTo
+    // Ensure the relationship is named 'client'
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(User::class,'client_id');
+        return $this->belongsTo(User::class, 'client_id');
     }
 
-    public function room(): hasMany
+    public function room(): BelongsTo
     {
-        return $this->hasMany(Room::class, 'room_id');
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
-    public function receptionist(): belongsTo
+    public function receptionist(): BelongsTo
     {
-        return $this->belongsTo(User::class,'receptionist_id');
+        return $this->belongsTo(User::class, 'receptionist_id');
     }
 
     public function payment(): BelongsTo
     {
-        return $this->BelongsTo(Payment::class);
+        return $this->belongsTo(Payment::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -14,7 +15,7 @@ class Payment extends Model
         'reservation_id',
     ];
 
-    public function reservation(): hasMany
+    public function reservation(): HasMany
     {
         return $this->hasMany(Reservation::class, 'reservation_id');
     }

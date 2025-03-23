@@ -42,7 +42,7 @@ class RolesAndPermissionsSeeder extends Seeder
             // Reservations & Payments
             'manage reservations',      // Admin, Manager, Receptionist
             'view client reservations', // Admin, Receptionist
-            'make reservations',        // Client
+            'make reservations',        // Client 
             'pay for reservations',     // Client
         
             // Reports & System
@@ -59,7 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => config('auth.defaults.guard')]);
         }
 
-        $admin->syncPermissions($PermissionNames);
+        $admin->syncPermissions($PermissionNames); // remove client permissions?
         $manager->syncPermissions([
             'manage receptionists',
             'ban users',

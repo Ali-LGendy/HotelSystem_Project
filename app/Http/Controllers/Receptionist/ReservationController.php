@@ -8,7 +8,6 @@ use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
@@ -24,7 +23,8 @@ class ReservationController extends Controller
 
     // Client-related methods have been moved to ClientController
 
-    public function create(){
+    public function create()
+    {
         $availableRooms = Room::where('status', 'available')->get();
 
         // Get approved clients for the current receptionist
@@ -36,10 +36,12 @@ class ReservationController extends Controller
 
         return Inertia::render('Receptionist/Reservation/Create', [
             'rooms' => $availableRooms,
-            'approvedClients' => $approvedClients
+            'approvedClients' => $approvedClients,
         ]);
     }
-    public function store(Request $request){
+
+    public function store(Request $request)
+    {
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'client_id' => 'required|exists:users,id',
@@ -51,14 +53,14 @@ class ReservationController extends Controller
         ]);
 
         $room = Room::find($validated['room_id']);
-        if($validated['accompany_number'] > $room->room_capacity){
+        if ($validated['accompany_number'] > $room->room_capacity) {
             return back()->withErrors('error', 'Accompanying number exceeds the room capacity.');
         }
 
         // Standardize status format if needed
         if ($validated['status'] === 'checked-in') {
             $validated['status'] = 'checked_in';
-        } else if ($validated['status'] === 'checked-out') {
+        } elseif ($validated['status'] === 'checked-out') {
             $validated['status'] = 'checked_out';
         }
 
@@ -66,19 +68,28 @@ class ReservationController extends Controller
         $validated['receptionist_id'] = auth()->id();
 
         $reservation = Reservation::create($validated);
+
         return redirect()->route('receptionist.reservations.index')->with('success', 'Reservation created successfully.');
     }
-    public function show(Reservation $reservation){
-        $reservation->load('room','client');
+
+    public function show(Reservation $reservation)
+    {
+        $reservation->load('room', 'client');
+
         // Use the Pages directory with capital P
-        return Inertia::render('Receptionist/Reservation/Show',['reservation' => $reservation]);
+        return Inertia::render('Receptionist/Reservation/Show', ['reservation' => $reservation]);
     }
-    public function edit(Reservation $reservation){
-        $availableRooms = Room::where('status' , 'available')->orWhere('id' , $reservation->room_id)->get();
+
+    public function edit(Reservation $reservation)
+    {
+        $availableRooms = Room::where('status', 'available')->orWhere('id', $reservation->room_id)->get();
+
         // Use the Pages directory with capital P
         return Inertia::render('Receptionist/Reservation/Edit', ['reservation' => $reservation, 'rooms' => $availableRooms]);
     }
-    public function update(Request $request, Reservation $reservation){
+
+    public function update(Request $request, Reservation $reservation)
+    {
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'accompany_number' => 'required|integer|min:1',
@@ -89,7 +100,7 @@ class ReservationController extends Controller
         ]);
 
         $room = Room::find($validated['room_id']);
-        if($validated['accompany_number'] > $room->room_capacity){
+        if ($validated['accompany_number'] > $room->room_capacity) {
             return back()->withErrors(['accompany_number' => 'Accompanying number exceeds the room capacity.']);
         }
 
@@ -97,7 +108,7 @@ class ReservationController extends Controller
         if (isset($validated['status'])) {
             if ($validated['status'] === 'checked-in') {
                 $validated['status'] = 'checked_in';
-            } else if ($validated['status'] === 'checked-out') {
+            } elseif ($validated['status'] === 'checked-out') {
                 $validated['status'] = 'checked_out';
             }
 
@@ -105,7 +116,7 @@ class ReservationController extends Controller
             if ($validated['status'] === 'checked_in') {
                 // When checking in, mark the room as occupied
                 $room->update(['status' => 'occupied']);
-            } else if ($validated['status'] === 'checked_out' || $validated['status'] === 'cancelled') {
+            } elseif ($validated['status'] === 'checked_out' || $validated['status'] === 'cancelled') {
                 // When checking out or cancelling, mark the room as available
                 $room->update(['status' => 'available']);
             }
@@ -127,8 +138,11 @@ class ReservationController extends Controller
         return redirect()->route('receptionist.reservations.index')
             ->with('success', 'Reservation updated successfully.');
     }
-    public function destroy (Reservation $reservation){
+
+    public function destroy(Reservation $reservation)
+    {
         $reservation->delete();
+
         return redirect()->route('receptionist.reservations.index')->with('success', 'Reservation deleted successfully.');
     }
 }

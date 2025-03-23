@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Reservation;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Inertia\Inertia;
 
 class ClientController extends Controller
@@ -18,7 +17,7 @@ class ClientController extends Controller
             ->paginate(10);
 
         return Inertia::render('Receptionist/Client/PendingClients', [
-            'pendingClients' => $clients
+            'pendingClients' => $clients,
         ]);
     }
 
@@ -31,7 +30,7 @@ class ClientController extends Controller
             ->paginate(10);
 
         return Inertia::render('Receptionist/Client/ApprovedClients', [
-            'approvedClients' => $clients
+            'approvedClients' => $clients,
         ]);
     }
 
@@ -40,7 +39,7 @@ class ClientController extends Controller
         $client = User::findOrFail($id);
         $client->update([
             'is_approved' => true,
-            'manager_id' => auth()->id()
+            'manager_id' => auth()->id(),
         ]);
 
         return redirect()->back()->with('success', 'Client approved successfully');
@@ -49,10 +48,10 @@ class ClientController extends Controller
     public function clientReservations($id = null)
     {
         $query = Reservation::with(['client', 'room'])
-            ->whereHas('client', function($q) {
+            ->whereHas('client', function ($q) {
                 $q->where('role', 'client')
-                  ->where('is_approved', true)
-                  ->where('manager_id', auth()->id());
+                    ->where('is_approved', true)
+                    ->where('manager_id', auth()->id());
             });
 
         if ($id) {
@@ -63,7 +62,7 @@ class ClientController extends Controller
 
         return Inertia::render('Receptionist/Client/ClientsReservations', [
             'clientsReservations' => $reservations,
-            'clientId' => $id
+            'clientId' => $id,
         ]);
     }
 }

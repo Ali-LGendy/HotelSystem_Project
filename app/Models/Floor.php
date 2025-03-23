@@ -28,9 +28,8 @@ class Floor extends Model
         return $this->belongsTo(Manager::class, 'manager_id');
     }
 
-
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DONT DELETE THIS COMMENT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    /* test auto generated floor number 
+    /* test auto generated floor number
     protected $fillable = ['name', 'manager_id']; // Ensure 'number' is not fillable to prevent manual override
 
     protected static function boot()

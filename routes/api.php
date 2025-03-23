@@ -28,3 +28,7 @@ Route::middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('clients/approved', [App\Http\Controllers\Api\ClientController::class, 'approvedClients'])->name('clients.approved');
     });
+
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');

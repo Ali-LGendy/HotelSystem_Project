@@ -70,11 +70,6 @@ class User extends Authenticatable
         return $this->hasMany(Floor::class);
     }
 
-    public function notifications(): HasMany
-    {
-        return $this->hasMany(Notification::class);
-    }
-
     public function reservations(): HasMany // for both client and receptionist // check it
     {
         return $this->hasMany(Reservation::class);

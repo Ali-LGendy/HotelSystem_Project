@@ -11,7 +11,8 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $fillable = 
+    [
         'accompany_number',
         'price_paid',
         'check_in_date',
@@ -22,13 +23,12 @@ class Reservation extends Model
         'receptionist_id',
     ];
 
-    // Ensure the relationship is named 'client'
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
     }
 
-    public function room(): BelongsTo
+    public function room(): belongsTo
     {
         return $this->belongsTo(Room::class, 'room_id');
     }

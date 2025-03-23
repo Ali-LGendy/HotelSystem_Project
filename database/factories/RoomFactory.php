@@ -2,23 +2,34 @@
 
 namespace Database\Factories;
 
-use App\Models\Room;
-use App\Models\User; // Import the User model
+use App\Models\Floor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Room>
+ */
 class RoomFactory extends Factory
 {
-    protected $model = Room::class;
-
-    public function definition()
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
+        static $roomCount = 1000; // Start from 1000 to ensure 4 digits
+        $roomCount++;
+        
+        // Get or create a floor
+        $floor = Floor::inRandomOrder()->first() ?? Floor::factory()->create();
+        
         return [
-            'room_number' => $this->faker->unique()->numerify('R####'), // Ensure unique room numbers
-            'floor_id' => $this->faker->numberBetween(1, 5), // Assuming 5 floors
-            'room_capacity' => $this->faker->numberBetween(1, 4),
-            'price' => $this->faker->numberBetween(10000, 50000), // Price in cents
-            'status' => $this->faker->randomElement(['available', 'occupied', 'maintenance']),
-            'manager_id' => User::inRandomOrder()->first()->id ?? null, // Assign a random manager or null
+            'floor_id' => $floor->id,
+            'manager_id' => $floor->manager_id,
+            'room_number' => $roomCount,
+            'room_capacity' => $this->faker->numberBetween(1, 6),
+            'price' => $this->faker->numberBetween(1000,  10000),
+            'status' => 'available'
         ];
     }
 }

@@ -37,7 +37,7 @@ class UserFactory extends Factory
             'country' => $this->faker->country(),
             'gender' => $this->faker->randomElement(['male', 'female']),
             'is_banned' => false,
-            'is_approved' => true,
+            'is_approved' => false,
             'manager_id' => null,
         ];
     }

@@ -26,6 +26,37 @@ defineOptions({ layout: AppLayout });
 //         router.delete(route('admin.users.managers.destroy', id));
 //     }
 // };
+const getImageUrl = (path) => {
+    if (!path) return '/dafaults/user.png';
+
+    // For full URLs
+    if (path.startsWith('http')) {
+        return path;
+    }
+
+    // For local storage files
+    return `/storage/${path}`;
+};
+
+// Fallback to initials if image fails to load
+const handleImageError = (event) => {
+    event.target.style.display = 'none';
+    event.target.parentNode.innerHTML = `
+        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+            ${getInitials(manager.name)}
+        </div>
+    `;
+};
+
+// Get initials from name
+const getInitials = (name) => {
+    return name
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+};
 </script>
 
 <template>
@@ -57,8 +88,16 @@ defineOptions({ layout: AppLayout });
                     <TableCell>{{ manager.password }}</TableCell>
                     <TableCell>{{ manager.national_id }}</TableCell>
                     <TableCell class="border-t border-gray-700 p-4">
-                        <img v-if="manager.avatar_img" :src="manager.avatar_img" alt="Avatar" class="h-10 w-10 rounded-full border border-gray-600" />
-                        <span v-else class="text-gray-500">No Avatar</span>
+                        <img
+                            v-if="manager.avatar_img"
+                            :src="getImageUrl(manager.avatar_img)"
+                            alt="Avatar"
+                            class="h-10 w-10 rounded-full border border-gray-600"
+                            @="handleImageError"
+                        />
+                        <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300">
+                            {{ getInitials(manager.name) }}
+                        </div>
                     </TableCell>
                     <TableCell>
                         <div class="flex gap-4">

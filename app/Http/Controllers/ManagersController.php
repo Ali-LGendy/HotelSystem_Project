@@ -41,12 +41,10 @@ class ManagersController extends Controller
     {
         $validated = $request->validated();
         if($request->hasFile('avatar_img')){
-            $path = $request->file('avatar_img')->store('photo','public');
+            $path = $request->file('avatar_img')->store('managers','public');
             $validated['avatar_img'] = $path;
-        dd($path);
-
         }else{
-            $validated['avatar_img'] = 'storage\app\public\photo\FB_IMG_1509641224534-1-1.jpg';
+            $validated['avatar_img'] = 'defaults/user.png';
         }
  
         $user = User::create([
@@ -89,12 +87,18 @@ class ManagersController extends Controller
     public function update(StoreManagerRequest $request, User $user)
     {
         //
+        // dd($request->all());
         $validated = $request->validated();
         if($request->hasFile('avatar_img')){
-            $path = $request->file('photo')->store('photos','public');
+            $path = $request->file('avatar_img')->store('managers','public');
             $validated['avatar_img'] = $path;
-        }
- 
+        }else {
+        // Keep existing avatar if no new file is uploaded
+        $validated['avatar_img'] = $user->avatar_img;
+    }
+    if (!empty($validated['password'])) {
+        $validated['password'] = bcrypt($validated['password']);
+    }
         // dd( $title, $description);
         
         $user->update([
@@ -102,7 +106,7 @@ class ManagersController extends Controller
             'password' => $validated['password'],
             'name' => $validated['name'],
             'national_id' => $validated['national_id'],
-            // 'avatar_img' => $validated['avatar_img'],
+            'avatar_img' => $validated['avatar_img'],
         ]);
         return redirect()->route('admin.users.managers.index')->with([
             'success' => 'User created successfully.',

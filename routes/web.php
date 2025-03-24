@@ -47,15 +47,15 @@ Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/us
     Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); // Delete a receptionist
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
-    Route::get('/', [ManageClientsController::class, 'index'])->name('index');        // List all clients
-    Route::get('/create', [ManageClientsController::class, 'create'])->name('create'); // Show create form
-    Route::post('/', [ManageClientsController::class, 'store'])->name('store');        // Store a new client
-    Route::get('/{user}', [ManageClientsController::class, 'show'])->name('show');     // Show a specific client
-    Route::get('/{user}/edit', [ManageClientsController::class, 'edit'])->name('edit'); // Edit client form
-    Route::put('/{user}', [ManageClientsController::class, 'update'])->name('update');  // Update a client
-    Route::delete('/{user}', [ManageClientsController::class, 'destroy'])->name('destroy'); // Delete a client
-});
+// Route::middleware(['auth', 'role:admin'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
+//     Route::get('/', [ManageClientsController::class, 'index'])->name('index');        // List all clients
+//     Route::get('/create', [ManageClientsController::class, 'create'])->name('create'); // Show create form
+//     Route::post('/', [ManageClientsController::class, 'store'])->name('store');        // Store a new client
+//     Route::get('/{user}', [ManageClientsController::class, 'show'])->name('show');     // Show a specific client
+//     Route::get('/{user}/edit', [ManageClientsController::class, 'edit'])->name('edit'); // Edit client form
+//     Route::put('/{user}', [ManageClientsController::class, 'update'])->name('update');  // Update a client
+//     Route::delete('/{user}', [ManageClientsController::class, 'destroy'])->name('destroy'); // Delete a client
+// });
 
 
 Route::get('dashboard', function () {

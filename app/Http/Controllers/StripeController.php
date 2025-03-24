@@ -17,23 +17,18 @@ class StripeController extends Controller
     public function checkout(Request $request, $reservation_id)
     {
         try {
-            // Find the reservation
             $reservation = Reservation::findOrFail($reservation_id);
             
-            // Validate that the reservation belongs to the current user
             if ($reservation->client_id !== auth()->id()) {
                 return redirect()->back()->with('error', 'Unauthorized access to this reservation.');
             }
             
-            // Validate reservation status
             if ($reservation->status !== 'pending') {
                 return redirect()->back()->with('error', 'This reservation cannot be processed for payment.');
             }
             
-            // Set Stripe API key
             Stripe::setApiKey(config('services.stripe.secret'));
             
-            // Calculate dates for product description
             $checkInDate = date('M d, Y', strtotime($reservation->check_in_date));
             $checkOutDate = date('M d, Y', strtotime($reservation->check_out_date));
             
@@ -102,7 +97,7 @@ class StripeController extends Controller
             }
             $payment = Payment::where('stripe_payment_id', $session_id)->firstOrFail();
 
-            $amountPaid = $session->amount_total; // Convert cents to dollars
+            $amountPaid = $session->amount_total;
             if ($amountPaid != $payment->amount) {
                 Log::error('Payment amount mismatch', [
                     'expected' => $payment->amount,
@@ -114,7 +109,6 @@ class StripeController extends Controller
 
             DB::beginTransaction();
             
-            // Find the payment record
             $payment->status = 'paid';
             $payment->save();
             

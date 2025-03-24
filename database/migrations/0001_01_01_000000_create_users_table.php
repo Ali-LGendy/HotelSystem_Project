@@ -22,9 +22,8 @@ return new class extends Migration
 
             // extra User Details
             $table->timestamp('last_login_at')->nullable();
-            $table->enum('role', ['admin', 'manager', 'receptionist', 'client'])->default('client');
             $table->string('national_id')->nullable()->unique();
-            $table->string('avatar_img')->nullable();
+            $table->string('avatar_img')->nullable()->default('defaults/user.png');
             $table->string('country')->nullable();
             $table->enum('gender', ['male', 'female']);
             $table->boolean('is_banned')->default(false);

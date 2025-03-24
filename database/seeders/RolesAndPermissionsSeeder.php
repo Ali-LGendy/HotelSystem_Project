@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -29,31 +28,30 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage clients',           // Admin
             'assign roles',             // Admin
             'ban users',                // Admin, Manager
-        
+
             // Floor & Room Management
             'manage floors',            // Admin, Manager
             'manage rooms',             // Admin, Manager
-        
+
             // Client & Receptionist Management
             'approve clients',          // Admin, Receptionist
             'view all clients',         // Admin, Manager
             'view approved clients',    // Admin, Receptionist
-        
+
             // Reservations & Payments
             'manage reservations',      // Admin, Manager, Receptionist
             'view client reservations', // Admin, Receptionist
-            'make reservations',        // Client 
+            'make reservations',        // Client
             'pay for reservations',     // Client
-        
+
             // Reports & System
             'manage payments',          // Admin, Manager, Receptionist
             'view reports',             // Admin, Manager
-        
+
             // Profile & General Actions
             'update profile',           // Admin, Manager, Receptionist, Client
             'view own reservations',    // Client
         ];
-        
 
         foreach ($PermissionNames as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => config('auth.defaults.guard')]);
@@ -69,7 +67,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage reservations',
             'manage payments',
             'view reports',
-            'update profile'
+            'update profile',
         ]);
         $receptionist->syncPermissions([
             'approve clients',

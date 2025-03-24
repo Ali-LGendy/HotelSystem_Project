@@ -24,7 +24,11 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
+    resolve: (name) => {
+        // Use the Pages directory with capital P explicitly
+        const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue');
+        return resolvePageComponent(`./Pages/${name}.vue`, pages);
+    },
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)

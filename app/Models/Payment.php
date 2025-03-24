@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
-    protected $fillable = 
-    [
-        'stripe_payment_id', 
-        'amount',
-        'status',
-        'reservation_id',
-    ];
+    protected $fillable =
+        [
+            'stripe_payment_id',
+            'amount',
+            'status',
+            'reservation_id',
+        ];
 
     public function reservation(): HasMany
     {

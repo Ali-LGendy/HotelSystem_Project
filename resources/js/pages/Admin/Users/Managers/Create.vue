@@ -13,11 +13,11 @@ const form = useForm({
     email: '',
     password: '',
     national_id: '',
-    avatar_image: null,
+    avatar_img: null,
 });
 
 const handleFileUpload = (event) => {
-    form.avatar_image = event.target.files[0];
+    form.avatar_img = event.target.files[0];
 };
 
 const submitForm = () => {
@@ -60,8 +60,8 @@ const submitForm = () => {
 
                 <!-- Avatar Image -->
                 <div>
-                    <Label for="avatar_image" class="dark:text-gray-300">Avatar Image</Label>
-                    <Input id="avatar_image" type="file" @change="handleFileUpload" accept="image/*" />
+                    <Label for="avatar_img" class="dark:text-gray-300">Avatar Image</Label>
+                    <Input id="avatar_img" type="file" @change="handleFileUpload" accept="image/*" />
                 </div>
 
                 <!-- Submit Button -->

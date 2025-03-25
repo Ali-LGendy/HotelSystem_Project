@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { defineProps, onMounted } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -19,13 +19,57 @@ onMounted(() => {
     console.log('Managers data:', props.managers);
 });
 defineOptions({ layout: AppLayout });
-// Function to handle deletion (for demonstration)
-// const deleteManager = (id) => {
-//     if (confirm('Are you sure you want to delete this manager?')) {
-//         // Example: Implement deletion logic with Inertia
-//         router.delete(route('admin.users.managers.destroy', id));
-//     }
-// };
+
+const getImageUrl = (path) => {
+    if (!path) return '/dafaults/user.png';
+
+    // For full URLs
+    if (path.startsWith('http')) {
+        return path;
+    }
+
+    // For local storage files
+    return `/storage/${path}`;
+};
+
+// Fallback to initials if image fails to load
+const handleImageError = (event) => {
+    event.target.style.display = 'none';
+    event.target.parentNode.innerHTML = `
+        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+            ${getInitials(manager.name)}
+        </div>
+    `;
+};
+
+const banManager = (id) => {
+    if (confirm('Are you sure you want to change the ban status of this manager?')) {
+        router.patch(route('admin.users.managers.ban', id), {
+            onSuccess: () => {
+                // Find and update the manager in the local data
+                const managerIndex = props.managers.data.findIndex((m) => m.id === id);
+                if (managerIndex !== -1) {
+                    props.managers.data[managerIndex].is_banned = !props.managers.data[managerIndex].is_banned;
+                }
+            },
+        });
+    }
+};
+
+const confirmDelete = (id) => {
+    if (confirm('Are you sure you want to delete this user?')) {
+        router.delete(route('admin.users.managers.destroy', id));
+    }
+};
+// Get initials from name
+const getInitials = (name) => {
+    return name
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+};
 </script>
 
 <template>
@@ -57,14 +101,25 @@ defineOptions({ layout: AppLayout });
                     <TableCell>{{ manager.password }}</TableCell>
                     <TableCell>{{ manager.national_id }}</TableCell>
                     <TableCell class="border-t border-gray-700 p-4">
-                        <img v-if="manager.avatar_img" :src="manager.avatar_img" alt="Avatar" class="h-10 w-10 rounded-full border border-gray-600" />
-                        <span v-else class="text-gray-500">No Avatar</span>
+                        <img
+                            v-if="manager.avatar_img"
+                            :src="getImageUrl(manager.avatar_img)"
+                            alt="Avatar"
+                            class="h-10 w-10 rounded-full border border-gray-600"
+                            @="handleImageError"
+                        />
+                        <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300">
+                            {{ getInitials(manager.name) }}
+                        </div>
                     </TableCell>
                     <TableCell>
                         <div class="flex gap-4">
                             <!-- Edit Button -->
                             <Link :href="route('admin.users.managers.edit', manager)">
                                 <Button variant="outline">Edit</Button>
+                            </Link>
+                            <Link :href="route('admin.users.managers.show', manager)">
+                                <Button variant="secondary">View</Button>
                             </Link>
 
                             <!-- Delete Button -->
@@ -73,9 +128,13 @@ defineOptions({ layout: AppLayout });
                                 :href="route('admin.users.managers.destroy', manager)"
                                 as="button"
                                 class="text-red-500 transition-colors duration-200 hover:text-red-400"
+                                @click.prevent="confirmDelete(manager.id)"
                             >
                                 <Button variant="destructive">Delete</Button>
                             </Link>
+                            <Button @click="banManager(manager.id)" :variant="manager.is_banned ? 'default' : 'destructive'">
+                                {{ manager.is_banned ? 'Unban Manager' : 'Ban Manager' }}
+                            </Button>
                         </div>
                     </TableCell>
                 </TableRow>

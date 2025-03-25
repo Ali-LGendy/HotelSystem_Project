@@ -30,10 +30,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => 'client',
             'last_login_at' => now()->subDays(rand(1, 30)),
             'national_id' => $this->faker->unique()->numerify('##############'),
-            'avatar_img' => $this->faker->imageUrl(100, 100, 'people'),
+            'avatar_img' => 'defaults/user.png',
             'country' => $this->faker->country(),
             'gender' => $this->faker->randomElement(['male', 'female']),
             'is_banned' => false,
@@ -52,13 +51,40 @@ class UserFactory extends Factory
         ]);
     }
 
-    // public function configure()
-    // {
-    //     return $this->afterCreating(function (User $user) {
-    //         $roles = ['manager', 'receptionist', 'client'];
-    //         $randomRole = $this->faker->randomElement($roles);
+    public function confirmed()
+    {
+        return $this->state(function (array $attributes) {
+            $user = User::find($attributes['id']);
+            if ($user) {
+                $user->update(['status' => 'occupied']);
+            }
 
-    //         $user->assignRole($randomRole);
-    //     });
-    // }
+            return ['status' => 'confirmed'];
+        });
+    }
+
+    public function client(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $receptionist = User::role('receptionist')->inRandomOrder()->first() ?? User::factory()->receptionist()->create();
+            $user->assignRole('client');
+            $user->update(['manager_id' => $receptionist->id]);
+
+        });
+    }
+    public function manager(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole('manager');
+        });
+    }
+    public function receptionist(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $manager = User::role('manager')->inRandomOrder()->first() ?? User::factory()->manager()->create();
+            $user->assignRole('receptionist');
+            $user->update(['manager_id' => $manager->id]);
+
+        });
+    }
 }

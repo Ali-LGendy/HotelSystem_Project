@@ -13,10 +13,19 @@ class Floor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'number',
         'name',
         'manager_id',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($floor) {
+            $latestFloor = Floor::orderByDesc('number')->first();
+            $floor->number = $latestFloor ? $latestFloor->number + 1 : 1000;
+        });
+    }
 
     public function room(): HasMany
     {
@@ -25,20 +34,6 @@ class Floor extends Model
 
     public function manager(): BelongsTo
     {
-        return $this->belongsTo(Manager::class, 'manager_id');
+        return $this->belongsTo(User::class, 'manager_id');
     }
-
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DONT DELETE THIS COMMENT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    /* test auto generated floor number
-    protected $fillable = ['name', 'manager_id']; // Ensure 'number' is not fillable to prevent manual override
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($floor) {
-            $latestFloor = Floor::orderByDesc('number')->first();
-            $floor->number = $latestFloor ? $latestFloor->number + 1 : 1000; // Start from 1000
-        });
-    }*/
 }

@@ -27,25 +27,25 @@ class DatabaseSeeder extends Seeder
         $this->call([AdminSeeder::class]);
 
         // Create users
-        User::factory(3)->create(['role' => 'manager']);
-        User::factory(5)->create(['role' => 'receptionist']);
-        User::factory(15)->create(['role' => 'client']);
+        User::factory(20)->manager()->create();
+        User::factory(30)->receptionist()->create();
+        User::factory(70)->client()->create();
 
         // Create floors and rooms
-        $floors = Floor::factory(5)->create();
+        $floors = Floor::factory(10)->create();
 
         // Create rooms for each floor
         foreach ($floors as $floor) {
-            Room::factory(6)->create([
+            Room::factory(10)->create([
                 'floor_id' => $floor->id,
                 'manager_id' => $floor->manager_id,
             ]);
         }
 
         // Create reservations
-        Reservation::factory(10)->create(); // Pending
-        Reservation::factory(8)->confirmed()->create(); // Confirmed
-        Reservation::factory(5)->checkedIn()->create(); // Checked in
+        Reservation::factory(20)->create(); // Pending
+        Reservation::factory(10)->confirmed()->create(); // Confirmed
+        Reservation::factory(10)->checkedIn()->create(); // Checked in
     }
 }
 // RoomSeeder::class, // Uncommented if needed

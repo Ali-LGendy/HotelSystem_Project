@@ -17,7 +17,6 @@ class StripeController extends Controller
     public function checkout(Request $request, $reservation_id)
     {
         try {
-            // Find the reservation
             $reservation = Reservation::findOrFail($reservation_id);
 
             // Validate that the reservation belongs to the current user
@@ -104,7 +103,7 @@ class StripeController extends Controller
             }
             $payment = Payment::where('stripe_payment_id', $session_id)->firstOrFail();
 
-            $amountPaid = $session->amount_total; // Convert cents to dollars
+            $amountPaid = $session->amount_total;
             if ($amountPaid != $payment->amount) {
                 Log::error('Payment amount mismatch', [
                     'expected' => $payment->amount,
@@ -116,8 +115,7 @@ class StripeController extends Controller
             }
 
             DB::beginTransaction();
-
-            // Find the payment record
+            
             $payment->status = 'paid';
             $payment->save();
 

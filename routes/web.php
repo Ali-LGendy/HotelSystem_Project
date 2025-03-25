@@ -27,7 +27,7 @@ Route::middleware(['auth',])->get('/dashboardd', [DashboardController::class, 'i
 
 
 
-Route::middleware(['auth','permission:manage managers'])->prefix('admin/users/managers')->name('admin.users.managers.')->group(function () {
+Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/users/managers')->name('admin.users.managers.')->group(function () {
     Route::get('/', [ManagersController::class, 'index'])->name('index');        // List all managers
     Route::get('/create', [ManagersController::class, 'create'])->name('create'); // Show create form
     Route::post('/', [ManagersController::class, 'store'])->name('store');        // Store a new manager

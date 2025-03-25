@@ -31,33 +31,18 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|min:3',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'national_id' => 'required|digits:14|unique:users,national_id',
-            'mobile' => 'required|string|max:20',
-            'country' => 'required|string|max:100',
-            'gender' => 'required|in:male,female',
-            'avatar_img' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-
-        // Handle avatar upload if provided
-        $avatarPath = null;
-        if ($request->hasFile('avatar_img')) {
-            $avatarPath = $request->file('avatar_img')->store('avatars', 'public');
-        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'national_id' => $request->national_id,
-            'mobile' => $request->mobile,
-            'country' => $request->country,
             'gender' => $request->gender,
-            'avatar_img' => $avatarPath,
-            'role' => 'client',
-            'is_approved' => 0, // Client starts as not approved (using 0 instead of false)
         ]);
 
         event(new Registered($user));

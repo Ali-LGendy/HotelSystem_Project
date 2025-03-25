@@ -23,8 +23,8 @@ class FloorFactory extends Factory
         return [
             'name' => 'Floor '.$floorNumber,
             'number' => $floorNumber,
-            'manager_id' => User::where('role', 'manager')->inRandomOrder()->first()?->id
-                ?? User::factory()->create(['role' => 'manager'])->id,
+            'manager_id' => User::role('manager')->inRandomOrder()->first()?->id
+                ?? User::factory()->manager()->create()->id,
         ];
     }
 }

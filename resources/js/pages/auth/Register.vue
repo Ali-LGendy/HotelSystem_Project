@@ -15,14 +15,14 @@ const form = useForm({
     password: '',
     gender: '',
     password_confirmation: '',
-    avatar_image: '',
-    country: '  '
+    national_id: '',
 });
 
 const submit = () => {
     form.post(route('register'), {
         forceFormData: true, // Ensures the file is sent correctly
         onFinish: () => form.reset('password', 'password_confirmation'),
+        forceFormData: true // Required for file uploads
     });
 };
 
@@ -49,43 +49,65 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="avatar_image">Avatar Image</Label>
-                    <Input 
-                        id="avatar_image" 
-                        type="file" 
-                        name="avatar_image" 
-                        :tabindex="1" 
-                        @change="form.avatar_image = $event.target.files[0]" 
-                    />
-                    <InputError :message="form.errors.avatar_image" />
-                                    
+                    <Label for="national_id">National ID</Label>
+                    <Input id="national_id" type="text" required autofocus :tabindex="1" autocomplete="national_id" v-model="form.national_id" placeholder="##############" />
+                    <InputError :message="form.errors.national_id" />
                 </div>
-                        
-                <div class="grid gap-3">
-                    <Label for="gender">Gender</Label>
 
-                    <div class="flex gap-10 ps-16">
-                        <div class="flex gap-3">
-                            <Input id="male" type="radio" name="gender" value="male" v-model="form.gender" />
-                            <Label for="male">Male</Label>
+                <div class="grid gap-2">
+                    <Label for="mobile">Mobile Number</Label>
+                    <Input id="mobile" type="text" required :tabindex="4" autocomplete="tel" v-model="form.mobile" placeholder="+1234567890" />
+                    <InputError :message="form.errors.mobile" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="country">Country</Label>
+                    <Input id="country" type="text" required :tabindex="5" autocomplete="country-name" v-model="form.country" placeholder="Your country" />
+                    <InputError :message="form.errors.country" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="gender">Gender</Label>
+                    <div class="flex gap-4 mt-1">
+                        <div class="flex items-center">
+                            <Input
+                                id="gender-male"
+                                type="radio"
+                                name="gender"
+                                value="male"
+                                v-model="form.gender"
+                                :tabindex="6"
+                                class="h-4 w-4"
+                            />
+                            <Label for="gender-male" class="ml-2">Male</Label>
                         </div>
-                        <div class="flex gap-3">
-                            <Input id="female" type="radio" name="gender" value="female" v-model="form.gender" />
-                            <Label for="female">Female</Label>
+                        <div class="flex items-center">
+                            <Input
+                                id="gender-female"
+                                type="radio"
+                                name="gender"
+                                value="female"
+                                v-model="form.gender"
+                                :tabindex="7"
+                                class="h-4 w-4"
+                            />
+                            <Label for="gender-female" class="ml-2">Female</Label>
                         </div>
                     </div>
-                    
                     <InputError :message="form.errors.gender" />
                 </div>
-                        
-                <div class="grid gap-3">
-                    <Label for="country">Country</Label>
-                    <Select v-model="form.country" id="country">
-                        <option v-for="country in countries" :key="country" :value="country">
-                            {{ country }}
-                        </option>
-                    </Select>
-                    <InputError :message="form.errors.country" />
+
+                <div class="grid gap-2">
+                    <Label for="avatar_img">Profile Picture (Optional)</Label>
+                    <Input
+                        id="avatar_img"
+                        type="file"
+                        :tabindex="8"
+                        @input="form.avatar_img = $event.target.files[0]"
+                        accept="image/jpeg,image/jpg,image/png"
+                        class="w-full rounded-lg border border-gray-600 p-2"
+                    />
+                    <InputError :message="form.errors.avatar_img" />
                 </div>
 
                 <div class="grid gap-2">
@@ -93,6 +115,7 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
                     <Input
                         id="password"
                         type="password"
+                        required
                         :tabindex="3"
                         autocomplete="new-password"
                         v-model="form.password"
@@ -114,7 +137,7 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
+                <Button type="submit" class="mt-2 w-full" tabindex="11" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Create account
                 </Button>

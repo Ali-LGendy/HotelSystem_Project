@@ -12,13 +12,13 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ManageClientsController;
 use App\Http\Controllers\ManagersController;
 use App\Http\Controllers\ManageReceptionistsController;
+use App\Http\Controllers\FloorController;
+use App\Models\Floor;
+use App\Http\Controllers\ReceptionistsController;
 
 // this is an example on how to authorize based on permissions // our practice when it comes to Authorization : permisson gets assigned to roles, roles gets assigned to users then in middleware check permission names, or sometimes role-names
 // to add/remove/edit permissions or roles modify the ./database/seeders/RolesAndPermissionsSeeder
 // more can be found @ https://spatie.be/docs/laravel-permission/v6/best-practices/roles-vs-permissions
-Route::get('/floors', function () {
-    return Inertia::render('Welcome');
-})->middleware(['auth', 'permission:manage floors'])->name('floors.index');
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -129,6 +129,25 @@ Route::middleware(['auth', 'permission:pay for reservations'])->group(function (
 
 // Stripe Webhook (no web or csrf middleware to accept post requests from stripe)
 Route::withoutMiddleware(['web', 'csrf'])->post('/webhook/stripe', [StripeController::class, 'handleWebhook'])->name('stripe.webhook');
+
+Route::group(['middleware' => ['auth', 'permission:manage floors']], function () {
+    Route::get('/floors', [FloorController::class, 'index'])->name('floors.index');
+    Route::get('/floors/create', [FloorController::class, 'create'])->name('floors.create');
+    Route::post('/floors', [FloorController::class, 'store'])->name('floors.store');
+    Route::get('/floors/{floor}/edit', [FloorController::class, 'edit'])->name('floors.edit');
+    Route::put('/floors/{floor}', [FloorController::class, 'update'])->name('floors.update');
+    Route::delete('/floors/{floor}', [FloorController::class, 'destroy'])->name('floors.destroy');
+});
+
+// can be remove at deploy
+Route::get('/debug/floors', function() {
+    $floors = Floor::with('manager')->get();
+    $user = auth()->user();
+    return response()->json($user);
+});
+
+
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

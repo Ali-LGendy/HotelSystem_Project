@@ -15,7 +15,7 @@ use Cog\Laravel\Ban\Traits\Bannable;
 class User extends Authenticatable implements BannableInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable,Bannable;
+    use HasFactory, HasRoles, Notifiable, Bannable;
 
     /**
      * The attributes that are mass assignable.

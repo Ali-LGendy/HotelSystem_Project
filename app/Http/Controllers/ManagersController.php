@@ -118,6 +118,20 @@ class ManagersController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    public function ban(User $user)
+    {
+          $user->is_banned = !$user->is_banned;
+        $user->save();
+
+        // Prepare message based on new ban status
+        $message = $user->is_banned 
+            ? 'User banned successfully.' 
+            : 'User unbanned successfully.';
+
+        return redirect()
+            ->route('admin.users.managers.index')
+            ->with('success', $message);
+    }
     public function destroy(User $user)
     {
         //

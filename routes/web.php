@@ -23,7 +23,7 @@ Route::get('/', function () {
 })->name('home');
 
     
-Route::middleware(['auth'])->get('/dashboardd', [DashboardController::class, 'index'])->name('dashboard.index');
+Route::middleware(['auth',])->get('/dashboardd', [DashboardController::class, 'index'])->name('dashboard.index');
 
 
 
@@ -36,6 +36,11 @@ Route::middleware(['auth','permission:manage managers'])->prefix('admin/users/ma
     Route::put('/{user}', [ManagersController::class, 'update'])->name('update');  // Update manager
     Route::delete('/{user}', [ManagersController::class, 'destroy'])->name('destroy'); // Delete manager
 });
+
+
+Route::middleware(['auth','permission:manage receptionists'])->patch('/admin/users/managers/{user}/ban', [ManagersController::class, 'ban'])
+    ->name('admin.users.managers.ban');
+
 
 Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
     Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         // List all receptionists

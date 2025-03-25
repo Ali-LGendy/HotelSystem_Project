@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { defineProps, onMounted } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -46,6 +46,30 @@ const handleImageError = (event) => {
             ${getInitials(manager.name)}
         </div>
     `;
+};
+// const banManager = (id) => {
+//     if (confirm('Are you sure you want to ban this manager?')) {
+//         // Example: Implement ban logic with Inertia
+//         props.managers.data.forEach((manager) => {
+//             if (manager.id === id) {
+//                 manager.is_banned = !manager.is_banned;
+//             }
+//         });
+//         router.patch(route('admin.users.managers.ban', id));
+//     }
+// };
+const banManager = (id) => {
+    if (confirm('Are you sure you want to change the ban status of this manager?')) {
+        router.patch(route('admin.users.managers.ban', id), {
+            onSuccess: () => {
+                // Find and update the manager in the local data
+                const managerIndex = props.managers.data.findIndex((m) => m.id === id);
+                if (managerIndex !== -1) {
+                    props.managers.data[managerIndex].is_banned = !props.managers.data[managerIndex].is_banned;
+                }
+            },
+        });
+    }
 };
 
 // Get initials from name
@@ -115,6 +139,9 @@ const getInitials = (name) => {
                             >
                                 <Button variant="destructive">Delete</Button>
                             </Link>
+                            <Button @click="banManager(manager.id)" :variant="manager.is_banned ? 'default' : 'destructive'">
+                                {{ manager.is_banned ? 'Unban Manager' : 'Ban Manager' }}
+                            </Button>
                         </div>
                     </TableCell>
                 </TableRow>

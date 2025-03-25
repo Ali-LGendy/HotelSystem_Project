@@ -29,13 +29,13 @@ class ReservationFactory extends Factory
         $checkOutDate = (clone $checkInDate)->addDays($stayDuration);
 
         return [
-            'client_id' => User::where('role', 'client')->inRandomOrder()->first()?->id
+            'client_id' => User::role('client')->inRandomOrder()->first()?->id
                 ?? User::factory()->create(['role' => 'client'])->id,
             'room_id' => $room->id,
             'accompany_number' => $this->faker->numberBetween(1, $room->room_capacity),
             'price_paid' => $room->price * $stayDuration,
-            'receptionist_id' => User::where('role', 'receptionist')->inRandomOrder()->first()?->id
-                ?? User::factory()->create(['role' => 'receptionist'])->id,
+            'receptionist_id' => User::role('receptionist')->inRandomOrder()->first()?->id
+                ?? User::factory()->receptionist()->create()->id,
             'check_in_date' => $checkInDate,
             'check_out_date' => $checkOutDate,
             'status' => 'pending',

@@ -248,7 +248,16 @@ const getStatusVariant = (status) => {
 };
 
 const handlePageChange = (pageIndex) => {
-  window.location.href = `/receptionist/reservations?page=${pageIndex + 1}`;
+  const page = pageIndex + 1;
+  const url = props.showAll
+    ? `/receptionist/all-reservations?page=${page}`
+    : `/receptionist/reservations?page=${page}`;
+
+  router.visit(url, {
+    preserveScroll: true,
+    preserveState: false,
+    replace: true
+  });
 };
 
 

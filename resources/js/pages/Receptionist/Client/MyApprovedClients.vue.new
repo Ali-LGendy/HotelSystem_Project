@@ -4,15 +4,15 @@
       <!-- Header with Navigation -->
       <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 class="text-3xl font-bold">Manage Clients</h2>
-          <p class="mt-2 text-gray-400">Approve new clients waiting for approval</p>
+          <h2 class="text-3xl font-bold">My Approved Clients</h2>
+          <p class="mt-2 text-gray-400">Clients that you have approved</p>
         </div>
         <div class="flex flex-wrap gap-3">
           <a
-            href="/receptionist/clients/my-approved"
-            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+            href="/receptionist/clients"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
           >
-            My Approved Clients
+            Manage Clients
           </a>
           <a
             href="/receptionist/clients/reservations"
@@ -29,12 +29,10 @@
         </div>
       </div>
 
-      <!-- Pending Clients Section -->
-      <div class="mb-8">
-        <h3 class="text-2xl font-bold mb-4 text-gray-100">Clients Waiting for Approval</h3>
-
-        <div v-if="pendingClients.data.length === 0" class="text-center py-8">
-          <p class="text-lg text-gray-300">No pending client registrations found.</p>
+      <!-- My Approved Clients Section -->
+      <div>
+        <div v-if="myApprovedClients.data.length === 0" class="text-center py-8">
+          <p class="text-lg text-gray-300">You haven't approved any clients yet.</p>
         </div>
 
         <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
@@ -62,7 +60,7 @@
               </tr>
             </thead>
             <tbody class="bg-gray-800 divide-y divide-gray-700">
-              <tr v-for="client in pendingClients.data" :key="client.id" class="hover:bg-gray-700">
+              <tr v-for="client in myApprovedClients.data" :key="client.id" class="hover:bg-gray-700">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
                 </td>
@@ -80,17 +78,25 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
-                    <button
-                      @click="approveClient(client.id)"
-                      class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                    <a
+                      :href="`/receptionist/clients/${client.id}/reservations`"
+                      class="rounded-md bg-indigo-700 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-600"
                     >
-                      Approve
-                    </button>
+                      View Reservations
+                    </a>
                     <button
-                      @click="rejectClient(client.id)"
+                      v-if="!client.is_banned"
+                      @click="banClient(client.id)"
                       class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
                     >
-                      Reject
+                      Ban
+                    </button>
+                    <button
+                      v-else
+                      @click="unbanClient(client.id)"
+                      class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                    >
+                      Unban
                     </button>
                   </div>
                 </td>
@@ -98,16 +104,31 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Pagination for Pending Clients -->
-        <div v-if="pendingClients.data.length > 0" class="mt-4 flex justify-between items-center">
-          <div class="text-sm text-gray-400">
-            Showing {{ pendingClients.from }} to {{ pendingClients.to }} of {{ pendingClients.total }} pending clients
-          </div>
-        </div>
       </div>
 
-
+      <!-- Pagination -->
+      <div v-if="myApprovedClients.data.length > 0" class="mt-4 flex justify-between items-center">
+        <div class="text-sm text-gray-400">
+          Showing {{ myApprovedClients.from }} to {{ myApprovedClients.to }} of {{ myApprovedClients.total }} clients
+        </div>
+        <div class="flex space-x-2">
+          <button
+            v-for="page in myApprovedClients.links"
+            :key="page.label"
+            @click="goToPage(page.url)"
+            :disabled="!page.url"
+            :class="[
+              'px-3 py-1 rounded-md text-sm',
+              page.active 
+                ? 'bg-blue-600 text-white' 
+                : page.url 
+                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                  : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            ]"
+            v-html="page.label"
+          ></button>
+        </div>
+      </div>
 
       <!-- Confirmation Dialog -->
       <div v-if="showConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -124,49 +145,48 @@
             <button
               :class="[
                 'rounded-md px-4 py-2 text-sm font-medium text-white',
-                confirmAction === 'approve' 
-                  ? 'bg-green-700 hover:bg-green-600' 
-                  : 'bg-red-700 hover:bg-red-600'
+                confirmAction === 'ban' 
+                  ? 'bg-red-700 hover:bg-red-600' 
+                  : 'bg-green-700 hover:bg-green-600'
               ]"
-              @click="confirmAction === 'approve' ? confirmApprove() : confirmReject()"
+              @click="confirmAction === 'ban' ? confirmBan() : confirmUnban()"
             >
-              {{ confirmAction === 'approve' ? 'Approve' : 'Reject' }}
+              {{ confirmAction === 'ban' ? 'Ban' : 'Unban' }}
             </button>
           </div>
         </div>
       </div>
-
-      <!-- Approval Data Tables -->
-      <ApprovalDataTable
-        :stats="approvalStats"
-        :recent-approvals="recentApprovals"
-        :pending-reservations="pendingReservations"
+      
+      <!-- Client Statistics Dashboard -->
+      <ClientStatsDashboard 
+        :stats="clientStats" 
+        :reservations="recentReservations" 
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
-import ApprovalDataTable from './ApprovalDataTable.vue';
+import ClientStatsDashboard from './ClientStatsDashboard.vue';
 
 // Props
 const props = defineProps({
-  pendingClients: {
+  myApprovedClients: {
     type: Object,
     required: true
   },
-  approvedClientsCount: {
-    type: Number,
-    default: 0
+  clientStats: {
+    type: Object,
+    default: () => ({
+      totalApproved: 0,
+      activeReservations: 0,
+      pendingReservations: 0
+    })
   },
-  recentlyApprovedClients: {
-    type: Array,
-    default: () => []
-  },
-  pendingReservationsForApprovedClients: {
+  recentReservations: {
     type: Array,
     default: () => []
   }
@@ -179,16 +199,6 @@ const confirmDialogMessage = ref('');
 const confirmAction = ref('');
 const selectedClientId = ref(null);
 
-// Computed properties for ApprovalDataTable
-const approvalStats = computed(() => ({
-  totalClients: props.pendingClients.total + props.approvedClientsCount,
-  approvedClients: props.approvedClientsCount,
-  pendingClients: props.pendingClients.total
-}));
-
-const recentApprovals = computed(() => props.recentlyApprovedClients);
-const pendingReservations = computed(() => props.pendingReservationsForApprovedClients);
-
 // Methods
 const goToPage = (url) => {
   if (!url) return;
@@ -198,19 +208,19 @@ const goToPage = (url) => {
   });
 };
 
-const approveClient = (clientId) => {
+const banClient = (clientId) => {
   selectedClientId.value = clientId;
-  confirmAction.value = 'approve';
-  confirmDialogTitle.value = 'Confirm Client Approval';
-  confirmDialogMessage.value = 'Are you sure you want to approve this client? They will be added to your approved clients list.';
+  confirmAction.value = 'ban';
+  confirmDialogTitle.value = 'Confirm Client Ban';
+  confirmDialogMessage.value = 'Are you sure you want to ban this client? They will not be able to make new reservations.';
   showConfirmDialog.value = true;
 };
 
-const rejectClient = (clientId) => {
+const unbanClient = (clientId) => {
   selectedClientId.value = clientId;
-  confirmAction.value = 'reject';
-  confirmDialogTitle.value = 'Confirm Client Rejection';
-  confirmDialogMessage.value = 'Are you sure you want to reject this client? This action cannot be undone.';
+  confirmAction.value = 'unban';
+  confirmDialogTitle.value = 'Confirm Client Unban';
+  confirmDialogMessage.value = 'Are you sure you want to unban this client? They will be able to make reservations again.';
   showConfirmDialog.value = true;
 };
 
@@ -219,7 +229,7 @@ const cancelConfirmation = () => {
   selectedClientId.value = null;
 };
 
-const confirmApprove = async () => {
+const confirmBan = async () => {
   if (!selectedClientId.value) return;
 
   try {
@@ -227,32 +237,7 @@ const confirmApprove = async () => {
     showConfirmDialog.value = false;
 
     // Use axios to make the request
-    const response = await axios.post(`/receptionist/clients/${selectedClientId.value}/approve`);
-    console.log('Client approval response:', response.data);
-
-    // If the client was approved successfully, update the data tables
-    if (response.data.success) {
-      // Add the newly approved client to the recentApprovals
-      if (response.data.client) {
-        props.recentlyApprovedClients.unshift(response.data.client);
-        // Keep only the first 5 items
-        if (props.recentlyApprovedClients.length > 5) {
-          props.recentlyApprovedClients.pop();
-        }
-      }
-
-      // Add the updated reservations to pendingReservations
-      if (response.data.updatedReservations) {
-        props.pendingReservationsForApprovedClients.unshift(...response.data.updatedReservations);
-        // Keep only the first 5 items
-        if (props.pendingReservationsForApprovedClients.length > 5) {
-          props.pendingReservationsForApprovedClients.splice(5);
-        }
-      }
-
-      // Update the stats
-      props.approvedClientsCount++;
-    }
+    await axios.post(`/receptionist/clients/${selectedClientId.value}/ban`);
 
     // Use Inertia router to reload the page with fresh data
     router.visit(window.location.pathname, {
@@ -261,16 +246,16 @@ const confirmApprove = async () => {
       preserveState: false,
       replace: true,
       onSuccess: () => {
-        console.log('Client approved successfully');
+        console.log('Client banned successfully');
       }
     });
   } catch (error) {
-    console.error('Error approving client:', error);
-    alert('Could not approve client due to a technical issue. Please try refreshing the page.');
+    console.error('Error banning client:', error);
+    alert('Could not ban client due to a technical issue. Please try refreshing the page.');
   }
 };
 
-const confirmReject = async () => {
+const confirmUnban = async () => {
   if (!selectedClientId.value) return;
 
   try {
@@ -278,7 +263,7 @@ const confirmReject = async () => {
     showConfirmDialog.value = false;
 
     // Use axios to make the request
-    await axios.post(`/receptionist/clients/${selectedClientId.value}/reject`);
+    await axios.post(`/receptionist/clients/${selectedClientId.value}/unban`);
 
     // Use Inertia router to reload the page with fresh data
     router.visit(window.location.pathname, {
@@ -287,12 +272,12 @@ const confirmReject = async () => {
       preserveState: false,
       replace: true,
       onSuccess: () => {
-        console.log('Client rejected successfully');
+        console.log('Client unbanned successfully');
       }
     });
   } catch (error) {
-    console.error('Error rejecting client:', error);
-    alert('Could not reject client due to a technical issue. Please try refreshing the page.');
+    console.error('Error unbanning client:', error);
+    alert('Could not unban client due to a technical issue. Please try refreshing the page.');
   }
 };
 </script>

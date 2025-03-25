@@ -33,21 +33,30 @@ class ClientController extends Controller
      */
     public function approvedClients(): Response
     {
+        // Get the current user ID
+        $currentUserId = Auth::id();
+
         // Get only pending clients (not yet approved)
         $pendingClients = User::role('client')
             ->where('is_approved', 0)
             ->select(self::USER_FIELDS)
             ->paginate(10);
 
-        // Get count of approved clients
+        // Get count of all approved clients in the system
         $approvedClientsCount = User::role('client')
             ->where('is_approved', 1)
+            ->count();
+
+        // Get count of clients approved by the current receptionist
+        $myApprovedClientsCount = User::role('client')
+            ->where('is_approved', 1)
+            ->where('manager_id', $currentUserId)
             ->count();
 
         // Get recently approved clients (last 5)
         $recentlyApprovedClients = User::role('client')
             ->where('is_approved', 1)
-            ->where('manager_id', Auth::id())
+            ->where('manager_id', $currentUserId)
             ->select(self::USER_FIELDS)
             ->orderBy('updated_at', 'desc')
             ->limit(5)
@@ -59,9 +68,9 @@ class ClientController extends Controller
 
         // Get pending reservations for approved clients
         $pendingReservationsForApprovedClients = Reservation::with(['client', 'room'])
-            ->whereHas('client', function ($query) {
+            ->whereHas('client', function ($query) use ($currentUserId) {
                 $query->where('is_approved', 1)
-                      ->where('manager_id', Auth::id());
+                      ->where('manager_id', $currentUserId);
             })
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
@@ -71,8 +80,10 @@ class ClientController extends Controller
         return Inertia::render('Receptionist/Client/ApprovedClients', [
             'pendingClients' => $pendingClients,
             'approvedClientsCount' => $approvedClientsCount,
+            'myApprovedClientsCount' => $myApprovedClientsCount,
             'recentlyApprovedClients' => $recentlyApprovedClients,
             'pendingReservationsForApprovedClients' => $pendingReservationsForApprovedClients,
+            'currentUserId' => $currentUserId,
         ]);
     }
 
@@ -82,35 +93,58 @@ class ClientController extends Controller
      */
     public function myApprovedClients(): Response
     {
-        // Get only clients approved by the current receptionist
+        // Get the current user ID
+        $currentUserId = Auth::id();
+
+        // Get all clients (for debugging)
+        $allClients = User::role('client')
+            ->count();
+
+        // Get only clients managed by the current receptionist
         $myApprovedClients = User::role('client')
+            ->where('manager_id', $currentUserId)
             ->where('is_approved', 1)
-            ->where('manager_id', Auth::id())
             ->select(self::USER_FIELDS)
             ->paginate(10);
 
-        // Get statistics for approved clients
+        // Get statistics for managed clients
         $totalApprovedCount = User::role('client')
+            ->where('manager_id', $currentUserId)
             ->where('is_approved', 1)
-            ->where('manager_id', Auth::id())
             ->count();
 
-        $activeReservationsCount = Reservation::whereHas('client', function ($query) {
-                $query->where('is_approved', 1)
-                      ->where('manager_id', Auth::id());
+        $activeReservationsCount = Reservation::whereHas('client', function ($query) use ($currentUserId) {
+                $query->where('manager_id', $currentUserId)
+                      ->where('is_approved', 1);
             })
             ->whereIn('status', ['confirmed', 'checked_in'])
             ->count();
 
-        // Get recent reservations for approved clients
+        // Get recent reservations for managed clients
         $recentReservations = Reservation::with(['client', 'room'])
-            ->whereHas('client', function ($query) {
-                $query->where('is_approved', 1)
-                      ->where('manager_id', Auth::id());
+            ->whereHas('client', function ($query) use ($currentUserId) {
+                $query->where('manager_id', $currentUserId)
+                      ->where('is_approved', 1);
             })
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
+
+        // Add debug information
+        // $debug = [
+        //     'currentUserId' => $currentUserId,
+        //     'totalClientsInSystem' => $allClients,
+        //     'myManagedClientsCount' => $totalApprovedCount,
+        //     'approvedClientsQuery' => User::role('client')
+        //         ->where('manager_id', $currentUserId)
+        //         ->where('is_approved', 1)
+        //         ->select(['id', 'name', 'email', 'manager_id', 'is_approved'])
+        //         ->get(),
+        //     'allApprovedClients' => User::role('client')
+        //         ->where('is_approved', 1)
+        //         ->select(['id', 'name', 'email', 'manager_id', 'is_approved'])
+        //         ->get(),
+        // ];
 
         return Inertia::render('Receptionist/Client/MyApprovedClients', [
             'myApprovedClients' => $myApprovedClients,
@@ -120,6 +154,7 @@ class ClientController extends Controller
                 'pendingReservations' => $recentReservations->where('status', 'pending')->count(),
             ],
             'recentReservations' => $recentReservations,
+            //'debug' => $debug,
         ]);
     }
 
@@ -127,93 +162,24 @@ class ClientController extends Controller
      * Approve a client and send welcome notification.
      * Also update any pending reservations to confirmed status.
      */
-    public function approveClient(int $id, Request $request)
-    {
-        $client = User::findOrFail($id);
 
-        // If client is already approved, return early
-        if ($client->is_approved) {
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Client is already approved.'
-                ]);
-            }
-            return redirect()->back()->with('info', 'Client is already approved.');
-        }
+     public function approveClient($id)
+     {
+         $approvedBy =  Auth::user()->id;
+ 
+         $client = User::findOrFail($id);
+ 
+         $client->update(['is_approved' => true, 'manager_id' => $approvedBy]);
+ 
+         // $client->notify(new ClientApprovedNotification());
+ 
+         return back()->with('success', 'Client approved successfully.');
+     }
 
-        try {
-            DB::transaction(function () use ($client) {
-                // Update client status
-                $client->is_approved = 1;
-                $client->manager_id = Auth::id();
-                $client->save();
 
-                // Update all pending reservations to confirmed
-                $pendingReservationsCount = $client->reservations()
-                    ->where('status', 'pending')
-                    ->update([
-                        'status' => 'confirmed',
-                        'receptionist_id' => Auth::id(),
-                    ]);
 
-                // Send greeting notification
-                $client->notify((new GreetingApprovedClient())->delay(now()->addSeconds(10)));
 
-                // Log the approval
-                Log::info('Client approved', [
-                    'client_id' => $client->id,
-                    'client_name' => $client->name,
-                    'receptionist_id' => Auth::id(),
-                    'receptionist_name' => Auth::user()->name,
-                    'pending_reservations_updated' => $pendingReservationsCount
-                ]);
-            });
 
-            // Get updated client data with approved_at field
-            $updatedClient = User::find($client->id);
-            $updatedClient->approved_at = $updatedClient->updated_at;
-
-            // Get pending reservations that were updated
-            $updatedReservations = Reservation::with(['client', 'room'])
-                ->where('client_id', $client->id)
-                ->where('status', 'confirmed')
-                ->orderBy('updated_at', 'desc')
-                ->get();
-
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Client approved successfully.',
-                    'client' => $updatedClient,
-                    'updatedReservations' => $updatedReservations
-                ]);
-            }
-
-            return redirect()->route('receptionist.clients.my-approved')->with('success', 'Client approved successfully and added to your approved clients list.');
-        } catch (\Exception $e) {
-            Log::error('Error approving client', [
-                'client_id' => $client->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'An error occurred while approving the client.',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'An error occurred while approving the client.');
-        }
-    }
-
-    /**
-     * Display reservations for clients approved by the current receptionist.
-     * Shows client name, accompany number, room number, and paid price.
-     */
     public function clientReservations(int $id = null): Response
     {
         $query = Reservation::with([
@@ -297,9 +263,9 @@ class ClientController extends Controller
     {
         $client = User::findOrFail($id);
 
-        // Ensure the client was approved by this receptionist
+        // Ensure the client is managed by this receptionist
         if ($client->manager_id !== Auth::id()) {
-            return back()->with('error', 'You can only ban clients that you have approved.');
+            return back()->with('error', 'You can only ban clients that you manage.');
         }
 
         try {
@@ -329,9 +295,9 @@ class ClientController extends Controller
     {
         $client = User::findOrFail($id);
 
-        // Ensure the client was approved by this receptionist
+        // Ensure the client is managed by this receptionist
         if ($client->manager_id !== Auth::id()) {
-            return back()->with('error', 'You can only unban clients that you have approved.');
+            return back()->with('error', 'You can only unban clients that you manage.');
         }
 
         try {
@@ -372,32 +338,37 @@ class ClientController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($client) {
-                // Update client status
-                $client->is_approved = 1;
-                $client->manager_id = Auth::id();
-                $client->save();
+            // Update client status
+            $client->is_approved = 1;
+            $client->manager_id = Auth::id();
+            $client->save();
 
-                // Update all pending reservations to confirmed
-                $pendingReservationsCount = $client->reservations()
-                    ->where('status', 'pending')
-                    ->update([
-                        'status' => 'confirmed',
-                        'receptionist_id' => Auth::id(),
-                    ]);
-
-                // Send greeting notification
-                $client->notify((new GreetingApprovedClient())->delay(now()->addSeconds(10)));
-
-                // Log the approval
-                Log::info('Client approved via API', [
-                    'client_id' => $client->id,
-                    'client_name' => $client->name,
+            // Update all pending reservations to confirmed
+            $pendingReservationsCount = $client->reservations()
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'confirmed',
                     'receptionist_id' => Auth::id(),
-                    'receptionist_name' => Auth::user()->name,
-                    'pending_reservations_updated' => $pendingReservationsCount
                 ]);
-            });
+
+            // Try to send notification, but don't fail if it doesn't work
+            try {
+                $client->notify((new GreetingApprovedClient())->delay(now()->addSeconds(10)));
+            } catch (\Exception $notifyException) {
+                Log::warning('Failed to send approval notification', [
+                    'client_id' => $client->id,
+                    'error' => $notifyException->getMessage()
+                ]);
+            }
+
+            // Log the approval
+            Log::info('Client approved via API', [
+                'client_id' => $client->id,
+                'client_name' => $client->name,
+                'receptionist_id' => Auth::id(),
+                'receptionist_name' => Auth::user()->name,
+                'pending_reservations_updated' => $pendingReservationsCount
+            ]);
 
             return response()->json([
                 'success' => true,

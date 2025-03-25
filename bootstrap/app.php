@@ -9,6 +9,8 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Illuminate\Foundation\Providers\HealthCheckServiceProvider;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -31,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role' => RoleMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
-        ]);
+      ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

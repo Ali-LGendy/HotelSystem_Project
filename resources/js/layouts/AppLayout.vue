@@ -4,6 +4,7 @@ import type { BreadcrumbItemType } from '@/types';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
+    menuLinks?: { name: string; route: string }[];
 }
 
 withDefaults(defineProps<Props>(), {
@@ -12,7 +13,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppLayout :breadcrumbs="breadcrumbs" :menuLinks="menuLinks">
         <slot />
     </AppLayout>
 </template>

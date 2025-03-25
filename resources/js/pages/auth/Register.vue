@@ -14,11 +14,16 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     national_id: '',
+    mobile: '',
+    country: '',
+    gender: 'male', // Default value
+    avatar_img: null,
 });
 
 const submit = () => {
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
+        forceFormData: true // Required for file uploads
     });
 };
 </script>
@@ -43,8 +48,64 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <Label for="national_id">National ID</Label>
-                    <Input id="national_id" type="text" required autofocus :tabindex="1" autocomplete="national_id" v-model="form.national_id" placeholder="##############" />
+                    <Input id="national_id" type="text" required :tabindex="3" autocomplete="national_id" v-model="form.national_id" placeholder="##############" />
                     <InputError :message="form.errors.national_id" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="mobile">Mobile Number</Label>
+                    <Input id="mobile" type="text" required :tabindex="4" autocomplete="tel" v-model="form.mobile" placeholder="+1234567890" />
+                    <InputError :message="form.errors.mobile" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="country">Country</Label>
+                    <Input id="country" type="text" required :tabindex="5" autocomplete="country-name" v-model="form.country" placeholder="Your country" />
+                    <InputError :message="form.errors.country" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="gender">Gender</Label>
+                    <div class="flex gap-4 mt-1">
+                        <div class="flex items-center">
+                            <Input
+                                id="gender-male"
+                                type="radio"
+                                name="gender"
+                                value="male"
+                                v-model="form.gender"
+                                :tabindex="6"
+                                class="h-4 w-4"
+                            />
+                            <Label for="gender-male" class="ml-2">Male</Label>
+                        </div>
+                        <div class="flex items-center">
+                            <Input
+                                id="gender-female"
+                                type="radio"
+                                name="gender"
+                                value="female"
+                                v-model="form.gender"
+                                :tabindex="7"
+                                class="h-4 w-4"
+                            />
+                            <Label for="gender-female" class="ml-2">Female</Label>
+                        </div>
+                    </div>
+                    <InputError :message="form.errors.gender" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="avatar_img">Profile Picture (Optional)</Label>
+                    <Input
+                        id="avatar_img"
+                        type="file"
+                        :tabindex="8"
+                        @input="form.avatar_img = $event.target.files[0]"
+                        accept="image/jpeg,image/jpg,image/png"
+                        class="w-full rounded-lg border border-gray-600 p-2"
+                    />
+                    <InputError :message="form.errors.avatar_img" />
                 </div>
 
                 <div class="grid gap-2">
@@ -53,7 +114,7 @@ const submit = () => {
                         id="password"
                         type="password"
                         required
-                        :tabindex="3"
+                        :tabindex="9"
                         autocomplete="new-password"
                         v-model="form.password"
                         placeholder="Password"
@@ -75,7 +136,7 @@ const submit = () => {
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
+                <Button type="submit" class="mt-2 w-full" tabindex="11" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Create account
                 </Button>

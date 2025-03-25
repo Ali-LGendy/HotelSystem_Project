@@ -29,6 +29,11 @@ Route::middleware(['auth:sanctum'])
         Route::get('clients/approved', [App\Http\Controllers\Api\ClientController::class, 'approvedClients'])->name('clients.approved');
     });
 
+// Direct API route for client approval
+Route::middleware(['auth:sanctum', 'permission:manage clients'])
+    ->post('/api/receptionist/clients/{id}/approve', [App\Http\Controllers\Receptionist\ClientController::class, 'approveClientApi'])
+    ->name('api.receptionist.clients.approve');
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');

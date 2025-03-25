@@ -3,23 +3,40 @@
     <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
       <!-- Header with Navigation -->
       <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 class="text-3xl font-bold">Reservations Management</h2>
+        <div>
+          <h2 class="text-3xl font-bold">{{ showAll ? 'All Reservations' : 'Pending Reservations' }}</h2>
+          <p class="mt-2 text-gray-400">{{ showAll ? 'Showing all reservations in the system' : 'Showing reservations that need your approval' }}</p>
+        </div>
         <div class="flex flex-wrap gap-3">
-          <Link
-            v-for="(link, index) in navigationLinks"
-            :key="index"
-            :href="link.href"
-            class="rounded-lg px-4 py-2 font-semibold transition"
-            :class="link.bgClass"
-            preserve-scroll
+          <a
+            v-if="!showAll"
+            href="/receptionist/all-reservations"
+            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            {{ link.text }}
-          </Link>
+            All Reservations
+          </a>
+          <a
+            v-else
+            href="/receptionist/reservations"
+            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+          >
+            Pending Reservations
+          </a>
+          <a
+            href="/receptionist/reservations/create"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+          >
+            New Reservation
+          </a>
         </div>
       </div>
 
+      <div v-if="reservations.data.length === 0" class="text-center py-8">
+        <p class="text-lg text-gray-300">{{ showAll ? 'No reservations found.' : 'No pending reservations found.' }}</p>
+      </div>
+
       <!-- Data Table -->
-      <div class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
+      <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
         <DataTable
           :columns="columns"
           :data="reservations.data"
@@ -42,88 +59,79 @@
           <!-- Actions Cell Template -->
           <template #cell-actions="{ row }">
             <div class="flex items-center gap-2">
-              <Button
+              <button
                 v-if="row.original && row.original.status === 'pending'"
-                variant="success"
-                size="sm"
-                @click="approveReservation(row)"
-                class="bg-green-700 hover:bg-green-600"
+                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                @click.prevent="approveReservation(row)"
               >
                 Approve
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="viewReservation(row)"
-                class="border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600"
+              </button>
+              <a
+                :href="'/receptionist/reservations/' + (row.original ? row.original.id : row.id)"
+                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 View
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="editReservation(row)"
-                class="border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600"
+              </a>
+              <a
+                :href="'/receptionist/reservations/' + (row.original ? row.original.id : row.id) + '/edit'"
+                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
+              </a>
+              <button
+                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
                 @click="confirmDelete(row)"
-                class="bg-red-800 hover:bg-red-700"
               >
                 Delete
-              </Button>
+              </button>
             </div>
           </template>
         </DataTable>
       </div>
 
       <!-- Delete Confirmation Dialog -->
-      <Dialog :open="showDeleteDialog" @close="showDeleteDialog = false">
-        <DialogContent class="bg-gray-800 text-gray-200 border-gray-700">
-          <DialogHeader>
-            <DialogTitle class="text-gray-100">Confirm Deletion</DialogTitle>
-            <DialogDescription class="text-gray-400">
-              Are you sure you want to delete this reservation? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
+      <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
+          <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
+          <p class="mt-2 text-gray-400">
+            Are you sure you want to delete this reservation? This action cannot be undone.
+          </p>
           <div class="mt-6 flex justify-end space-x-3">
-            <Button
-              variant="outline"
+            <button
+              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
               @click="showDeleteDialog = false"
-              class="border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600"
             >
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
+            </button>
+            <button
+              class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
               @click="deleteReservation"
-              class="bg-red-700 hover:bg-red-600"
             >
               Delete
-            </Button>
+            </button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
 import DataTable from '@/components/ui/DataTable.vue';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 
 // Props
 const props = defineProps({
   reservations: {
     type: Object,
     required: true
+  },
+  showAll: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -134,19 +142,24 @@ const selectedReservation = ref(null);
 // Navigation Links
 const navigationLinks = [
   {
-    href: route('receptionist.clients.pending'),
-    text: 'Pending Clients',
-    bgClass: 'bg-yellow-600 text-white hover:bg-yellow-700'
+    href: '/receptionist/all-reservations',
+    text: 'All Reservations',
+    bgClass: 'bg-purple-600 text-white hover:bg-purple-700'
   },
   {
-    href: route('receptionist.clients.approved'),
+    href: '/receptionist/clients',
+    text: 'Manage Clients',
+    bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
+  },
+  {
+    href: route('receptionist.clients.my-approved'),
     text: 'My Approved Clients',
     bgClass: 'bg-green-600 text-white hover:bg-green-700'
   },
   {
     href: route('receptionist.clients.reservations'),
     text: 'Clients Reservations',
-    bgClass: 'bg-indigo-600 text-white hover:bg-indigo-700'
+    bgClass: 'bg-purple-600 text-white hover:bg-purple-700'
   },
   {
     href: route('receptionist.reservations.create'),
@@ -157,7 +170,8 @@ const navigationLinks = [
 
 // Handle navigation button clicks
 const handleNavigation = (route) => {
-  router.visit(route, {
+  console.log('Navigating to:', route);
+  router.get(route, {}, {
     preserveScroll: true,
     onError: (errors) => {
       console.error('Navigation error:', errors);
@@ -234,43 +248,19 @@ const getStatusVariant = (status) => {
 };
 
 const handlePageChange = (pageIndex) => {
-  router.visit(
-    route('receptionist.reservations.index', { page: pageIndex + 1 }),
-    {
-      only: ['reservations'],
-      preserveState: true,
-      preserveScroll: true
-    }
-  );
-};
+  const page = pageIndex + 1;
+  const url = props.showAll
+    ? `/receptionist/all-reservations?page=${page}`
+    : `/receptionist/reservations?page=${page}`;
 
-const viewReservation = (reservation) => {
-  console.log('Viewing reservation:', reservation);
-  // Ensure we get the correct ID regardless of data structure
-  const id = reservation.original ? reservation.original.id : reservation.id;
-
-  // Use router.visit for navigation
-  router.visit(route('receptionist.reservations.show', id), {
+  router.visit(url, {
     preserveScroll: true,
-    onError: (errors) => {
-      console.error('Error viewing reservation:', errors);
-    }
+    preserveState: false,
+    replace: true
   });
 };
 
-const editReservation = (reservation) => {
-  console.log('Editing reservation:', reservation);
-  // Ensure we get the correct ID regardless of data structure
-  const id = reservation.original ? reservation.original.id : reservation.id;
 
-  // Use router.visit for navigation
-  router.visit(route('receptionist.reservations.edit', id), {
-    preserveScroll: true,
-    onError: (errors) => {
-      console.error('Error editing reservation:', errors);
-    }
-  });
-};
 
 const confirmDelete = (reservation) => {
   // Store the reservation object with the correct structure
@@ -281,57 +271,123 @@ const confirmDelete = (reservation) => {
 const deleteReservation = () => {
   console.log('Deleting reservation:', selectedReservation.value);
   if (selectedReservation.value) {
-    const id = selectedReservation.value.id;
+    try {
+      const id = selectedReservation.value.id;
 
-    // Use router.delete with proper error handling
-    router.delete(route('receptionist.reservations.destroy', id), {
-      onSuccess: () => {
-        showDeleteDialog.value = false;
-        selectedReservation.value = null;
+      // Get CSRF token from cookie if available
+      let csrfToken = '';
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('XSRF-TOKEN=')) {
+          csrfToken = decodeURIComponent(cookie.substring('XSRF-TOKEN='.length));
+          break;
+        }
+      }
 
-        // Refresh the page to show updated data
-        router.visit(route('receptionist.reservations.index'), {
-          only: ['reservations'],
-          preserveScroll: true
-        });
-      },
-      onError: (errors) => {
-        console.error('Error deleting reservation:', errors);
-        showDeleteDialog.value = false;
-      },
-      preserveScroll: true
-    });
+      // Prepare headers
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
+
+      // Add CSRF token if available
+      if (csrfToken) {
+        headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+
+      fetch(`/receptionist/reservations/${id}`, {
+        method: 'DELETE',
+        headers: headers
+      })
+      .then(response => {
+        if (response.ok) {
+          showDeleteDialog.value = false;
+          selectedReservation.value = null;
+          alert('Reservation deleted successfully!');
+          window.location.reload();
+        } else {
+          console.error('Error deleting reservation, status:', response.status);
+          alert('Could not delete reservation. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting reservation:', error);
+        alert('Error deleting reservation. Please try again.');
+      });
+    } catch (error) {
+      console.error('Exception in deleteReservation:', error);
+      alert('An unexpected error occurred. Please try again.');
+    }
   }
 };
 
-const approveReservation = (reservation) => {
-  console.log('Approving reservation:', reservation);
-  // Ensure we get the correct ID regardless of data structure
-  const id = reservation.original ? reservation.original.id : reservation.id;
-  const data = {
-    status: 'confirmed',
-    // Include other required fields from the reservation
-    room_id: reservation.original.room_id,
-    accompany_number: reservation.original.accompany_number,
-    check_in_date: reservation.original.check_in_date,
-    check_out_date: reservation.original.check_out_date,
-    price_paid: reservation.original.price_paid
-  };
+const approveReservation = async (row) => {
+  try {
+    // Get the reservation data, handling both possible structures
+    let reservation;
 
-  // Use router.put to update the status
-  router.put(route('receptionist.reservations.update', id), data, {
-    onSuccess: () => {
-      // Refresh the page to show updated data
-      router.visit(route('receptionist.reservations.index'), {
-        only: ['reservations'],
-        preserveScroll: true
+    if (row.original) {
+      reservation = row.original;
+    } else {
+      reservation = row;
+    }
+
+    if (!reservation || !reservation.id) {
+      console.error('Invalid reservation object:', reservation);
+      alert('Error: Could not identify reservation. Please try again.');
+      return;
+    }
+
+    console.log('Approving reservation:', reservation);
+
+    // Create the data object with all required fields
+    const data = {
+      status: 'confirmed',
+      _method: 'PUT' // For method spoofing
+    };
+
+    // Add other fields if they exist in the reservation data
+    if (reservation.room_id) data.room_id = reservation.room_id;
+    if (reservation.accompany_number) data.accompany_number = reservation.accompany_number;
+    if (reservation.check_in_date) data.check_in_date = reservation.check_in_date;
+    if (reservation.check_out_date) data.check_out_date = reservation.check_out_date;
+    if (reservation.price_paid) data.price_paid = reservation.price_paid;
+    if (reservation.client_id) data.client_id = reservation.client_id;
+    if (reservation.receptionist_id) data.receptionist_id = reservation.receptionist_id;
+
+    console.log('Sending data for approval:', data);
+
+    // First, update the reservation status using axios
+    const response = await axios.post(`/receptionist/reservations/${reservation.id}`, data);
+    console.log('Reservation approval response:', response.data);
+
+    // Show success message for the reservation
+    alert('Reservation approved successfully!');
+
+    // If the client needs to be approved, redirect to the clients page
+    if (reservation.client_id) {
+      router.visit('/receptionist/clients', {
+        onSuccess: () => {
+          console.log('Redirected to clients page to approve the client');
+        }
       });
-    },
-    onError: (errors) => {
-      console.error('Error approving reservation:', errors);
-    },
-    preserveScroll: true
-  });
+    } else {
+      // Otherwise, just reload the current page
+      router.visit(window.location.pathname, {
+        method: 'get',
+        preserveScroll: false,
+        preserveState: false,
+        replace: true,
+        onSuccess: () => {
+          console.log('Page reloaded after reservation approval');
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error approving reservation:', error);
+    alert('Could not approve reservation. Please try again.');
+  }
 };
 </script>
 

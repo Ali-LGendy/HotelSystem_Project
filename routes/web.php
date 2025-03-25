@@ -7,9 +7,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\ManageClientsController;
 use App\Http\Controllers\ManagersController;
-use App\Http\Controllers\ManageReceptionistsController;
+use App\Http\Controllers\ReceptionistsController;
 
 // this is an example on how to authorize based on permissions // our practice when it comes to Authorization : permisson gets assigned to roles, roles gets assigned to users then in middleware check permission names, or sometimes role-names
 // to add/remove/edit permissions or roles modify the ./database/seeders/RolesAndPermissionsSeeder

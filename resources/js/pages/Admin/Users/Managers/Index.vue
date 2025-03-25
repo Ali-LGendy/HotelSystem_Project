@@ -118,6 +118,9 @@ const getInitials = (name) => {
                             <Link :href="route('admin.users.managers.edit', manager)">
                                 <Button variant="outline">Edit</Button>
                             </Link>
+                            <Link :href="route('admin.users.managers.show', manager)">
+                                <Button variant="secondary">View</Button>
+                            </Link>
 
                             <!-- Delete Button -->
                             <Link

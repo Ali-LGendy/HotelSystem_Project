@@ -64,11 +64,18 @@ class ManagersController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
-
+   public function show(User $user)
+{
+    return Inertia::render('Admin/Users/Managers/Show', [
+        'user' => [
+            'data' => $user,
+            'created_at' => $user->created_at,
+            'id' => $user->id,
+            
+        ],
+        'menuLinks' => $this->getAdminMenuLinks()
+    ]);
+}
     /**
      * Show the form for editing the specified resource.
      */

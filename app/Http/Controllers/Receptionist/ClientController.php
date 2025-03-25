@@ -9,6 +9,7 @@ use App\Notifications\GreetingApprovedClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -229,14 +230,18 @@ class ClientController extends Controller
                 'client_id',
                 'room_id',
                 'accompany_number',
-                'price_paid'
+                'price_paid',
+                'status'
             ]);
 
         if ($id) {
             $query->where('client_id', $id);
         }
 
-        $reservations = $query->latest()->paginate(10);
+        // Use latest by default
+        $query->latest();
+
+        $reservations = $query->paginate(10);
 
         // Get client name if specific client is selected
         $clientName = null;
@@ -248,7 +253,7 @@ class ClientController extends Controller
         return Inertia::render('Receptionist/Client/ClientsReservations', [
             'clientsReservations' => $reservations,
             'clientId' => $id,
-            'clientName' => $clientName,
+            'clientName' => $clientName
         ]);
     }
 

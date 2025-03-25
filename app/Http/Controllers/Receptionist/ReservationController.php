@@ -24,7 +24,9 @@ class ReservationController extends Controller
             ->latest()
             ->paginate(10);
 
-        return Inertia::render('Receptionist/Reservation/Index', ['reservations' => $reservations]);
+        return Inertia::render('Receptionist/Reservation/Index', [
+            'reservations' => $reservations
+        ]);
     }
 
     /**
@@ -37,9 +39,8 @@ class ReservationController extends Controller
             ->latest()
             ->paginate(10);
 
-        return Inertia::render('Receptionist/Reservation/Index', [
-            'reservations' => $reservations,
-            'showAll' => true
+        return Inertia::render('Receptionist/Reservation/AllReservations', [
+            'reservations' => $reservations
         ]);
     }
 

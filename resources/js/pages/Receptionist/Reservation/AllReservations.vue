@@ -29,126 +29,89 @@
 
       <!-- Data Table -->
       <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-700">
-          <thead class="bg-gray-800">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Client Name
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Room Number
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Accompany Number
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Paid Price
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Check-in Date
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Check-out Date
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Status
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-gray-800 divide-y divide-gray-700">
-            <tr v-for="reservation in reservations.data" :key="reservation.id" class="hover:bg-gray-700">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-200">
-                  {{ reservation.client ? reservation.client.name : 'N/A' }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-300">
-                  {{ reservation.room ? reservation.room.room_number : 'N/A' }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-300">{{ reservation.accompany_number }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-300">${{ reservation.price_paid }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-300">{{ formatDate(reservation.check_in_date) }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-300">{{ formatDate(reservation.check_out_date) }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span 
-                  :class="[
-                    'px-2 py-1 text-xs font-medium rounded-full',
-                    getStatusClass(reservation.status)
-                  ]"
-                >
-                  {{ reservation.status }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex space-x-2">
-                  <button
-                    v-if="reservation.status === 'pending'"
-                    @click="approveReservation(reservation.id)"
-                    class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                  >
-                    Approve
-                  </button>
-                  <a
-                    :href="`/receptionist/reservations/${reservation.id}`"
-                    class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                  >
-                    View
-                  </a>
-                  <a
-                    :href="`/receptionist/reservations/${reservation.id}/edit`"
-                    class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                  >
-                    Edit
-                  </a>
-                  <button
-                    @click="confirmDelete(reservation.id)"
-                    class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <DataTable
+          :columns="columns"
+          :data="reservations.data"
+          :pagination="{
+            pageSize: 10,
+            pageIndex: currentPage - 1,
+            totalItems: reservations.total,
+            manualPagination: true
+          }"
+          @page-change="handlePageChange"
+          class="text-gray-200"
+        >
+          <!-- Client Name Cell Template -->
+          <template #cell-client.name="{ row }">
+            {{ row.client ? row.client.name : 'N/A' }}
+          </template>
+
+          <!-- Room Number Cell Template -->
+          <template #cell-room.room_number="{ row }">
+            {{ row.room ? row.room.room_number : 'N/A' }}
+          </template>
+
+          <!-- Price Cell Template -->
+          <template #cell-price_paid="{ row }">
+            ${{ row.price_paid }}
+          </template>
+
+          <!-- Check-in Date Cell Template -->
+          <template #cell-check_in_date="{ row }">
+            {{ formatDate(row.check_in_date) }}
+          </template>
+
+          <!-- Check-out Date Cell Template -->
+          <template #cell-check_out_date="{ row }">
+            {{ formatDate(row.check_out_date) }}
+          </template>
+
+          <!-- Status Cell Template -->
+          <template #cell-status="{ row }">
+            <span
+              :class="[
+                'px-2 py-1 text-xs font-medium rounded-full',
+                getStatusClass(row.status)
+              ]"
+            >
+              {{ row.status }}
+            </span>
+          </template>
+
+          <!-- Actions Cell Template -->
+          <template #cell-actions="{ row }">
+            <div class="flex space-x-2">
+              <button
+                v-if="row.status === 'pending'"
+                @click="approveReservation(row.id)"
+                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+              >
+                Approve
+              </button>
+              <a
+                :href="`/receptionist/reservations/${row.id}`"
+                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              >
+                View
+              </a>
+              <a
+                :href="`/receptionist/reservations/${row.id}/edit`"
+                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              >
+                Edit
+              </a>
+              <button
+                @click="confirmDelete(row.id)"
+                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </template>
+        </DataTable>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="reservations.data.length > 0" class="mt-4 flex justify-between items-center">
-        <div class="text-sm text-gray-400">
-          Showing {{ reservations.from }} to {{ reservations.to }} of {{ reservations.total }} reservations
-        </div>
-        <div class="flex space-x-2">
-          <button
-            v-for="page in reservations.links"
-            :key="page.label"
-            @click="goToPage(page.url)"
-            :disabled="!page.url"
-            :class="[
-              'px-3 py-1 rounded-md text-sm',
-              page.active 
-                ? 'bg-blue-600 text-white' 
-                : page.url 
-                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
-                  : 'bg-gray-800 text-gray-500 cursor-not-allowed'
-            ]"
-            v-html="page.label"
-          ></button>
-        </div>
-      </div>
+
 
       <!-- Delete Confirmation Dialog -->
       <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -202,7 +165,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+import DataTable from '@/components/ui/DataTable.vue';
 
 // Props
 const props = defineProps({
@@ -216,6 +181,48 @@ const props = defineProps({
 const showDeleteDialog = ref(false);
 const showApproveDialog = ref(false);
 const selectedReservationId = ref(null);
+
+// Table columns definition
+const columns = [
+  {
+    accessorKey: 'client.name',
+    header: 'Client Name'
+  },
+  {
+    accessorKey: 'room.room_number',
+    header: 'Room Number'
+  },
+  {
+    accessorKey: 'accompany_number',
+    header: 'Accompany Number'
+  },
+  {
+    accessorKey: 'price_paid',
+    header: 'Paid Price'
+  },
+  {
+    accessorKey: 'check_in_date',
+    header: 'Check-in Date'
+  },
+  {
+    accessorKey: 'check_out_date',
+    header: 'Check-out Date'
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status'
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    enableSorting: false
+  }
+];
+
+// Computed
+const currentPage = computed(() => {
+  return props.reservations.current_page || 1;
+});
 
 // Methods
 const formatDate = (dateString) => {
@@ -241,9 +248,19 @@ const getStatusClass = (status) => {
   return classes[status] || 'bg-gray-700 text-gray-200';
 };
 
-const goToPage = (url) => {
-  if (!url) return;
-  window.location.href = url;
+const handlePageChange = (pageIndex) => {
+  const page = pageIndex + 1;
+  const baseUrl = `/receptionist/all-reservations`;
+
+  // Build query parameters
+  const params = new URLSearchParams();
+  params.append('page', page);
+
+  router.visit(`${baseUrl}?${params.toString()}`, {
+    preserveScroll: true,
+    preserveState: false,
+    replace: true
+  });
 };
 
 const confirmDelete = (id) => {

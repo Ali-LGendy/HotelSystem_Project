@@ -15,6 +15,7 @@ defineOptions({ layout: AppLayout });
 
 // Initialize form with existing manager data
 const form = useForm({
+    _method: 'PUT',
     name: props.manager.name || '', // Ensure non-null value
     email: props.manager.email || '', // Ensure non-null value
     password: '', // Keep as optional
@@ -27,9 +28,29 @@ const handleFileUpload = (event) => {
     form.avatar_img = event.target.files[0];
 };
 
-// Submit form using PUT for update
 const submitForm = () => {
-    form.put(route('admin.users.managers.update', props.manager.id), {
+    // Create a FormData object to handle file upload
+    const formData = new FormData();
+
+    // Append all form fields
+    formData.append('_method', 'PUT');
+    formData.append('name', form.name);
+    formData.append('email', form.email);
+    formData.append('national_id', form.national_id);
+
+    // Only append password if it's not empty
+    if (form.password) {
+        formData.append('password', form.password);
+    }
+
+    // Handle file upload
+    if (form.avatar_img instanceof File) {
+        formData.append('avatar_img', form.avatar_img);
+    }
+
+    // Use axios directly for more control
+    router.post(route('admin.users.managers.update', props.manager.id), formData, {
+        forceFormData: true, // Important for file uploads
         onSuccess: () => {
             console.log('Update successful');
             router.visit(route('admin.users.managers.index'));
@@ -41,18 +62,6 @@ const submitForm = () => {
         preserveState: true,
     });
 };
-
-// const getImageUrl = (path) => {
-//     if (!path) return '/dafaults/user.png';
-//     console.log(path);
-//     // For full URLs
-//     if (path.startsWith('http')) {
-//         return path;
-//     }
-
-//     // For local storage files
-//     return `/storage/${path}`;
-// };
 const getImageUrl = (path) => {
     // If path is a File object
     if (path instanceof File) {
@@ -102,7 +111,7 @@ const getInitials = (name) => {
                 <!-- Name -->
                 <div>
                     <Label for="name" class="dark:text-gray-300">Name</Label>
-                    <Input v-model="form.name" id="name" placeholder="Enter manager's name" required />
+                    <Input v-model="form.name" id="name" placeholder="Enter manager's name" />
                     <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">
                         {{ form.errors.name }}
                     </p>
@@ -111,7 +120,7 @@ const getInitials = (name) => {
                 <!-- Email -->
                 <div>
                     <Label for="email" class="dark:text-gray-300">Email</Label>
-                    <Input v-model="form.email" id="email" type="email" placeholder="Enter manager's email" required />
+                    <Input v-model="form.email" id="email" type="email" placeholder="Enter manager's email" />
                     <p v-if="form.errors.email" class="mt-1 text-sm text-red-500">
                         {{ form.errors.email }}
                     </p>
@@ -120,7 +129,7 @@ const getInitials = (name) => {
                 <!-- Password -->
                 <div>
                     <Label for="password" class="dark:text-gray-300">Password</Label>
-                    <Input v-model="form.password" id="password" type="password" placeholder="Set a password" required />
+                    <Input v-model="form.password" id="password" type="password" placeholder="Set a password" />
                     <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
                         {{ form.errors.password }}
                     </p>
@@ -129,7 +138,7 @@ const getInitials = (name) => {
                 <!-- National ID -->
                 <div>
                     <Label for="national_id" class="dark:text-gray-300">National ID</Label>
-                    <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" required />
+                    <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" />
                     <p v-if="form.errors.national_id" class="mt-1 text-sm text-red-500">
                         {{ form.errors.national_id }}
                     </p>

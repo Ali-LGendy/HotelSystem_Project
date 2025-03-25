@@ -15,7 +15,7 @@ use Cog\Laravel\Ban\Traits\Bannable;
 class User extends Authenticatable implements BannableInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable,Bannable;
+    use HasFactory, HasRoles, Notifiable, Bannable;
 
     /**
      * The attributes that are mass assignable.
@@ -25,9 +25,9 @@ class User extends Authenticatable implements BannableInterface
     protected $fillable = [
         'name',
         'email',
+        'mobile',
         'password',
         'role',
-        'national_id',
         'avatar_img',
         'country',
         'gender',
@@ -56,6 +56,8 @@ class User extends Authenticatable implements BannableInterface
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_approved' => 'boolean',
+            'is_banned' => 'boolean',
         ];
     }
 

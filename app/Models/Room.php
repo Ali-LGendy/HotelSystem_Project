@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Room extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'room_number',
         'price',
@@ -28,8 +29,8 @@ class Room extends Model
         return $this->belongsTo(Floor::class, 'floor_id');
     }
 
-    public function reservations(): belongsTo
+    public function reservations(): HasMany
     {
-        return $this->belongsTo(Reservation::class);
+        return $this->hasMany(Reservation::class);
     }
 }

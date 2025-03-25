@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Floor;
 use App\Models\User;
 use Inertia\Inertia;
+use Illuminate\Support\Collection;
 
 class FloorController extends Controller
 {
@@ -49,7 +50,12 @@ class FloorController extends Controller
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
 
-        $managers = $isAdmin ? User::where('role', 'manager')->get(['id', 'name']) : [$user];
+        $managers = $isAdmin ? User::role('manager')->get(['id', 'name']) : collect([$user])->map(function($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name
+            ];
+        });
 
         return Inertia::render('Floors/Create', [
             'managers' => $managers
@@ -89,9 +95,14 @@ class FloorController extends Controller
             return redirect()->route('floors.index')
                 ->withErrors(['error' => 'You are not authorized to edit this floor.']);
         }
-    
-        $managers = $isAdmin ? User::where('role', 'manager')->get(['id', 'name']) : [$user];
-        
+
+        $managers = $isAdmin ? User::role('manager')->get(['id', 'name']) : collect([$user])->map(function($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name
+            ];
+        });
+
         return Inertia::render('Floors/Edit', [
             'floor' => $floor,
             'managers' => $managers

@@ -22,26 +22,26 @@ class ReservationFactory extends Factory
         // Get or create an available room
         $room = Room::where('status', 'available')->inRandomOrder()->first()
             ?? Room::factory()->create();
-            
+
         // Random stay duration (1-7 days)
         $stayDuration = $this->faker->numberBetween(1, 7);
         $checkInDate = Carbon::now()->addDays($this->faker->numberBetween(1, 30));
         $checkOutDate = (clone $checkInDate)->addDays($stayDuration);
-        
+
         return [
-            'client_id' => User::where('role', 'client')->inRandomOrder()->first()?->id 
+            'client_id' => User::role('client')->inRandomOrder()->first()?->id
                 ?? User::factory()->create(['role' => 'client'])->id,
             'room_id' => $room->id,
             'accompany_number' => $this->faker->numberBetween(1, $room->room_capacity),
             'price_paid' => $room->price * $stayDuration,
-            'receptionist_id' => User::where('role', 'receptionist')->inRandomOrder()->first()?->id 
-                ?? User::factory()->create(['role' => 'receptionist'])->id,
+            'receptionist_id' => User::role('receptionist')->inRandomOrder()->first()?->id
+                ?? User::factory()->receptionist()->create()->id,
             'check_in_date' => $checkInDate,
             'check_out_date' => $checkOutDate,
-            'status' => 'pending'
+            'status' => 'pending',
         ];
     }
-    
+
     /**
      * Mark reservation as confirmed and update room status
      */
@@ -49,12 +49,14 @@ class ReservationFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $room = Room::find($attributes['room_id']);
-            if ($room) $room->update(['status' => 'occupied']);
-            
+            if ($room) {
+                $room->update(['status' => 'occupied']);
+            }
+
             return ['status' => 'confirmed'];
         });
     }
-    
+
     /**
      * Mark reservation as checked in and update room status
      */
@@ -62,8 +64,10 @@ class ReservationFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $room = Room::find($attributes['room_id']);
-            if ($room) $room->update(['status' => 'occupied']);
-            
+            if ($room) {
+                $room->update(['status' => 'occupied']);
+            }
+
             return [
                 'status' => 'checked_in',
                 'check_in_date' => Carbon::now()->subDays(1),

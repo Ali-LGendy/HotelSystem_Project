@@ -19,12 +19,12 @@ class FloorFactory extends Factory
     {
         static $floorNumber = 1000; // Start from 1000 to ensure 4 digits
         $floorNumber++;
-        
+
         return [
-            'name' => 'Floor ' . $floorNumber,
+            'name' => 'Floor '.$floorNumber,
             'number' => $floorNumber,
-            'manager_id' => User::where('role', 'manager')->inRandomOrder()->first()?->id 
-                ?? User::factory()->create(['role' => 'manager'])->id,
+            'manager_id' => User::role('manager')->inRandomOrder()->first()?->id
+                ?? User::factory()->manager()->create()->id,
         ];
     }
 }

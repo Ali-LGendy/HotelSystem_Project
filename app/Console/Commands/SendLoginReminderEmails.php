@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\User;
 use App\Notifications\LoginReminderNotification;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class SendLoginReminderEmails extends Command
 {
@@ -29,7 +29,7 @@ class SendLoginReminderEmails extends Command
     public function handle()
     {
         $users = User::where('last_login_at', '<', Carbon::now()->subMonth())
-                    ->get();
+            ->get();
 
         foreach ($users as $user) {
             $user->notify(new LoginReminderNotification($user));

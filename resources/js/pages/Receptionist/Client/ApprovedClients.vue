@@ -18,7 +18,7 @@
             href="/receptionist/clients/reservations"
             class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
           >
-            Clients Reservations
+            All My Clients Reservations
           </a>
           <a
             href="/receptionist/reservations"
@@ -271,7 +271,7 @@
               href="/receptionist/clients/reservations"
               class="inline-block rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
             >
-              View Client Reservations
+              View All My Clients Reservations
             </a>
           </div>
         </div>

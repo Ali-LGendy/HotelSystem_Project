@@ -11,16 +11,17 @@ abstract class Controller
         return [
             ['title' => 'Manage Managers', 'href' => route('admin.users.managers.index')],
             ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.index')],
-            ['title' => 'Manage Clients', 'href' => route('admin.users.clients.index')],
+            ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
         ];
     }
     protected function getManagerMenuLinks()
     {
         return [
-            ['title' => 'Manage Managers', 'href' => route('admin.users.managers.index')],
             ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.index')],
-            ['title' => 'Manage Floors', 'href' => route('admin.users.floors.index')],
-            ['title' => 'Manage Rooms', 'href' => route('admin.users.rooms.index')],
+            ['title' => 'Manage Floors', 'href' => route('floors.index')],
+            ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
+            ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
+
 
         ];
     }

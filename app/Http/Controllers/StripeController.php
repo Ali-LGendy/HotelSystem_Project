@@ -126,10 +126,9 @@ class StripeController extends Controller
 
             // Update room status if needed
             $room = $reservation->room;
-            if ($reservation->check_in_date == date('Y-m-d')) {
                 $room->status = 'occupied';
                 $room->save();
-            }
+            
 
             DB::commit();
 

@@ -18,7 +18,7 @@
             v-model="form.room_number"
             type="text"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+            disabled
           />
         </div>
 
@@ -79,7 +79,7 @@
           </select>
         </div>
 
-        <div class="mb-6">
+        <div v-if="isAdmin" class="mb-6">
           <label for="manager_id" class="block text-sm font-medium text-gray-700 mb-1">Room Manager</label>
           <select
             id="manager_id"
@@ -115,22 +115,27 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 const props = defineProps({
   room: Object,
   managers: Array,
   floors: Array,
   statuses: Array,
+  isAdmin: Boolean,
   errors: {
     type: Object,
     default: () => ({})
   }
 });
 
+defineOptions({ layout: AppLayout });
+
+
 const form = useForm({
   room_number: props.room?.room_number || '',
   room_capacity: props.room?.room_capacity || '',
-  price: props.room?.price || '',
+  price: (props.room?.price/100).toFixed(2) || '',
   status: props.room?.status || 'available',
   floor_id: props.room?.floor_id || '',
   manager_id: props.room?.manager_id || ''

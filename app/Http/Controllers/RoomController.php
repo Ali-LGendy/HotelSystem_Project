@@ -167,7 +167,8 @@ class RoomController extends Controller
             'room' => $room,
             'managers' => $managers,
             'floors' => $floors,
-            'statuses' => ['available', 'occupied', 'maintenance']
+            'statuses' => ['available', 'occupied', 'maintenance'],
+            'isAdmin' => $isAdmin
         ]);
     }
 
@@ -185,17 +186,18 @@ class RoomController extends Controller
         }
 
         $validated = $request->validate([
-            'room_number' => 'required|string|unique:rooms,room_number,' . $room->id,
-            'price' => 'required|numeric|min:1000|max:1000000',
+            // 'room_number' => 'required|string|unique:rooms,room_number,' . $room->id,
+            'price' => 'required|numeric|min:10|max:10000',
             'room_capacity' => 'required|integer|min:1|max:100',
             'status' => 'required|in:available,occupied,maintenance',
             'floor_id' => 'required|exists:floors,id',
             'manager_id' => 'nullable|exists:users,id'
         ]);
 
-        if (!$isAdmin) {
-            $validated['manager_id'] = $room->manager_id;
-        }
+        // if (!$isAdmin) {
+        //     $validated['manager_id'] = $room->manager_id;
+        // }
+        $validated['price'] *= 100;
 
         $room->update($validated);
 

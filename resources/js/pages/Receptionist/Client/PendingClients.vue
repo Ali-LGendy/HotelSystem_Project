@@ -8,20 +8,18 @@
           <p class="mt-2 text-gray-400">Manage client registration requests</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <Button
-            @click="router.visit(route('receptionist.clients.my-approved'))"
-            variant="default"
-            class="bg-green-600 hover:bg-green-700 text-white"
+          <button
+            @click="navigateTo('/receptionist/clients/my-approved')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             My Approved Clients
-          </Button>
-          <Button
-            @click="router.visit(route('receptionist.clients.reservations'))"
-            variant="default"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Clients Reservations
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -138,6 +136,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -150,6 +149,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
+  });
+};
+
 // Existing script logic remains the same as in the original file...
-// (I've kept the script portion the same to focus on the template changes)
 </script>

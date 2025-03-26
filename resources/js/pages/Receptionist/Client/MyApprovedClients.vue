@@ -8,34 +8,34 @@
           <p class="mt-2 text-gray-400">Clients that you have approved</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a
-            href="/receptionist/clients"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+          <button
+            @click="navigateTo('/receptionist/clients')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Manage Clients
-          </a>
-          <a
-            href="/receptionist/clients/reservations"
-            class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Clients Reservations
-          </a>
-          <!-- Only show Pending Reservations button to admin -->
-          <a
+          </button>
+          <!-- Pending Reservations button - only visible to admin -->
+          <button
             v-if="isAdmin"
-            href="/receptionist/reservations"
-            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+            @click="navigateTo('/receptionist/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Pending Reservations
-          </a>
+          </button>
           <!-- Only show All Clients button to admin -->
-          <a
+          <button
             v-if="isAdmin"
-            href="/receptionist/clients/all"
-            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+            @click="navigateTo('/receptionist/clients/all')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             All Clients
-          </a>
+          </button>
         </div>
       </div>
 
@@ -43,10 +43,7 @@
       <div>
         <div v-if="myApprovedClients.data.length === 0" class="text-center py-8">
           <p class="text-lg text-gray-300">You haven't approved any clients yet.</p>
-          <p class="mt-2 text-gray-400">Go to <a href="/receptionist/clients" class="text-blue-400 hover:underline">Manage Clients</a> to approve new clients.</p>
-          <div v-if="debug" class="mt-4 p-4 bg-gray-800 rounded-lg max-w-lg mx-auto">
-            <p class="text-sm text-yellow-400">Debug Info: Make sure you have approved clients with your user ID as manager_id and is_approved set to 1.</p>
-          </div>
+          <p class="mt-2 text-gray-400">Go to <Link href="/receptionist/clients" class="text-blue-400 hover:underline">Manage Clients</Link> to approve new clients.</p>
         </div>
 
         <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
@@ -200,19 +197,7 @@
         </div>
       </div>
 
-      <!-- Debug Information (Always visible for now) -->
-      <div class="mt-8 p-6 bg-red-900 rounded-lg border border-red-700">
-        <h3 class="text-xl font-semibold mb-4 text-gray-100">Debug Information</h3>
-        <div class="overflow-x-auto">
-          <p class="text-sm text-gray-300 mb-2">isAdmin prop: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">userRole prop: {{ userRole }}</p>
-          <p class="text-sm text-gray-300 mb-2">Admin button should show: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">isAdmin prop: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">userRole prop: {{ userRole }}</p>
-          <p class="text-sm text-gray-300 mb-2">Admin button should show: {{ isAdmin }}</p>
-          <pre class="text-xs text-gray-300">{{ JSON.stringify(debug, null, 2) }}</pre>
-        </div>
-      </div>
+
 
       <!-- Client Statistics Dashboard -->
       <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
@@ -294,7 +279,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 
 // Props
 const props = defineProps({
@@ -321,14 +306,6 @@ const props = defineProps({
   isAdmin: {
     type: Boolean,
     default: false
-  },
-  isAdmin: {
-    type: Boolean,
-    default: false
-  },
-  debug: {
-    type: Object,
-    default: null
   }
 });
 
@@ -345,9 +322,19 @@ const perPage = ref(10);
 // Methods
 const goToPage = (url) => {
   if (!url) return;
-  router.visit(url, {
+  router.get(url, {}, {
     preserveScroll: true,
-    preserveState: false
+    preserveState: true,
+    only: ['myApprovedClients', 'clientStats', 'recentReservations']
+  });
+};
+
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
   });
 };
 
@@ -359,17 +346,17 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
     direction: sortDir
   };
 
-  // Navigate with new parameters
-  router.visit(window.location.pathname, {
-    data: {
-      page,
-      per_page: perPage,
-      sort_by: sortBy,
-      sort_dir: sortDir
-    },
+  // Navigate with new parameters using Inertia's get method
+  router.get(window.location.pathname, {
+    page,
+    per_page: perPage,
+    sort_by: sortBy,
+    sort_dir: sortDir
+  }, {
     preserveScroll: true,
-    preserveState: false,
-    replace: true
+    preserveState: true, // Keep component state between requests
+    only: ['myApprovedClients', 'clientStats', 'recentReservations'], // Only refresh these data props
+    replace: true // Replace current history entry instead of adding a new one
   });
 };
 

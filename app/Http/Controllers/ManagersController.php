@@ -19,7 +19,7 @@ class ManagersController extends Controller
 
         return Inertia::render('Admin/Users/Managers/Index', [
             'managers' => $managers,
-            'menuLinks' => $this->getAdminMenuLinks()
+            'menuLinks' => $this->getManagerMenuLinks()
         ]);
     }
 
@@ -30,7 +30,7 @@ class ManagersController extends Controller
     {
         //
         return Inertia::render('Admin/Users/Managers/Create', [
-            'menuLinks' => $this->getAdminMenuLinks()
+            'menuLinks' => $this->getManagerMenuLinks()
         ]);
     }
 
@@ -73,7 +73,7 @@ class ManagersController extends Controller
             'id' => $user->id,
             
         ],
-        'menuLinks' => $this->getAdminMenuLinks()
+        'menuLinks' => $this->getManagerMenuLinks()
     ]);
 }
     /**
@@ -84,7 +84,7 @@ class ManagersController extends Controller
         //
          return Inertia::render('Admin/Users/Managers/Edit', [
             'manager' => $user,
-            'menuLinks' => $this->getAdminMenuLinks()
+            'menuLinks' => $this->getManagerMenuLinks()
         ]);
     }
 

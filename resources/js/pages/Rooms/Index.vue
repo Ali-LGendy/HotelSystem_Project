@@ -94,7 +94,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { defineProps,ref, onMounted } from 'vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import Pagination from '@/Components/Pagination.vue';
@@ -130,6 +131,9 @@ onMounted(() => {
     }, 3000);
   }
 });
+
+defineOptions({ layout: AppLayout });
+
 
 // Function to get status class based on status
 const getStatusClass = (status) => {

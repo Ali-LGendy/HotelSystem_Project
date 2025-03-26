@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Room;
 use App\Models\Reservation;
 use Inertia\Inertia;
+
 
 class DashboardController extends Controller
 {

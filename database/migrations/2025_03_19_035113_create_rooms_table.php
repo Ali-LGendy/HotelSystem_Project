@@ -22,7 +22,7 @@ return new class extends Migration
             // Room Details
             $table->string('room_number')->unique();
             $table->unsignedInteger('room_capacity');
-            $table->unsignedInteger('price');
+            $table->BigInteger ('price');
             $table->enum('status', ['available', 'occupied', 'maintenance'])->default('available');
         });
     }

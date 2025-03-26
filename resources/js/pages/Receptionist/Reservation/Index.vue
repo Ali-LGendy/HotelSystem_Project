@@ -1,380 +1,344 @@
 <template>
-    <div class="mx-auto max-w-7xl px-4 py-8">
-        <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-            <!-- Header with Navigation -->
-            <div class="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                <div>
-                    <h2 class="text-3xl font-bold">{{ showAll ? 'All Reservations' : 'Pending Reservations' }}</h2>
-                    <p class="mt-2 text-gray-400">
-                        {{ showAll ? 'Showing all reservations in the system' : 'Showing reservations that need your approval' }}
-                    </p>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <a
-                        v-if="!showAll"
-                        href="/receptionist/all-reservations"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-                    >
-                        All Reservations
-                    </a>
-                    <a
-                        v-else
-                        href="/receptionist/reservations"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-                    >
-                        Pending Reservations
-                    </a>
-                    <a
-                        href="/receptionist/clients/my-approved"
-                        class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
-                    >
-                        My Approved Clients
-                    </a>
-                </div>
-            </div>
-
-            <div v-if="reservations.data.length === 0" class="py-8 text-center">
-                <p class="text-lg text-gray-300">{{ showAll ? 'No reservations found.' : 'No pending reservations found.' }}</p>
-            </div>
-
-            <!-- Data Table -->
-            <div v-else class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
-                <DataTable
-                    :columns="columns"
-                    :data="reservations.data"
-                    :pagination="{
-                        pageSize: 10,
-                        pageIndex: currentPage - 1,
-                        totalItems: reservations.total,
-                        manualPagination: true,
-                    }"
-                    @page-change="handlePageChange"
-                    class="text-gray-200"
-                >
-                    <!-- Status Cell Template -->
-                    <template #cell-status="{ row }">
-                        <Badge :variant="getStatusVariant(row.status)" class="text-xs font-medium">
-                            {{ row.status }}
-                        </Badge>
-                    </template>
-
-                    <!-- Actions Cell Template -->
-                    <template #cell-actions="{ row }">
-                        <div class="flex items-center gap-2">
-                            <button
-                                v-if="row.original && row.original.status === 'pending'"
-                                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                                @click.prevent="approveReservation(row)"
-                            >
-                                Approve
-                            </button>
-                            <a
-                                :href="'/receptionist/reservations/' + (row.original ? row.original.id : row.id)"
-                                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            >
-                                View
-                            </a>
-                            <a
-                                :href="'/receptionist/reservations/' + (row.original ? row.original.id : row.id) + '/edit'"
-                                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            >
-                                Edit
-                            </a>
-                            <button
-                                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                                @click="confirmDelete(row)"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </template>
-                </DataTable>
-            </div>
-
-            <!-- Delete Confirmation Dialog -->
-            <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-                    <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
-                    <p class="mt-2 text-gray-400">Are you sure you want to delete this reservation? This action cannot be undone.</p>
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button
-                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            @click="showDeleteDialog = false"
-                        >
-                            Cancel
-                        </button>
-                        <button class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600" @click="deleteReservation">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
+  <div class="mx-auto max-w-7xl px-4 py-8">
+    <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
+      <!-- Header with Navigation -->
+      <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-3xl font-bold">{{ showAll ? 'All Reservations' : 'Pending Reservations' }}</h2>
+          <p class="mt-2 text-gray-400">{{ showAll ? 'Showing all reservations in the system' : 'Showing reservations that need your approval' }}</p>
         </div>
+        <div class="flex flex-wrap gap-3">
+          <Link
+            v-if="!showAll"
+            :href="route('receptionist.all-reservations')"
+            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+          >
+            All Reservations
+          </Link>
+          <Link
+            v-else
+            :href="route('receptionist.reservations')"
+            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+          >
+            Pending Reservations
+          </Link>
+          <Link
+            :href="route('receptionist.clients.approved')"
+            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+          >
+            My Approved Clients
+          </Link>
+        </div>
+      </div>
+
+      <!-- No Reservations Message -->
+      <div v-if="reservations.data.length === 0" class="text-center py-8">
+        <p class="text-lg text-gray-300">
+          {{ showAll ? 'No reservations found.' : 'No pending reservations found.' }}
+        </p>
+      </div>
+
+      <!-- Reservations Table -->
+      <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
+        <DataTable
+          :columns="columns"
+          :data="reservations.data"
+          :pagination="{
+            pageSize: 10,
+            pageIndex: currentPage - 1,
+            totalItems: reservations.total,
+            manualPagination: true
+          }"
+          @page-change="handlePageChange"
+          class="text-gray-200"
+        >
+          <!-- Status Cell Template -->
+          <template #cell-status="{ row }">
+            <Badge :variant="getStatusVariant(row.status)" class="text-xs font-medium">
+              {{ row.status }}
+            </Badge>
+          </template>
+
+          <!-- Actions Cell Template -->
+          <template #cell-actions="{ row }">
+            <div class="flex items-center gap-2">
+              <Button
+                v-if="row.original && row.original.status === 'pending'"
+                variant="success"
+                size="sm"
+                @click.prevent="approveReservation(row)"
+              >
+                Approve
+              </Button>
+              <Button
+                @click="viewReservation(row.original ? row.original.id : row.id)"
+                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              >
+                View
+              </Button>
+              <Button
+                @click="editReservation(row.original ? row.original.id : row.id)"
+                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              >
+                Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                @click="confirmDelete(row)"
+              >
+                Delete
+              </Button>
+            </div>
+
+      <!-- Delete Confirmation Dialog -->
+      <Dialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this reservation? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" @click="showDeleteDialog = false">
+              Cancel
+            </Button>
+            <Button variant="destructive" @click="deleteReservation">
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
 </template>
 
 <script setup>
-import DataTable from '@/components/ui/DataTable.vue';
-import { Badge } from '@/components/ui/badge';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { router } from '@inertiajs/vue3';
-import axios from 'axios';
-import { computed, ref } from 'vue';
-defineOptions({ layout: AppLayout });
-// Props
+import { ref, computed } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
+import axios from 'axios'
+
+// Shadcn UI Components
+import { Link } from '@/Components/ui/link'
+import { Button } from '@/Components/ui/button'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/Components/ui/dialog'
+import { Badge } from '@/Components/ui/badge'
+
+// Custom Components
+import DataTable from '@/Components/ui/DataTable.vue'
+
+// Props Definition
 const props = defineProps({
-    reservations: {
-        type: Object,
-        required: true,
-    },
-    showAll: {
-        type: Boolean,
-        default: false,
-    },
-});
+  reservations: {
+    type: Object,
+    required: true
+  },
+  showAll: {
+    type: Boolean,
+    default: false
+  }
+})
 
-// State
-const showDeleteDialog = ref(false);
-const selectedReservation = ref(null);
+// State Management
+const showDeleteDialog = ref(false)
+const selectedReservation = ref(null)
 
-// Navigation Links
-const navigationLinks = [
-    {
-        href: '/receptionist/all-reservations',
-        text: 'All Reservations',
-        bgClass: 'bg-purple-600 text-white hover:bg-purple-700',
-    },
-    {
-        href: route('receptionist.reservations.create'),
-        text: 'New Reservation',
-        bgClass: 'bg-blue-600 text-white hover:bg-blue-700',
-    },
-];
-
-// Handle navigation button clicks
-const handleNavigation = (route) => {
-    console.log('Navigating to:', route);
-    router.get(
-        route,
-        {},
-        {
-            preserveScroll: true,
-            onError: (errors) => {
-                console.error('Navigation error:', errors);
-            },
-        },
-    );
-};
-
-// Table Columns
-const columns = [
-    {
-        accessorKey: 'client.name', // Changed from user.name to client.name
-        header: 'Client Name',
-    },
-    {
-        accessorKey: 'room.room_number',
-        header: 'Room Number',
-    },
-    {
-        accessorKey: 'accompany_number',
-        header: 'Accompany Number',
-    },
-    {
-        accessorKey: 'price_paid', // Using the correct column name from the database
-        header: 'Paid Price',
-        cell: ({ row }) => (row.original && row.original.price_paid ? `$${row.original.price_paid}` : 'N/A'),
-    },
-    {
-        accessorKey: 'check_in_date',
-        header: 'Check-in Date',
-        cell: ({ row }) => (row.original ? formatDate(row.original.check_in_date) : 'N/A'),
-    },
-    {
-        accessorKey: 'check_out_date',
-        header: 'Check-out Date',
-        cell: ({ row }) => (row.original ? formatDate(row.original.check_out_date) : 'N/A'),
-    },
-    {
-        accessorKey: 'status',
-        header: 'Status',
-    },
-    {
-        id: 'actions',
-        header: 'Actions',
-    },
-];
-
-// Computed
+// Computed Properties
 const currentPage = computed(() => {
-    return props.reservations.current_page || 1;
-});
+  return props.reservations.current_page || 1
+})
 
-// Methods
+// Table Columns Configuration
+const columns = [
+  {
+    accessorKey: 'client.name',
+    header: 'Client Name'
+  },
+  {
+    accessorKey: 'room.room_number',
+    header: 'Room Number'
+  },
+  {
+    accessorKey: 'accompany_number',
+    header: 'Accompany Number'
+  },
+  {
+    accessorKey: 'price_paid',
+    header: 'Paid Price',
+    cell: ({ row }) => row.original && row.original.price_paid 
+      ? `$${row.original.price_paid}` 
+      : 'N/A'
+  },
+  {
+    accessorKey: 'check_in_date',
+    header: 'Check-in Date',
+    cell: ({ row }) => row.original 
+      ? formatDate(row.original.check_in_date) 
+      : 'N/A'
+  },
+  {
+    accessorKey: 'check_out_date',
+    header: 'Check-out Date',
+    cell: ({ row }) => row.original 
+      ? formatDate(row.original.check_out_date) 
+      : 'N/A'
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status'
+  },
+  {
+    id: 'actions',
+    header: 'Actions'
+  }
+]
+
+// Utility Functions
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString();
-    } catch (e) {
-        return dateString;
-    }
-};
+  if (!dateString) return 'N/A'
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString()
+  } catch (e) {
+    return dateString
+  }
+}
 
 const getStatusVariant = (status) => {
-    const variants = {
-        confirmed: 'success',
-        checked_in: 'info',
-        'checked-in': 'info', // Support both formats for backward compatibility
-        checked_out: 'secondary',
-        'checked-out': 'secondary', // Support both formats for backward compatibility
-        pending: 'warning',
-        cancelled: 'destructive',
-    };
-    return variants[status] || 'default';
-};
+  const variants = {
+    'confirmed': 'success',
+    'checked_in': 'info',
+    'checked-in': 'info',
+    'checked_out': 'secondary',
+    'checked-out': 'secondary',
+    'pending': 'warning',
+    'cancelled': 'destructive'
+  }
+  return variants[status] || 'default'
+}
 
+// Pagination Handler
 const handlePageChange = (pageIndex) => {
-    const page = pageIndex + 1;
-    const url = props.showAll ? `/receptionist/all-reservations?page=${page}` : `/receptionist/reservations?page=${page}`;
+  const page = pageIndex + 1
+  const url = props.showAll
+    ? route('receptionist.all-reservations', { page })
+    : route('receptionist.reservations', { page })
 
-    router.visit(url, {
-        preserveScroll: true,
-        preserveState: false,
-        replace: true,
-    });
-};
+  router.visit(url, {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true
+  })
+}
 
+// Reservation Management Methods
 const confirmDelete = (reservation) => {
-    // Store the reservation object with the correct structure
-    selectedReservation.value = reservation.original || reservation;
-    showDeleteDialog.value = true;
-};
+  selectedReservation.value = reservation.original || reservation
+  showDeleteDialog.value = true
+}
 
 const deleteReservation = () => {
-    console.log('Deleting reservation:', selectedReservation.value);
-    if (selectedReservation.value) {
-        try {
-            const id = selectedReservation.value.id;
-
-            // Get CSRF token from cookie if available
-            let csrfToken = '';
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith('XSRF-TOKEN=')) {
-                    csrfToken = decodeURIComponent(cookie.substring('XSRF-TOKEN='.length));
-                    break;
-                }
-            }
-
-            // Prepare headers
-            const headers = {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            };
-
-            // Add CSRF token if available
-            if (csrfToken) {
-                headers['X-XSRF-TOKEN'] = csrfToken;
-            }
-
-            fetch(`/receptionist/reservations/${id}`, {
-                method: 'DELETE',
-                headers: headers,
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        showDeleteDialog.value = false;
-                        selectedReservation.value = null;
-                        alert('Reservation deleted successfully!');
-                        window.location.reload();
-                    } else {
-                        console.error('Error deleting reservation, status:', response.status);
-                        alert('Could not delete reservation. Please try again.');
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error deleting reservation:', error);
-                    alert('Error deleting reservation. Please try again.');
-                });
-        } catch (error) {
-            console.error('Exception in deleteReservation:', error);
-            alert('An unexpected error occurred. Please try again.');
+  if (selectedReservation.value) {
+    router.delete(
+      route('receptionist.reservations.destroy', { 
+        reservation: selectedReservation.value.id 
+      }),
+      {
+        onSuccess: () => {
+          showDeleteDialog.value = false
+          selectedReservation.value = null
+          // Optional: Add toast notification
+        },
+        onError: (errors) => {
+          console.error('Error deleting reservation:', errors)
+          // Optional: Add error toast notification
         }
-    }
+      }
+    )
+  }
+}
+
+const viewReservation = (id) => {
+  router.visit(route('receptionist.reservations.show', { reservation: id }), {
+    preserveScroll: false,
+    preserveState: false
+  });
+};
+
+const editReservation = (id) => {
+  router.visit(route('receptionist.reservations.edit', { reservation: id }), {
+    preserveScroll: false,
+    preserveState: false
+  });
 };
 
 const approveReservation = async (row) => {
-    try {
-        // Get the reservation data, handling both possible structures
-        let reservation;
+  try {
+    const reservation = row.original || row
 
-        if (row.original) {
-            reservation = row.original;
-        } else {
-            reservation = row;
-        }
-
-        if (!reservation || !reservation.id) {
-            console.error('Invalid reservation object:', reservation);
-            alert('Error: Could not identify reservation. Please try again.');
-            return;
-        }
-
-        console.log('Approving reservation:', reservation);
-
-        // Create the data object with all required fields
-        const data = {
-            status: 'confirmed',
-            _method: 'PUT', // For method spoofing
-        };
-
-        // Add other fields if they exist in the reservation data
-        if (reservation.room_id) data.room_id = reservation.room_id;
-        if (reservation.accompany_number) data.accompany_number = reservation.accompany_number;
-        if (reservation.check_in_date) data.check_in_date = reservation.check_in_date;
-        if (reservation.check_out_date) data.check_out_date = reservation.check_out_date;
-        if (reservation.price_paid) data.price_paid = reservation.price_paid;
-        if (reservation.client_id) data.client_id = reservation.client_id;
-        if (reservation.receptionist_id) data.receptionist_id = reservation.receptionist_id;
-
-        console.log('Sending data for approval:', data);
-
-        // First, update the reservation status using axios
-        const response = await axios.post(`/receptionist/reservations/${reservation.id}`, data);
-        console.log('Reservation approval response:', response.data);
-
-        // Show success message for the reservation
-        alert('Reservation approved successfully!');
-
-        // If the client needs to be approved, redirect to the clients page
-        if (reservation.client_id) {
-            router.visit('/receptionist/clients', {
-                onSuccess: () => {
-                    console.log('Redirected to clients page to approve the client');
-                },
-            });
-        } else {
-            // Otherwise, just reload the current page
-            router.visit(window.location.pathname, {
-                method: 'get',
-                preserveScroll: false,
-                preserveState: false,
-                replace: true,
-                onSuccess: () => {
-                    console.log('Page reloaded after reservation approval');
-                },
-            });
-        }
-    } catch (error) {
-        console.error('Error approving reservation:', error);
-        alert('Could not approve reservation. Please try again.');
+    if (!reservation || !reservation.id) {
+      console.error('Invalid reservation object')
+      return
     }
-};
+
+    const data = {
+      status: 'confirmed',
+      ...reservation  // Spread other existing reservation details
+    }
+
+    // Use axios directly instead of Inertia to handle the JSON response
+    const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    // Check if the request was successful
+    if (response.data.success) {
+      alert('Reservation approved successfully!');
+
+      // Check if client is already approved
+      const clientApproved = response.data.client_approved;
+
+      // Refresh the current page to show updated data
+      if (reservation.client_id && !clientApproved) {
+        // If client is not approved, redirect to clients page
+        router.visit('/receptionist/clients', {
+          preserveScroll: false,
+          preserveState: false,
+          replace: false
+        });
+      } else {
+        // Otherwise, refresh the current page with updated data
+        window.location.reload(); // Full page reload to ensure data is refreshed
+      }
+    } else {
+      alert('Could not approve reservation. Please try again.');
+    }
+  } catch (error) {
+    console.error('Error approving reservation:', error);
+
+    // Show more detailed error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      alert(`Error: ${error.response.data.message}`);
+    } else {
+      alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+    }
+  }
+}
 </script>
 
 <style scoped>
+/* Existing custom styles */
 label {
     color: #e5e7eb;
 }

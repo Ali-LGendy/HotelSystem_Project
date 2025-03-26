@@ -81,6 +81,77 @@
             </div>
         </div>
     </div>
+    
+    <!-- Recent Reservations -->
+    <div>
+      <h4 class="text-xl font-semibold mb-4 text-gray-100">Recent Reservations</h4>
+      <div v-if="reservations.length === 0" class="text-center py-4 bg-gray-800 rounded-lg">
+        <p class="text-gray-400">No recent reservations found.</p>
+      </div>
+      <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-700">
+          <thead class="bg-gray-800">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Client Name
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Room Number
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Check-in Date
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Status
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-gray-800 divide-y divide-gray-700">
+            <tr v-for="reservation in reservations" :key="reservation.id" class="hover:bg-gray-700">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-200">
+                  {{ reservation.client ? reservation.client.name : 'N/A' }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-300">
+                  {{ reservation.room ? reservation.room.room_number : 'N/A' }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-300">{{ formatDate(reservation.check_in_date) }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span :class="getStatusClass(reservation.status)" class="px-2 py-1 text-xs font-medium rounded-full">
+                  {{ reservation.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                  <button
+                    v-if="reservation.status === 'pending'"
+                    @click="approveReservation(reservation)"
+                    class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    @click="navigateTo(`/receptionist/reservations/${reservation.id}`)"
+                    class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+                  >
+                    View
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -115,6 +186,15 @@ const formatDate = (dateString) => {
     } catch (e) {
         return dateString;
     }
+};
+
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
+  });
 };
 
 const getStatusClass = (status) => {

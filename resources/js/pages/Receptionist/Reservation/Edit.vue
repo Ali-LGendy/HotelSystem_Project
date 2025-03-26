@@ -112,6 +112,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 import { defineProps, ref } from 'vue';
 defineOptions({ layout: AppLayout });
 const props = defineProps({
@@ -148,26 +149,42 @@ const updateFormFromReservation = () => {
     form.price_paid = reservation.value.price_paid;
 };
 
-const updateReservation = () => {
+const updateReservation = async () => {
     // Update form data from the reservation ref
     updateFormFromReservation();
 
     // Log the data being sent
     console.log('Updating reservation:', form.data());
 
-    // Use form.put for better error handling and form processing
-    form.put(route('receptionist.reservations.update', reservation.value.id), {
-        onSuccess: () => {
-            // After updating, navigate back to the index page
-            router.visit(route('receptionist.reservations.index'), {
-                preserveScroll: true,
-            });
-        },
-        onError: (errors) => {
-            console.error('Error updating reservation:', errors);
-        },
-        preserveScroll: true,
-    });
+    try {
+        // Use axios directly instead of Inertia to handle the JSON response
+        const response = await axios.put(`/receptionist/reservations/${reservation.value.id}`, form.data(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+        });
+
+        // Check if the request was successful
+        if (response.data.success) {
+            alert('Reservation updated successfully!');
+
+            // Navigate back to the index page
+            window.location.href = '/receptionist/reservations';
+        } else {
+            alert('Could not update reservation. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating reservation:', error);
+
+        // Show more detailed error message if available
+        if (error.response && error.response.data && error.response.data.message) {
+            alert(`Error: ${error.response.data.message}`);
+        } else {
+            alert('Could not update reservation due to a technical issue. Please try refreshing the page.');
+        }
+    }
 };
 
 const goBack = () => {

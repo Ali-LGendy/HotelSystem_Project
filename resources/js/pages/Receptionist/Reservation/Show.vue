@@ -86,6 +86,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { defineProps } from 'vue';
 defineOptions({ layout: AppLayout });
 const props = defineProps({
@@ -117,7 +118,7 @@ const editReservation = () => {
     });
 };
 
-const updateStatus = (newStatus) => {
+const updateStatus = async (newStatus) => {
     // Create a data object with just the status change
     const data = {
         status: newStatus,
@@ -131,19 +132,35 @@ const updateStatus = (newStatus) => {
         redirect_back: true,
     };
 
-    // Use router.put to update just the status
-    router.put(route('receptionist.reservations.update', props.reservation.id), data, {
-        onSuccess: () => {
-            // Reload the current page to show the updated status
-            router.reload({
-                preserveScroll: true,
-            });
-        },
-        onError: (errors) => {
-            console.error('Error updating reservation status:', errors);
-        },
-        preserveScroll: true,
-    });
+    try {
+        // Use axios directly instead of Inertia to handle the JSON response
+        const response = await axios.put(`/receptionist/reservations/${props.reservation.id}`, data, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+        });
+
+        // Check if the request was successful
+        if (response.data.success) {
+            alert('Reservation status updated successfully!');
+
+            // Reload the page to show the updated status
+            window.location.reload();
+        } else {
+            alert('Could not update reservation status. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating reservation status:', error);
+
+        // Show more detailed error message if available
+        if (error.response && error.response.data && error.response.data.message) {
+            alert(`Error: ${error.response.data.message}`);
+        } else {
+            alert('Could not update reservation status due to a technical issue. Please try refreshing the page.');
+        }
+    }
 };
 
 const getStatusVariant = (status) => {

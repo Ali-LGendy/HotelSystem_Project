@@ -17,7 +17,7 @@ class FloorController extends Controller
         $isManager = $user->hasRole('manager');
 
         $perPage = $request->input('per_page', 10);
-        $floors = Floor::with('manager')->paginate($perPage);
+        $floors = Floor::with('manager')->withCount('room')->paginate($perPage);
     
         $floors->getCollection()->transform(function ($floor) use ($isAdmin, $user) {
             return [
@@ -25,6 +25,7 @@ class FloorController extends Controller
                 'name' => $floor->name,
                 'number' => $floor->number,
                 'manager_name' => $isAdmin ? ($floor->manager ? $floor->manager->name : null) : null,
+                'rooms_count' => $floor->room_count,
                 'can_edit' => $isAdmin || $floor->manager_id === $user->id,
             ];
         });
@@ -138,17 +139,23 @@ class FloorController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
-    
+
         if (!$isAdmin && $floor->manager_id !== $user->id) {
-            return redirect()->route('floors.index')
-                ->withErrors(['error' => 'You are not authorized to delete this floor.']);
+            return request()->expectsJson()
+                ? response()->json(['error' => 'You are not authorized to delete this floor.'], 403)
+                : redirect()->route('floors.index')->withErrors(['error' => 'You are not authorized to delete this floor.']);
         }
 
         if ($floor->room()->exists()) {
-            return back()->withErrors(['error' => 'Cannot delete a floor with associated rooms']);
+            return request()->expectsJson()
+                ? response()->json(['error' => 'Cannot delete a floor with associated rooms'], 422)
+                : back()->withErrors(['error' => 'Cannot delete a floor with associated rooms']);
         }
 
         $floor->delete();
-        return redirect()->route('floors.index')->with('success', 'Floor deleted successfully');
+
+        return request()->expectsJson()
+            ? response()->json(['success' => 'Floor deleted successfully'])
+            : redirect()->route('floors.index')->with('success', 'Floor deleted successfully');
     }
 }

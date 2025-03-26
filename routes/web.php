@@ -11,6 +11,7 @@ use App\Http\Controllers\ManageClientsController;
 use App\Http\Controllers\ManagersController;
 use App\Http\Controllers\ManageReceptionistsController;
 use App\Http\Controllers\FloorController;
+use App\Http\Controllers\RoomController;
 use App\Models\Floor;
 use App\Http\Controllers\ReceptionistsController;
 
@@ -112,6 +113,16 @@ Route::group(['middleware' => ['auth', 'permission:manage floors']], function ()
     Route::get('/floors/{floor}/edit', [FloorController::class, 'edit'])->name('floors.edit');
     Route::put('/floors/{floor}', [FloorController::class, 'update'])->name('floors.update');
     Route::delete('/floors/{floor}', [FloorController::class, 'destroy'])->name('floors.destroy');
+});
+
+Route::group(['middleware' => ['auth', 'permission:manage rooms']], function () {
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+    Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+    Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 });
 
 // can be remove at deploy

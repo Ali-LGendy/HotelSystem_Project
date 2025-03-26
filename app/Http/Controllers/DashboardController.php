@@ -52,6 +52,11 @@ class DashboardController extends Controller
                 'clients_to_approve' => User::role('client')->where('is_approved', false)->get(),
                 'approved_clients' => User::role('client')->where('is_approved', true)->get(),
                 // 'total_reservations' => Reservation::where('is_approved', true)->where('manager_id', $user->id),
+                // ['title' => 'Manage Floors', 'href' => route('floors.index')],
+                // ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
+                ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
+                ['title' => 'My Approved Clients', 'href' => route('receptionist.clients.index')],
+
             ]);
         }
         if ($user->hasRole('client')) {

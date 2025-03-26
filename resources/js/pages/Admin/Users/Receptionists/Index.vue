@@ -166,5 +166,19 @@ const canManageReceptionist = (receptionist) => {
                 </TableRow>
             </TableBody>
         </Table>
+        <div class="mt-6 flex items-center justify-center gap-2">
+            <Link
+                v-for="page in receptionists.last_page"
+                :key="page"
+                :href="`?page=${page}`"
+                class="rounded-lg px-4 py-2"
+                :class="{
+                    'bg-blue-600 text-white': page === receptionists.current_page,
+                    'bg-gray-700 text-gray-300 hover:bg-gray-600': page !== receptionists.current_page,
+                }"
+            >
+                {{ page }}
+            </Link>
+        </div>
     </div>
 </template>

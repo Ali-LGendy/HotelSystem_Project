@@ -77,12 +77,12 @@
                   >
                     Approve
                   </button>
-                  <a
-                    :href="`/receptionist/reservations/${reservation.id}`"
+                  <button
+                    @click="navigateTo(`/receptionist/reservations/${reservation.id}`)"
                     class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
                   >
                     View
-                  </a>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -125,6 +125,15 @@ const formatDate = (dateString) => {
   } catch (e) {
     return dateString;
   }
+};
+
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
+  });
 };
 
 const getStatusClass = (status) => {

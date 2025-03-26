@@ -1,2 +1,11 @@
+# Ignore everything inside public
 *
+
+# Allow .gitignore itself
 !.gitignore
+
+# Allow the avatars folder
+!avatars/
+
+# Allow the default avatar image
+!avatars/default_avatar.jpg

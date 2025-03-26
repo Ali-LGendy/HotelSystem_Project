@@ -86,11 +86,21 @@
                     Reject
                   </Button>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <div class="flex flex-wrap gap-3">
+                    <a
+                        href="/receptionist/clients/my-approved"
+                        class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+                    >
+                        My Approved Clients
+                    </a>
+                    <a
+                        href="/receptionist/clients/reservations"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+                    >
+                        Clients Reservations
+                    </a>
+                </div>
+            </div>
 
       <!-- Pagination -->
       <div v-if="pendingClients.data.length > 0" class="mt-4 flex justify-between items-center">
@@ -131,10 +141,10 @@
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  </div>
 </template>
 
 <script setup>
+import AppLayout from '@/layouts/AppLayout.vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';

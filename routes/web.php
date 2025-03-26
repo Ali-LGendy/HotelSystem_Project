@@ -23,7 +23,7 @@ Route::get('/', function () {
 })->name('home');
 
     
-Route::middleware(['auth',])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth','CkeckBan'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 
@@ -43,7 +43,7 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/us
 //     ->name('admin.users.managers.ban');
 
 
-Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
+Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
     Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         // List all receptionists
     Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); // Show create form
     Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        // Store a new receptionist
@@ -71,6 +71,7 @@ Route::middleware(['auth', 'permission:manage reservations'])
         Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
         // Add route for all reservations
         Route::get('all-reservations', [ReservationController::class, 'allReservations'])->name('reservations.all');
+        Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
 
         // Client management routes
         Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
@@ -140,5 +141,6 @@ Route::get('/debug/floors', function() {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
 
 

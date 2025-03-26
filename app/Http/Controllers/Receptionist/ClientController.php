@@ -271,6 +271,11 @@ class ClientController extends Controller
 
     public function clientReservations(Request $request, int $id = null): Response
     {
+        // Check if ID is passed in the request (for the /clients/reservations/{id?} route)
+        if (!$id && $request->has('id')) {
+            $id = $request->input('id');
+        }
+
         // Get request parameters for sorting and pagination
         $perPage = $request->input('per_page', 10);
         $sortBy = $request->input('sort_by', 'created_at');

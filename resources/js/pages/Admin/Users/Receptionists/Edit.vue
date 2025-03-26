@@ -104,7 +104,7 @@ const getInitials = (name) => {
 <template>
     <Card class="mx-auto max-w-2xl rounded-lg bg-white shadow-lg dark:bg-gray-900">
         <CardHeader>
-            <CardTitle class="text-gray-900 dark:text-gray-100">Update Manager</CardTitle>
+            <CardTitle class="text-gray-900 dark:text-gray-100">Update Receptionist</CardTitle>
         </CardHeader>
         <CardContent>
             <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
@@ -166,7 +166,7 @@ const getInitials = (name) => {
                 </div>
 
                 <!-- Submit Button -->
-                <Button type="submit" class="w-full">Update Manager</Button>
+                <Button type="submit" class="w-full">Update Receptionist</Button>
             </form>
         </CardContent>
     </Card>

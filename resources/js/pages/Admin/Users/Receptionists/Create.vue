@@ -30,7 +30,7 @@ const submitForm = () => {
 <template>
     <Card class="mx-auto max-w-2xl rounded-lg bg-white shadow-lg dark:bg-gray-900">
         <CardHeader>
-            <CardTitle class="text-gray-900 dark:text-gray-100">Create New Manager</CardTitle>
+            <CardTitle class="text-gray-900 dark:text-gray-100">Create New Receptionist</CardTitle>
         </CardHeader>
         <CardContent>
             <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
@@ -65,7 +65,7 @@ const submitForm = () => {
                 </div>
 
                 <!-- Submit Button -->
-                <Button type="submit" class="w-full">Create Manager</Button>
+                <Button type="submit" class="w-full">Create Receptionist</Button>
             </form>
         </CardContent>
     </Card>

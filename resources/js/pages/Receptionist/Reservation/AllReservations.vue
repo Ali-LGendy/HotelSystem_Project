@@ -89,18 +89,18 @@
               >
                 Approve
               </button>
-              <Link
-                :href="`/receptionist/reservations/${row.id}`"
+              <button
+                @click="navigateTo(`/receptionist/reservations/${row.id}`)"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 View
-              </Link>
-              <Link
-                :href="`/receptionist/reservations/${row.id}/edit`"
+              </button>
+              <button
+                @click="navigateTo(`/receptionist/reservations/${row.id}/edit`)"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 Edit
-              </Link>
+              </button>
               <button
                 @click="confirmDelete(row.id)"
                 class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
@@ -189,6 +189,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
+import axios from 'axios';
 import DataTable from '@/components/ui/DataTable.vue';
 
 // Props
@@ -332,7 +333,16 @@ const cancelApprove = () => {
   selectedReservationId.value = null;
 };
 
-const confirmApproveReservation = () => {
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
+  });
+};
+
+const confirmApproveReservation = async () => {
   if (!selectedReservationId.value) return;
 
   // Find the reservation data
@@ -350,15 +360,57 @@ const confirmApproveReservation = () => {
     client_id: reservation.client_id
   };
 
-  router.put(`/receptionist/reservations/${selectedReservationId.value}`, data, {
-    onSuccess: () => {
+  try {
+    // Use axios directly instead of Inertia to handle the JSON response
+    const response = await axios.put(`/receptionist/reservations/${selectedReservationId.value}`, data, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    // Check if the request was successful
+    if (response.data.success) {
+      alert('Reservation approved successfully!');
+
+      // Close the dialog
       showApproveDialog.value = false;
       selectedReservationId.value = null;
-    },
-    onError: (errors) => {
-      console.error('Error approving reservation:', errors);
+
+      // Check if client is already approved
+      const clientApproved = response.data.client_approved;
+
+      // Refresh the current page to show updated data
+      if (reservation.client_id && !clientApproved) {
+        // If client is not approved, redirect to clients page
+        const baseUrl = `/receptionist/clients`;
+        router.visit(baseUrl, {
+          preserveScroll: false,
+          preserveState: false,
+          replace: false
+        });
+      } else {
+        // Otherwise, refresh the current page with updated data
+        window.location.reload(); // Full page reload to ensure data is refreshed
+      }
+    } else {
+      alert('Could not approve reservation. Please try again.');
     }
-  });
+  } catch (error) {
+    console.error('Error approving reservation:', error);
+
+    // Show more detailed error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      alert(`Error: ${error.response.data.message}`);
+    } else {
+      alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+    }
+
+    // Close the dialog
+    showApproveDialog.value = false;
+    selectedReservationId.value = null;
+  }
 };
 </script>
 

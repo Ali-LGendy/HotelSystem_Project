@@ -133,12 +133,12 @@
                     </span>
 
                     <!-- View Reservations button -->
-                    <a
-                      :href="`/receptionist/clients/${client.id}/reservations`"
+                    <button
+                      @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
                       class="rounded-md bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
                     >
                       View Reservations
-                    </a>
+                    </button>
                   </div>
                 </td>
               </tr>

@@ -58,12 +58,12 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                  <a
-                    :href="`/receptionist/clients/${client.id}/reservations`"
+                  <button
+                    @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
                     class="rounded-md bg-indigo-700 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-600"
                   >
                     View Reservations
-                  </a>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -125,12 +125,12 @@
                   >
                     Approve
                   </button>
-                  <a
-                    :href="`/receptionist/reservations/${reservation.id}`"
+                  <button
+                    @click="navigateTo(`/receptionist/reservations/${reservation.id}`)"
                     class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
                   >
                     View
-                  </a>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -184,6 +184,15 @@ const formatDate = (dateString) => {
   }
 };
 
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.visit(url, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
+  });
+};
+
 const approveReservation = async (reservation) => {
   if (confirm('Are you sure you want to approve this reservation?')) {
     try {
@@ -194,11 +203,12 @@ const approveReservation = async (reservation) => {
         client_id: reservation.client_id,
         accompany_number: reservation.accompany_number,
         price_paid: reservation.price_paid,
-        _method: 'PUT' // For method spoofing
+        check_in_date: reservation.check_in_date,
+        check_out_date: reservation.check_out_date
       };
 
-      // Use axios to make the request
-      const response = await axios.post(`/receptionist/reservations/${reservation.id}`, data);
+      // Use axios to make the request with proper method
+      const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data);
       console.log('Reservation approval response:', response.data);
 
       // Show success message
@@ -215,7 +225,7 @@ const approveReservation = async (reservation) => {
         }
       });
     } catch (error) {
-      console.error('Error approving reservation:', error);
+      console.error('Error approving reservation:', error.response?.data || error);
       alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
     }
   }

@@ -24,7 +24,7 @@ Route::get('/', function () {
 })->name('home');
 
     
-Route::middleware(['auth',])->get('/dashboardd', [DashboardController::class, 'index'])->name('dashboard.index');
+Route::middleware(['auth',])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 
@@ -36,11 +36,12 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/us
     Route::get('/{user}/edit', [ManagersController::class, 'edit'])->name('edit'); // Edit manager form
     Route::put('/{user}', [ManagersController::class, 'update'])->name('update');  // Update manager
     Route::delete('/{user}', [ManagersController::class, 'destroy'])->name('destroy'); // Delete manager
+    Route::patch('/{user}/ban', [ManagersController::class, 'ban'])->name('ban'); // Delete manager
 });
 
 
-Route::middleware(['auth','permission:manage receptionists'])->patch('/admin/users/managers/{user}/ban', [ManagersController::class, 'ban'])
-    ->name('admin.users.managers.ban');
+// Route::middleware(['auth','permission:manage receptionists'])->patch('/admin/users/managers/{user}/ban', [ManagersController::class, 'ban'])
+//     ->name('admin.users.managers.ban');
 
 
 Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/us
     Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); // Edit receptionist form
     Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  // Update a receptionist
     Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); // Delete a receptionist
+     Route::patch('/{user}/ban', [ReceptionistsController::class, 'ban'])->name('ban');
 });
 
 // Route::middleware(['auth', 'role:admin'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
@@ -64,9 +66,9 @@ Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/us
 // });
 
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 
 // Receptionist Routes

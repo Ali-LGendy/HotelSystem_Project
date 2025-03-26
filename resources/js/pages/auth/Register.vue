@@ -3,7 +3,6 @@ import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import   Select  from '@/Components/ui/input/Select.vue'; // Import the new Select component
 import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -22,19 +21,18 @@ const submit = () => {
     form.post(route('register'), {
         forceFormData: true, // Ensures the file is sent correctly
         onFinish: () => form.reset('password', 'password_confirmation'),
-        forceFormData: true // Required for file uploads
+        // forceFormData: true // Required for file uploads
     });
 };
 
-
-const countries = ["USA", "UK", "Canada", "Germany", "France"];
+const countries = ['USA', 'UK', 'Canada', 'Germany', 'France'];
 </script>
 
 <template>
     <AuthBase title="Create an account" description="Enter your details below to create your account">
         <Head title="Register" />
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
+        <form @submit.prevent="submit" class="flex flex-col gap-6" enctype="multipart/form-data">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
@@ -50,7 +48,16 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
 
                 <div class="grid gap-2">
                     <Label for="national_id">National ID</Label>
-                    <Input id="national_id" type="text" required autofocus :tabindex="1" autocomplete="national_id" v-model="form.national_id" placeholder="##############" />
+                    <Input
+                        id="national_id"
+                        type="text"
+                        required
+                        autofocus
+                        :tabindex="1"
+                        autocomplete="national_id"
+                        v-model="form.national_id"
+                        placeholder="##############"
+                    />
                     <InputError :message="form.errors.national_id" />
                 </div>
 
@@ -62,35 +69,27 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
 
                 <div class="grid gap-2">
                     <Label for="country">Country</Label>
-                    <Input id="country" type="text" required :tabindex="5" autocomplete="country-name" v-model="form.country" placeholder="Your country" />
+                    <Input
+                        id="country"
+                        type="text"
+                        required
+                        :tabindex="5"
+                        autocomplete="country-name"
+                        v-model="form.country"
+                        placeholder="Your country"
+                    />
                     <InputError :message="form.errors.country" />
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="gender">Gender</Label>
-                    <div class="flex gap-4 mt-1">
+                    <div class="mt-1 flex gap-4">
                         <div class="flex items-center">
-                            <Input
-                                id="gender-male"
-                                type="radio"
-                                name="gender"
-                                value="male"
-                                v-model="form.gender"
-                                :tabindex="6"
-                                class="h-4 w-4"
-                            />
+                            <Input id="gender-male" type="radio" name="gender" value="male" v-model="form.gender" :tabindex="6" class="h-4 w-4" />
                             <Label for="gender-male" class="ml-2">Male</Label>
                         </div>
                         <div class="flex items-center">
-                            <Input
-                                id="gender-female"
-                                type="radio"
-                                name="gender"
-                                value="female"
-                                v-model="form.gender"
-                                :tabindex="7"
-                                class="h-4 w-4"
-                            />
+                            <Input id="gender-female" type="radio" name="gender" value="female" v-model="form.gender" :tabindex="7" class="h-4 w-4" />
                             <Label for="gender-female" class="ml-2">Female</Label>
                         </div>
                     </div>

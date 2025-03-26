@@ -87,7 +87,6 @@ const getInitials = (name) => {
                 <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Password</TableHead>
                     <TableHead>National ID</TableHead>
                     <TableHead>Avatar Image</TableHead>
                     <TableHead>Actions</TableHead>
@@ -98,7 +97,6 @@ const getInitials = (name) => {
                 <TableRow v-for="manager in managers.data" :key="manager.id" class="transition hover:bg-gray-800">
                     <TableCell>{{ manager.name }}</TableCell>
                     <TableCell>{{ manager.email }}</TableCell>
-                    <TableCell>{{ manager.password }}</TableCell>
                     <TableCell>{{ manager.national_id }}</TableCell>
                     <TableCell class="border-t border-gray-700 p-4">
                         <img

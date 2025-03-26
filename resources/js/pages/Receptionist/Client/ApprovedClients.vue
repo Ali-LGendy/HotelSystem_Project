@@ -8,32 +8,32 @@
           <p class="mt-2 text-gray-400">Review and approve new client registrations</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a
-            href="/receptionist/clients/my-approved"
-            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+          <button
+            @click="navigateTo('/receptionist/clients/my-approved')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             My Approved Clients
-          </a>
-          <a
-            href="/receptionist/clients/reservations"
-            class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             All My Clients Reservations
-          </a>
-          <a
-            href="/receptionist/reservations"
-            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Pending Reservations
-          </a>
+          </button>
           <!-- Only show All Clients button to admin -->
-          <a
+          <button
             v-if="isAdmin"
-            href="/receptionist/clients/all"
-            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+            @click="navigateTo('/receptionist/clients/all')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             All Clients
-          </a>
+          </button>
         </div>
       </div>
 
@@ -261,18 +261,18 @@
             <strong>Note:</strong> After approving a client, they will appear in your "My Approved Clients" list and can make reservations.
           </p>
           <div class="mt-2 flex flex-wrap gap-3">
-            <a
-              href="/receptionist/clients/my-approved"
-              class="inline-block rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+            <button
+              @click="navigateTo('/receptionist/clients/my-approved')"
+              class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
             >
               View My Approved Clients ({{ myApprovedClientsCount }})
-            </a>
-            <a
-              href="/receptionist/clients/reservations"
-              class="inline-block rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
+            </button>
+            <button
+              @click="navigateTo('/receptionist/clients/reservations')"
+              class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
             >
               View All My Clients Reservations
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -347,9 +347,19 @@ const pendingReservations = computed(() => props.pendingReservationsForApprovedC
 // Methods
 const goToPage = (url) => {
   if (!url) return;
-  router.visit(url, {
+  router.get(url, {}, {
     preserveScroll: true,
-    preserveState: false
+    preserveState: true,
+    only: ['pendingClients', 'approvedClientsCount', 'myApprovedClientsCount', 'recentlyApprovedClients', 'pendingReservationsForApprovedClients']
+  });
+};
+
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
   });
 };
 
@@ -361,17 +371,17 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
     direction: sortDir
   };
 
-  // Navigate with new parameters
-  router.visit(window.location.pathname, {
-    data: {
-      page,
-      per_page: perPage,
-      sort_by: sortBy,
-      sort_dir: sortDir
-    },
+  // Navigate with new parameters using Inertia's get method
+  router.get(window.location.pathname, {
+    page,
+    per_page: perPage,
+    sort_by: sortBy,
+    sort_dir: sortDir
+  }, {
     preserveScroll: true,
-    preserveState: false,
-    replace: true
+    preserveState: true, // Keep component state between requests
+    only: ['pendingClients', 'approvedClientsCount', 'myApprovedClientsCount', 'recentlyApprovedClients', 'pendingReservationsForApprovedClients'], // Only refresh these data props
+    replace: true // Replace current history entry instead of adding a new one
   });
 };
 

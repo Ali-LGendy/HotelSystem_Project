@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
@@ -18,6 +19,16 @@ class Room extends Model
         'manager_id',
         'floor_id',
     ];
+
+    // public function setPriceAttribute($value)
+    // {
+    //     $this->attributes['price'] = intval($value * 100);
+    // }
+
+    // public function getPriceAttribute($value)
+    // {
+    //     return number_format($value / 100, 2);
+    // }
 
     public function manager(): BelongsTo
     {

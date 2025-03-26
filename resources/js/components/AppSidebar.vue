@@ -8,10 +8,10 @@ import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
 import { defineProps } from 'vue';
 import AppLogo from './AppLogo.vue';
-interface MenuLink {
-    name: string;
-    route: string;
-}
+// interface MenuLink {
+//     name: string;
+//     route: string;
+// }
 
 // Accept the menuLinks prop
 defineProps<{
@@ -54,24 +54,13 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
-            <!-- <h4>HIIIIIIIIIIIIIIIIIIIIIIIIIIIII</h4> -->
-            <!-- <aside class="min-h-screen w-1/4 bg-gray-800 p-4 text-white"> -->
-            <h2 class="mb-4 text-xl font-bold">Admin Dashboard</h2>
-
-            <!-- Dynamic Links -->
-            <ul>
-                <li v-for="link in menuLinks" :key="link.name" class="mb-2">
-                    <Link :href="link.route" class="block rounded bg-gray-700 p-2 hover:bg-gray-600">
-                        {{ link.name }}
-                    </Link>
-                </li>
-            </ul>
-            <!-- </aside> -->
+            <!-- <NavMain :items="mainNavItems" /> -->
+            <NavMain :items="menuLinks" />
+            
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <!-- <NavFooter :items="footerNavItems" /> -->
             <NavUser />
         </SidebarFooter>
     </Sidebar>

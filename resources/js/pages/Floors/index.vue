@@ -42,19 +42,19 @@
                 {{ floor.manager_name || 'Not Assigned' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button 
-                  v-if="floor.can_edit"
-                  @click="navigateToEdit(floor.id)" 
-                  class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md mr-2"
+                <button
+                  v-if="floor.can_edit && (!isAdmin || floor.rooms_count === 0 || floor.rooms_count === undefined)"
+                  @click="openDeleteDialog(floor)"
+                  class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md mr-2"
                 >
-                  Edit
+                  Delete
                 </button>
                 <button 
                   v-if="floor.can_edit"
-                  @click="confirmDelete(floor)" 
-                  class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md"
+                  @click="navigateToEdit(floor.id)" 
+                  class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md"
                 >
-                  Delete
+                  Edit
                 </button>
               </td>
             </tr>
@@ -62,23 +62,30 @@
         </table>
 
         <!-- Pagination Controls -->
-        <div class="flex justify-between items-center p-4">
-          <button @click="prevPage" :disabled="!floors.prev_page_url" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">
-            Previous
-          </button>
-          <span>Page {{ floors.current_page }} of {{ floors.last_page }}</span>
-          <button @click="nextPage" :disabled="!floors.next_page_url" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
-            Next
-          </button>
-        </div>
+        <Pagination :pagination="floors" />
       </div>
     </div>
   </div>
+
+  <!-- Confirmation Dialog -->
+  <ConfirmationDialog
+    :show="showDeleteDialog"
+    title="Delete Floor"
+    :message="deleteMessage"
+    confirmText="Delete"
+    cancelText="Cancel"
+    @confirm="executeDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { defineProps,ref, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import axios from 'axios';
+import Pagination from '@/Components/Pagination.vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 // Define props
 const props = defineProps({
@@ -91,6 +98,9 @@ const props = defineProps({
 // Setup reactive state
 const successMessage = ref(props.success || '');
 const selectedFloor = ref(null);
+const showDeleteDialog = ref(false);
+const deleteMessage = ref('');
+const isLoading = ref(false);
 
 // Log props for debugging
 onMounted(() => {
@@ -106,6 +116,8 @@ onMounted(() => {
   }
 });
 
+defineOptions({ layout: AppLayout });
+
 // Function to navigate to create page
 const navigateToCreate = () => {
   router.get(route('floors.create'));
@@ -116,39 +128,62 @@ const navigateToEdit = (floorId) => {
   router.get(route('floors.edit', floorId));
 };
 
-// Function to confirm deletion
-const confirmDelete = (floor) => {
+// Function to open delete confirmation dialog
+const openDeleteDialog = (floor) => {
   selectedFloor.value = floor;
-  if (confirm(`Are you sure you want to delete floor ${floor.name}?`)) {
-    deleteFloor(floor.id);
+  deleteMessage.value = `Are you sure you want to delete floor ${floor.name}? This action cannot be undone.`;
+  showDeleteDialog.value = true;
+};
+
+// Function to cancel deletion
+const cancelDelete = () => {
+  showDeleteDialog.value = false;
+  selectedFloor.value = null;
+};
+
+// Function to execute deletion via AJAX
+const executeDelete = async () => {
+  if (!selectedFloor.value) return;
+
+  isLoading.value = true;
+
+  try {
+    // Get the CSRF token from the meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    console.log('CSRF Token:', csrfToken);
+
+    // Create form data with _method=DELETE to handle method spoofing
+    const formData = new FormData();
+    formData.append('_method', 'DELETE');
+
+    // Make the POST request with _method=DELETE
+    await axios.post(route('floors.destroy', selectedFloor.value.id), formData, {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      }
+    });
+
+    // Show success message
+    successMessage.value = 'Floor deleted successfully';
+    setTimeout(() => {
+      successMessage.value = '';
+    }, 3000);
+
+    // Refresh the data
+    router.reload({ only: ['floors'] });
+
+  } catch (error) {
+    // Handle errors
+    const errorMessage = error.response?.data?.error || 'An error occurred while deleting the floor';
+    alert(errorMessage);
+  } finally {
+    // Reset state
+    isLoading.value = false;
+    showDeleteDialog.value = false;
+    selectedFloor.value = null;
   }
 };
 
-// Function to delete floor
-const deleteFloor = (id) => {
-  router.delete(route('floors.destroy', id), {
-    onSuccess: () => {
-      successMessage.value = 'Floor deleted successfully';
-      setTimeout(() => {
-        successMessage.value = '';
-      }, 3000);
-    },
-    onError: (errors) => {
-      alert(errors.error || 'An error occurred while deleting the floor');
-    }
-  });
-};
-
-// Pagination functions
-const prevPage = () => {
-  if (props.floors.prev_page_url) {
-    router.get(props.floors.prev_page_url);
-  }
-};
-
-const nextPage = () => {
-  if (props.floors.next_page_url) {
-    router.get(props.floors.next_page_url);
-  }
-};
+// Pagination is now handled by the Pagination component
 </script>

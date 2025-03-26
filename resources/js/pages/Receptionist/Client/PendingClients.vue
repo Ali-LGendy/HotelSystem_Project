@@ -9,7 +9,7 @@
         </div>
         <div class="flex flex-wrap gap-3">
           <a
-            href="/receptionist/clients/my-my-approved"
+            href="/receptionist/clients/my-approved"
             class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
             My Approved Clients
@@ -250,7 +250,7 @@ const goToPage = (url) => {
         <h2 class="text-3xl font-bold">Clients Pending Approval</h2>
         <div class="flex flex-wrap gap-3">
           <button
-            @click="router.visit(route('receptionist.clients.my-my-approved'))"
+            @click="router.visit(route('receptionist.clients.my-approved'))"
             class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
             My Approved Clients
@@ -372,7 +372,7 @@ const currentPage = computed(() => {
 // Methods
 const handlePageChange = (pageIndex) => {
   router.visit(
-    route('receptionist.clients.pending', { page: pageIndex + 1 }),
+    route('receptionist.clients.index', { page: pageIndex + 1 }),
     {
       only: ['pendingClients'],
       preserveState: true,
@@ -398,7 +398,7 @@ const approveClient = (client) => {
       onSuccess: () => {
         console.log('Client approved successfully');
         // Redirect to the approved clients page to show the newly approved client
-        router.visit(route('receptionist.clients.approved'), {
+        router.visit(route('receptionist.clients.index'), {
           preserveScroll: true
         });
       },
@@ -429,7 +429,7 @@ const rejectClient = (id) => {
       onSuccess: () => {
         console.log('Client rejected successfully');
         // Refresh the page to show updated data
-        router.visit(route('receptionist.clients.pending'), {
+        router.visit(route('receptionist.clients.index'), {
           only: ['pendingClients'],
           preserveScroll: true
         });

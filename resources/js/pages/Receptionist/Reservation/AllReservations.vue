@@ -15,10 +15,10 @@
             Pending Reservations
           </a>
           <a
-            href="/receptionist/reservations/create"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            href="/receptionist/clients/my-approved"
+            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
-            New Reservation
+            My Approved Clients
           </a>
         </div>
       </div>

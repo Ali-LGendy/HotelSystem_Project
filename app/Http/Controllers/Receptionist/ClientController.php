@@ -22,25 +22,62 @@ class ClientController extends Controller
      * Fields to select from users table
      */
     private const USER_FIELDS = [
-        'id', 'name', 'email', 'mobile', 'country', 'gender'
+        'id', 'name', 'email', 'mobile', 'country', 'gender', 'is_approved', 'is_banned', 'manager_id', 'created_at', 'updated_at'
     ];
 
+    /**
+     * Get paginated data for a data table with optional filters
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query Base query to paginate
+     * @param array $filters Optional filters to apply (key => value pairs)
+     * @param int $perPage Number of items per page
+     * @param string $sortBy Column to sort by
+     * @param string $sortDir Sort direction (asc or desc)
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    private function paginateData($query, array $filters = [], int $perPage = 10, string $sortBy = 'created_at', string $sortDir = 'desc')
+    {
+        // Apply filters
+        foreach ($filters as $field => $value) {
+            if ($value !== null && $value !== '') {
+                if (is_array($value)) {
+                    $query->whereIn($field, $value);
+                } else {
+                    $query->where($field, $value);
+                }
+            }
+        }
+
+        // Apply sorting
+        $query->orderBy($sortBy, $sortDir);
+
+        // Return paginated results
+        return $query->paginate($perPage)->withQueryString();
+    }
 
 
     /**
      * Display a listing of pending clients (not yet approved).
-     * This is the "Manage Clients" page.
+     * This is the main clients management page.
      */
-    public function approvedClients(): Response
+    public function index(Request $request): Response
     {
         // Get the current user ID
         $currentUserId = Auth::id();
 
+        // Get request parameters for sorting and pagination
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
         // Get only pending clients (not yet approved)
-        $pendingClients = User::role('client')
-            ->where('is_approved', 0)
-            ->select(self::USER_FIELDS)
-            ->paginate(10);
+        $pendingClients = $this->paginateData(
+            User::role('client')->select(self::USER_FIELDS),
+            ['is_approved' => 0],
+            $perPage,
+            $sortBy,
+            $sortDir
+        );
 
         // Get count of all approved clients in the system
         $approvedClientsCount = User::role('client')
@@ -77,13 +114,19 @@ class ClientController extends Controller
             ->limit(5)
             ->get();
 
-        return Inertia::render('Receptionist/Client/ApprovedClients', [
+        // Get current user role and admin status
+        $userRole = Auth::user()->getRoleNames()->first();
+        $isAdmin = Auth::user()->hasRole('admin');
+
+        return Inertia::render('Receptionist/Client/Index', [
             'pendingClients' => $pendingClients,
             'approvedClientsCount' => $approvedClientsCount,
             'myApprovedClientsCount' => $myApprovedClientsCount,
             'recentlyApprovedClients' => $recentlyApprovedClients,
             'pendingReservationsForApprovedClients' => $pendingReservationsForApprovedClients,
             'currentUserId' => $currentUserId,
+            'userRole' => $userRole,
+            'isAdmin' => $isAdmin,
         ]);
     }
 
@@ -91,7 +134,7 @@ class ClientController extends Controller
      * Display a listing of clients approved by the current receptionist.
      * This is the "My Approved Clients" page.
      */
-    public function myApprovedClients(): Response
+    public function myApprovedClients(Request $request): Response
     {
         // Get the current user ID
         $currentUserId = Auth::id();
@@ -100,12 +143,22 @@ class ClientController extends Controller
         $allClients = User::role('client')
             ->count();
 
+        // Get request parameters for sorting and pagination
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
         // Get only clients managed by the current receptionist
-        $myApprovedClients = User::role('client')
-            ->where('manager_id', $currentUserId)
-            ->where('is_approved', 1)
-            ->select(self::USER_FIELDS)
-            ->paginate(10);
+        $myApprovedClients = $this->paginateData(
+            User::role('client')->select(self::USER_FIELDS),
+            [
+                'manager_id' => $currentUserId,
+                'is_approved' => 1
+            ],
+            $perPage,
+            $sortBy,
+            $sortDir
+        );
 
         // Get statistics for managed clients
         $totalApprovedCount = User::role('client')
@@ -146,15 +199,41 @@ class ClientController extends Controller
         //         ->get(),
         // ];
 
+        // Get current user role
+        $userRole = Auth::user()->getRoleNames()->first();
+        $isAdmin = Auth::user()->hasRole('admin');
+
+        // Add debug information
+        $debug = [
+            'userRole' => $userRole,
+            'hasAdminRole' => $isAdmin,
+            'allRoles' => Auth::user()->getRoleNames(),
+            'userId' => Auth::id(),
+            'userName' => Auth::user()->name,
+        ];
+        $isAdmin = Auth::user()->hasRole('admin');
+
+        // Add debug information
+        $debug = [
+            'userRole' => $userRole,
+            'hasAdminRole' => $isAdmin,
+            'allRoles' => Auth::user()->getRoleNames(),
+            'userId' => Auth::id(),
+            'userName' => Auth::user()->name,
+        ];
+
         return Inertia::render('Receptionist/Client/MyApprovedClients', [
             'myApprovedClients' => $myApprovedClients,
             'clientStats' => [
+            'isAdmin' => $isAdmin, // Pass the boolean directly
                 'totalApproved' => $totalApprovedCount,
                 'activeReservations' => $activeReservationsCount,
                 'pendingReservations' => $recentReservations->where('status', 'pending')->count(),
             ],
             'recentReservations' => $recentReservations,
-            //'debug' => $debug,
+            'userRole' => $userRole,
+            'isAdmin' => $isAdmin, // Pass the boolean directly
+            'debug' => $debug,
         ]);
     }
 
@@ -180,8 +259,14 @@ class ClientController extends Controller
 
 
 
-    public function clientReservations(int $id = null): Response
+    public function clientReservations(Request $request, int $id = null): Response
     {
+        // Get request parameters for sorting and pagination
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Build base query
         $query = Reservation::with([
                 'client:id,name',
                 'room:id,room_number'
@@ -197,17 +282,19 @@ class ClientController extends Controller
                 'room_id',
                 'accompany_number',
                 'price_paid',
-                'status'
+                'status',
+                'created_at',
+                'updated_at'
             ]);
 
+        // Apply client filter if specified
+        $filters = [];
         if ($id) {
-            $query->where('client_id', $id);
+            $filters['client_id'] = $id;
         }
 
-        // Use latest by default
-        $query->latest();
-
-        $reservations = $query->paginate(10);
+        // Get paginated results
+        $reservations = $this->paginateData($query, $filters, $perPage, $sortBy, $sortDir);
 
         // Get client name if specific client is selected
         $clientName = null;
@@ -387,5 +474,138 @@ class ClientController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Display a listing of all clients in the system.
+     * This is only accessible to admin users.
+     */
+    public function allClients(Request $request): Response
+    {
+        // Check if user has admin role
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Get request parameters for sorting and pagination
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Get all clients regardless of approval status or manager
+        $allClients = $this->paginateData(
+            User::role('client')->select(self::USER_FIELDS),
+            [], // No filters - get all clients
+            $perPage,
+            $sortBy,
+            $sortDir
+        );
+
+        // Get statistics
+        $totalClientsCount = User::role('client')->count();
+        $approvedClientsCount = User::role('client')->where('is_approved', 1)->count();
+        $pendingClientsCount = User::role('client')->where('is_approved', 0)->count();
+        $bannedClientsCount = User::role('client')->where('is_banned', 1)->count();
+
+        // Get recent reservations (system-wide)
+        $recentReservations = Reservation::with(['client', 'room'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return Inertia::render('Receptionist/Client/AllClients', [
+            'allClients' => $allClients,
+            'isAdmin' => Auth::user()->hasRole('admin'),
+            'clientStats' => [
+                'totalClients' => $totalClientsCount,
+                'approvedClients' => $approvedClientsCount,
+                'pendingClients' => $pendingClientsCount,
+                'bannedClients' => $bannedClientsCount,
+            ],
+            'recentReservations' => $recentReservations,
+            'userRole' => Auth::user()->getRoleNames()->first(),
+            'currentUserId' => Auth::id(),
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified client.
+     * Admin only.
+     */
+    public function edit(string $id): Response
+    {
+        // Check if user is admin
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Find the client with reservations
+        $client = User::role('client')
+            ->with(['reservations' => function($query) {
+                $query->with('room')
+                    ->orderBy('created_at', 'desc');
+            }])
+            ->findOrFail($id);
+
+        return Inertia::render('Receptionist/Client/EditClient', [
+            'client' => $client,
+            'isAdmin' => Auth::user()->hasRole('admin'),
+            'currentUserId' => Auth::id(),
+        ]);
+    }
+
+    /**
+     * Update the specified client in storage.
+     * Admin only.
+     */
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        // Check if user is admin
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Validate the request
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $id,
+            'mobile' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+            'gender' => 'nullable|string|in:male,female,other',
+            'is_approved' => 'boolean',
+            'is_banned' => 'boolean',
+        ]);
+
+        // Find the client
+        $client = User::role('client')->findOrFail($id);
+
+        // Update the client
+        $client->update($validated);
+
+        return redirect()->route('receptionist.clients.all')
+            ->with('success', 'Client updated successfully.');
+    }
+
+    /**
+     * Remove the specified client from storage.
+     * Admin only.
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        // Check if user is admin
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Find the client
+        $client = User::role('client')->findOrFail($id);
+
+        // Delete associated reservations
+        $client->reservations()->delete();
+
+        // Delete the client
+        $client->delete();
+
+        return response()->json(['message' => 'Client deleted successfully.']);
     }
 }

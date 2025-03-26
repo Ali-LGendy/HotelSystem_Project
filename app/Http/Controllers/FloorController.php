@@ -17,17 +17,24 @@ class FloorController extends Controller
         $isManager = $user->hasRole('manager');
 
         $perPage = $request->input('per_page', 10);
-        $floors = Floor::with('manager')->paginate($perPage);
+        $floors = Floor::with('manager')->withCount('room')->paginate($perPage);
     
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
         $floors->getCollection()->transform(function ($floor) use ($isAdmin, $user) {
             return [
                 'id' => $floor->id,
                 'name' => $floor->name,
                 'number' => $floor->number,
                 'manager_name' => $isAdmin ? ($floor->manager ? $floor->manager->name : null) : null,
+                'rooms_count' => $floor->room_count,
                 'can_edit' => $isAdmin || $floor->manager_id === $user->id,
+                
             ];
-        });
+        }); // logical error???????????????????????????????????????????????????
 
         // Debug the role and permissions  // i think i dont need that anymore
         \Log::debug('User role and permissions', [
@@ -41,7 +48,9 @@ class FloorController extends Controller
             'isAdmin' => $isAdmin,
             'isManager' => $isManager,
             'permissions' => $user->getAllPermissions()->pluck('name'),
-            'success' => session('success')
+            'success' => session('success'),
+            'menuLinks' => $menuLinks
+
         ]);
     }
 
@@ -66,7 +75,7 @@ class FloorController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
-
+        
         $validated = $request->validate([
             'name' => 'required|unique:floors,name|string|min:3',
             'manager_id' => 'nullable|exists:users,id'
@@ -138,17 +147,23 @@ class FloorController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
-    
+
         if (!$isAdmin && $floor->manager_id !== $user->id) {
-            return redirect()->route('floors.index')
-                ->withErrors(['error' => 'You are not authorized to delete this floor.']);
+            return request()->expectsJson()
+                ? response()->json(['error' => 'You are not authorized to delete this floor.'], 403)
+                : redirect()->route('floors.index')->withErrors(['error' => 'You are not authorized to delete this floor.']);
         }
 
         if ($floor->room()->exists()) {
-            return back()->withErrors(['error' => 'Cannot delete a floor with associated rooms']);
+            return request()->expectsJson()
+                ? response()->json(['error' => 'Cannot delete a floor with associated rooms'], 422)
+                : back()->withErrors(['error' => 'Cannot delete a floor with associated rooms']);
         }
 
         $floor->delete();
-        return redirect()->route('floors.index')->with('success', 'Floor deleted successfully');
+
+        return request()->expectsJson()
+            ? response()->json(['success' => 'Floor deleted successfully'])
+            : redirect()->route('floors.index')->with('success', 'Floor deleted successfully');
     }
 }

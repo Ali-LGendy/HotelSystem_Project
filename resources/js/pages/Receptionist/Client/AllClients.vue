@@ -4,8 +4,8 @@
       <!-- Header with Navigation -->
       <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 class="text-3xl font-bold">My Approved Clients</h2>
-          <p class="mt-2 text-gray-400">Clients that you have approved</p>
+          <h2 class="text-3xl font-bold">All Clients</h2>
+          <p class="mt-2 text-gray-400">System-wide view of all clients</p>
         </div>
         <div class="flex flex-wrap gap-3">
           <a
@@ -15,38 +15,24 @@
             Manage Clients
           </a>
           <a
-            href="/receptionist/clients/reservations"
+            href="/receptionist/clients/my-approved"
             class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
           >
-            Clients Reservations
+            My Approved Clients
           </a>
-          <!-- Only show Pending Reservations button to admin -->
           <a
-            v-if="isAdmin"
             href="/receptionist/reservations"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             Pending Reservations
           </a>
-          <!-- Only show All Clients button to admin -->
-          <a
-            v-if="isAdmin"
-            href="/receptionist/clients/all"
-            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
-          >
-            All Clients
-          </a>
         </div>
       </div>
 
-      <!-- My Approved Clients Section -->
+      <!-- All Clients Section -->
       <div>
-        <div v-if="myApprovedClients.data.length === 0" class="text-center py-8">
-          <p class="text-lg text-gray-300">You haven't approved any clients yet.</p>
-          <p class="mt-2 text-gray-400">Go to <a href="/receptionist/clients" class="text-blue-400 hover:underline">Manage Clients</a> to approve new clients.</p>
-          <div v-if="debug" class="mt-4 p-4 bg-gray-800 rounded-lg max-w-lg mx-auto">
-            <p class="text-sm text-yellow-400">Debug Info: Make sure you have approved clients with your user ID as manager_id and is_approved set to 1.</p>
-          </div>
+        <div v-if="allClients.data.length === 0" class="text-center py-8">
+          <p class="text-lg text-gray-300">No clients found in the system.</p>
         </div>
 
         <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
@@ -94,22 +80,22 @@
                   </span>
                 </th>
                 <th
-                  @click="sortAndPaginate(1, 10, 'gender', currentSort.field === 'gender' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                  @click="sortAndPaginate(1, 10, 'is_approved', currentSort.field === 'is_approved' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
                   scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
                 >
-                  Gender
-                  <span v-if="currentSort.field === 'gender'" class="ml-1">
+                  Status
+                  <span v-if="currentSort.field === 'is_approved'" class="ml-1">
                     {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
                   </span>
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  {{ isAdmin ? 'Actions' : 'Status' }}
+                  Actions
                 </th>
               </tr>
             </thead>
             <tbody class="bg-gray-800 divide-y divide-gray-700">
-              <tr v-for="client in myApprovedClients.data" :key="client.id" class="hover:bg-gray-700">
+              <tr v-for="client in allClients.data" :key="client.id" class="hover:bg-gray-700">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
                 </td>
@@ -123,36 +109,30 @@
                   <div class="text-sm text-gray-300">{{ client.country || 'N/A' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-300">{{ client.gender || 'N/A' }}</div>
+                  <span 
+                    :class="getStatusClass(client)"
+                    class="px-2 py-1 text-xs font-medium rounded-full"
+                  >
+                    {{ getStatusText(client) }}
+                  </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
-                    <!-- Show actions only for admin role -->
-                    <template v-if="isAdmin">
-                      <button
-                        v-if="!client.is_banned"
-                        @click="banClient(client.id)"
-                        class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                      >
-                        Ban
-                      </button>
-                      <button
-                        v-else
-                        @click="unbanClient(client.id)"
-                        class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                      >
-                        Unban
-                      </button>
-                    </template>
-                    <!-- For receptionist role, show status instead of actions -->
-                    <template v-else>
-                      <span
-                        :class="client.is_banned ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'"
-                        class="px-2 py-1 text-xs font-medium rounded-full"
-                      >
-                        {{ client.is_banned ? 'Banned' : 'Active' }}
-                      </span>
-                    </template>
+                    <!-- Edit/Delete Actions (Admin Only) -->
+                    <button
+                      v-if="isAdmin"
+                      @click="editClient(client.id)"
+                      class="rounded-md bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      v-if="isAdmin"
+                      @click="deleteClient(client.id)"
+                      class="rounded-md bg-red-700 px-3 py-1 text-sm font-medium text-white hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -162,9 +142,9 @@
       </div>
 
       <!-- Enhanced Pagination -->
-      <div v-if="myApprovedClients.data.length > 0" class="mt-4 flex justify-between items-center">
+      <div v-if="allClients.data.length > 0" class="mt-4 flex justify-between items-center">
         <div class="text-sm text-gray-400">
-          Showing {{ myApprovedClients.from }} to {{ myApprovedClients.to }} of {{ myApprovedClients.total }} clients
+          Showing {{ allClients.from }} to {{ allClients.to }} of {{ allClients.total }} clients
         </div>
 
         <!-- Page Size Selector -->
@@ -186,11 +166,11 @@
           <!-- Page Navigation -->
           <div class="flex space-x-2">
             <button
-              v-for="page in myApprovedClients.links"
+              v-for="page in allClients.links"
               :key="page.label"
               @click="page.url && sortAndPaginate(
-                page.label === '&laquo; Previous' ? myApprovedClients.current_page - 1 :
-                page.label === 'Next &raquo;' ? myApprovedClients.current_page + 1 :
+                page.label === '&laquo; Previous' ? allClients.current_page - 1 :
+                page.label === 'Next &raquo;' ? allClients.current_page + 1 :
                 parseInt(page.label),
                 perPage,
                 currentSort.field,
@@ -211,35 +191,21 @@
         </div>
       </div>
 
-      <!-- Debug Information (Always visible for now) -->
-      <div class="mt-8 p-6 bg-red-900 rounded-lg border border-red-700">
-        <h3 class="text-xl font-semibold mb-4 text-gray-100">Debug Information</h3>
-        <div class="overflow-x-auto">
-          <p class="text-sm text-gray-300 mb-2">isAdmin prop: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">userRole prop: {{ userRole }}</p>
-          <p class="text-sm text-gray-300 mb-2">Admin button should show: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">isAdmin prop: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">userRole prop: {{ userRole }}</p>
-          <p class="text-sm text-gray-300 mb-2">Admin button should show: {{ isAdmin }}</p>
-          <pre class="text-xs text-gray-300">{{ JSON.stringify(debug, null, 2) }}</pre>
-        </div>
-      </div>
-
       <!-- Client Statistics Dashboard -->
       <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
         <h3 class="text-xl font-semibold mb-4 text-gray-100">Client Statistics</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div class="p-4 rounded-lg bg-gray-700">
-            <div class="text-sm text-gray-400">Total Approved Clients</div>
-            <div class="text-2xl font-bold text-gray-100">{{ clientStats.totalApproved }}</div>
+            <div class="text-sm text-gray-400">Total Clients</div>
+            <div class="text-2xl font-bold text-gray-100">{{ clientStats.totalClients }}</div>
           </div>
-          <div class="p-4 rounded-lg bg-blue-900">
-            <div class="text-sm text-gray-300">Active Reservations</div>
-            <div class="text-2xl font-bold text-gray-100">{{ clientStats.activeReservations }}</div>
+          <div class="p-4 rounded-lg bg-green-900">
+            <div class="text-sm text-gray-300">Approved Clients</div>
+            <div class="text-2xl font-bold text-gray-100">{{ clientStats.approvedClients }}</div>
           </div>
           <div class="p-4 rounded-lg bg-yellow-900">
-            <div class="text-sm text-gray-300">Pending Reservations</div>
-            <div class="text-2xl font-bold text-gray-100">{{ clientStats.pendingReservations }}</div>
+            <div class="text-sm text-gray-300">Pending Clients</div>
+            <div class="text-2xl font-bold text-gray-100">{{ clientStats.pendingClients }}</div>
           </div>
         </div>
 
@@ -281,7 +247,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="getStatusClass(reservation.status)" class="px-2 py-1 text-xs font-medium rounded-full">
+                  <span :class="getReservationStatusClass(reservation.status)" class="px-2 py-1 text-xs font-medium rounded-full">
                     {{ reservation.status }}
                   </span>
                 </td>
@@ -297,7 +263,7 @@
         </div>
       </div>
 
-      <!-- Confirmation Dialog - Only shown for admin role -->
+      <!-- Confirmation Dialog -->
       <div v-if="showConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
           <h3 class="text-xl font-semibold text-gray-100">{{ confirmDialogTitle }}</h3>
@@ -310,15 +276,10 @@
               Cancel
             </button>
             <button
-              :class="[
-                'rounded-md px-4 py-2 text-sm font-medium text-white',
-                confirmAction === 'ban'
-                  ? 'bg-red-700 hover:bg-red-600'
-                  : 'bg-green-700 hover:bg-green-600'
-              ]"
-              @click="confirmAction === 'ban' ? confirmBan() : confirmUnban()"
+              class="rounded-md px-4 py-2 text-sm font-medium text-white bg-red-700 hover:bg-red-600"
+              @click="confirmDelete()"
             >
-              {{ confirmAction === 'ban' ? 'Ban' : 'Unban' }}
+              Delete
             </button>
           </div>
         </div>
@@ -334,16 +295,16 @@ import { router } from '@inertiajs/vue3';
 
 // Props
 const props = defineProps({
-  myApprovedClients: {
+  allClients: {
     type: Object,
     required: true
   },
   clientStats: {
     type: Object,
     default: () => ({
-      totalApproved: 0,
-      activeReservations: 0,
-      pendingReservations: 0
+      totalClients: 0,
+      approvedClients: 0,
+      pendingClients: 0
     })
   },
   recentReservations: {
@@ -358,9 +319,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isAdmin: {
-    type: Boolean,
-    default: false
+  currentUserId: {
+    type: Number,
+    required: true
   },
   debug: {
     type: Object,
@@ -372,7 +333,6 @@ const props = defineProps({
 const showConfirmDialog = ref(false);
 const confirmDialogTitle = ref('');
 const confirmDialogMessage = ref('');
-const confirmAction = ref('');
 const selectedClientId = ref(null);
 const currentSort = ref({
   field: 'created_at',
@@ -380,7 +340,7 @@ const currentSort = ref({
 });
 const perPage = ref(10);
 
-// No need for co need for computed property anymore, using the prop directly
+// No need for co need for computed property, using the prop directly
 
 // Methods
 const goToPage = (url) => {
@@ -423,7 +383,7 @@ const formatDate = (dateString) => {
   }
 };
 
-const getStatusClass = (status) => {
+const getReservationStatusClass = (status) => {
   const classes = {
     'confirmed': 'bg-green-900 text-green-200',
     'checked_in': 'bg-blue-900 text-blue-200',
@@ -436,26 +396,20 @@ const getStatusClass = (status) => {
   return classes[status] || 'bg-gray-700 text-gray-200';
 };
 
-const banClient = (clientId) => {
-  // Only allow admin to ban clients
-  if (!props.isAdmin) return;
-
-  selectedClientId.value = clientId;
-  confirmAction.value = 'ban';
-  confirmDialogTitle.value = 'Confirm Client Ban';
-  confirmDialogMessage.value = 'Are you sure you want to ban this client? They will not be able to make new reservations.';
-  showConfirmDialog.value = true;
+const getStatusClass = (client) => {
+  if (client.is_approved) {
+    return 'bg-green-900 text-green-200';
+  } else {
+    return 'bg-yellow-900 text-yellow-200';
+  }
 };
 
-const unbanClient = (clientId) => {
-  // Only allow admin to unban clients
-  if (!props.isAdmin) return;
-
-  selectedClientId.value = clientId;
-  confirmAction.value = 'unban';
-  confirmDialogTitle.value = 'Confirm Client Unban';
-  confirmDialogMessage.value = 'Are you sure you want to unban this client? They will be able to make reservations again.';
-  showConfirmDialog.value = true;
+const getStatusText = (client) => {
+  if (client.is_approved) {
+    return 'Approved';
+  } else {
+    return 'Pending';
+  }
 };
 
 const cancelConfirmation = () => {
@@ -463,43 +417,33 @@ const cancelConfirmation = () => {
   selectedClientId.value = null;
 };
 
-const confirmBan = async () => {
-  // Only allow admin to confirm ban
-  if (!props.isAdmin || !selectedClientId.value) return;
-
-  try {
-    // Show loading state
-    showConfirmDialog.value = false;
-
-    // Use axios to make the request
-    await axios.post(`/receptionist/clients/${selectedClientId.value}/ban`);
-
-    // Use Inertia router to reload the page with fresh data
-    router.visit(window.location.pathname, {
-      method: 'get',
-      preserveScroll: false,
-      preserveState: false,
-      replace: true,
-      onSuccess: () => {
-        console.log('Client banned successfully');
-      }
-    });
-  } catch (error) {
-    console.error('Error banning client:', error);
-    alert('Could not ban client due to a technical issue. Please try refreshing the page.');
-  }
+// Edit client method
+const editClient = (clientId) => {
+  // Navigate to the edit page using Inertia
+  router.visit(`/receptionist/clients/${clientId}/edit`, {
+    method: 'get',
+    preserveState: false
+  });
 };
 
-const confirmUnban = async () => {
-  // Only allow admin to confirm unban
-  if (!props.isAdmin || !selectedClientId.value) return;
+// Delete client method
+const deleteClient = (clientId) => {
+  selectedClientId.value = clientId;
+  confirmDialogTitle.value = 'Confirm Client Deletion';
+  confirmDialogMessage.value = 'Are you sure you want to delete this client? This action cannot be undone and will remove all associated reservations.';
+  showConfirmDialog.value = true;
+};
+
+// Confirm delete method
+const confirmDelete = async () => {
+  if (!selectedClientId.value) return;
 
   try {
     // Show loading state
     showConfirmDialog.value = false;
 
     // Use axios to make the request
-    await axios.post(`/receptionist/clients/${selectedClientId.value}/unban`);
+    await axios.delete(`/receptionist/clients/${selectedClientId.value}`);
 
     // Use Inertia router to reload the page with fresh data
     router.visit(window.location.pathname, {
@@ -508,12 +452,12 @@ const confirmUnban = async () => {
       preserveState: false,
       replace: true,
       onSuccess: () => {
-        console.log('Client unbanned successfully');
+        console.log('Client deleted successfully');
       }
     });
   } catch (error) {
-    console.error('Error unbanning client:', error);
-    alert('Could not unban client due to a technical issue. Please try refreshing the page.');
+    console.error('Error deleting client:', error);
+    alert('Could not delete client due to a technical issue. Please try refreshing the page.');
   }
 };
 </script>

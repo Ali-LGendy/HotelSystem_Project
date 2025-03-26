@@ -16,31 +16,80 @@ class ReservationController extends Controller
     /**
      * Display a listing of pending reservations.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $reservations = Reservation::with(['room:id,room_number,room_capacity,price', 'client:id,name,email'])
-            ->where('status', 'pending')
-            ->select(['id', 'client_id', 'room_id', 'accompany_number', 'price_paid', 'check_in_date', 'check_out_date', 'status', 'receptionist_id'])
-            ->latest()
-            ->paginate(10);
+        // Check if user is admin
+        $isAdmin = Auth::user()->hasRole('admin');
 
-        return Inertia::render('Receptionist/Reservation/Index', [
-            'reservations' => $reservations
+        // Only allow admins to access this page
+        if (!$isAdmin) {
+            return redirect()->route('receptionist.dashboard')
+                ->with('error', 'You do not have permission to access this page.');
+        }
+
+        // Get request parameters for sorting and pagination
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Get pending reservations
+        $pendingReservations = Reservation::with(['room:id,room_number,room_capacity,price', 'client:id,name,email'])
+            ->where('status', 'pending')
+            ->select(['id', 'client_id', 'room_id', 'accompany_number', 'price_paid', 'check_in_date', 'check_out_date', 'status', 'receptionist_id', 'created_at'])
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage);
+
+        // Get statistics for the dashboard
+        $pendingCount = Reservation::where('status', 'pending')->count();
+        $confirmedCount = Reservation::where('status', 'confirmed')->count();
+        $checkedInCount = Reservation::whereIn('status', ['checked_in', 'checked-in'])->count();
+
+        return Inertia::render('Receptionist/Reservation/PendingReservations', [
+            'reservations' => $pendingReservations,
+            'reservationStats' => [
+                'totalPending' => $pendingCount,
+                'confirmedReservations' => $confirmedCount,
+                'checkedInGuests' => $checkedInCount,
+            ],
+            'isAdmin' => $isAdmin
         ]);
     }
 
     /**
      * Display a listing of all reservations.
      */
-    public function allReservations()
+    public function allReservations(Request $request)
     {
+        // Get request parameters for sorting and pagination
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Get all reservations
         $reservations = Reservation::with(['room:id,room_number,room_capacity,price', 'client:id,name,email'])
-            ->select(['id', 'client_id', 'room_id', 'accompany_number', 'price_paid', 'check_in_date', 'check_out_date', 'status', 'receptionist_id'])
-            ->latest()
-            ->paginate(10);
+            ->select(['id', 'client_id', 'room_id', 'accompany_number', 'price_paid', 'check_in_date', 'check_out_date', 'status', 'receptionist_id', 'created_at'])
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage);
+
+        // Get statistics for the dashboard
+        $pendingCount = Reservation::where('status', 'pending')->count();
+        $confirmedCount = Reservation::where('status', 'confirmed')->count();
+        $checkedInCount = Reservation::whereIn('status', ['checked_in', 'checked-in'])->count();
+        $totalRevenue = Reservation::whereIn('status', ['confirmed', 'checked_in', 'checked_out'])
+            ->sum('price_paid') / 100; // Convert cents to dollars for display
+
+        // Check if user is admin
+        $isAdmin = Auth::user()->hasRole('admin');
 
         return Inertia::render('Receptionist/Reservation/AllReservations', [
-            'reservations' => $reservations
+            'reservations' => $reservations,
+            'reservationStats' => [
+                'totalPending' => $pendingCount,
+                'confirmedReservations' => $confirmedCount,
+                'checkedInGuests' => $checkedInCount,
+                'totalRevenue' => $totalRevenue
+            ],
+            'isAdmin' => $isAdmin
         ]);
     }
 

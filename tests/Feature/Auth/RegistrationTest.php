@@ -33,6 +33,7 @@ test('new users can register', function () {
         'gender'=>'male',
         'avatar_image' => $avatar, // File upload
         'country' => 'USA', // Required field
+        'mobile' => '01020304050'
     ]);
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));

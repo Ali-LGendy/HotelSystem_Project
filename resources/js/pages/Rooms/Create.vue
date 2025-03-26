@@ -114,7 +114,8 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import {useForm } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 const props = defineProps({
   managers: Array,
@@ -134,6 +135,7 @@ const form = useForm({
   floor_id: '',
   manager_id: ''
 });
+defineOptions({ layout: AppLayout });
 
 const submit = () => {
   form.post(route('rooms.store'));

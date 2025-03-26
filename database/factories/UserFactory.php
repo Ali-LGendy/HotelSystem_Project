@@ -32,7 +32,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'last_login_at' => now()->subDays(rand(1, 30)),
             'national_id' => $this->faker->unique()->numerify('##############'),
-            'avatar_img' => 'defaults/user.png',
+            'avatar_img' => 'avatars/default_avatar.jpg',
             'country' => $this->faker->country(),
             'gender' => $this->faker->randomElement(['male', 'female']),
             'is_banned' => false,

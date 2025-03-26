@@ -15,6 +15,7 @@
 
 <script setup>
 import { defineProps } from 'vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import ApprovedClients from './ApprovedClients.vue';
 
 // Props passed from the controller
@@ -52,4 +53,7 @@ const props = defineProps({
     default: false
   }
 });
+
+defineOptions({ layout: AppLayout });
+
 </script>

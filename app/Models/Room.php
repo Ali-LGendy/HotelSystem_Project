@@ -20,15 +20,15 @@ class Room extends Model
         'floor_id',
     ];
 
-    public function setPriceAttribute($value)
-    {
-        $this->attributes['price'] = intval($value * 100);
-    }
+    // public function setPriceAttribute($value)
+    // {
+    //     $this->attributes['price'] = intval($value * 100);
+    // }
 
-    public function getPriceAttribute($value)
-    {
-        return number_format($value / 100, 2);
-    }
+    // public function getPriceAttribute($value)
+    // {
+    //     return number_format($value / 100, 2);
+    // }
 
     public function manager(): BelongsTo
     {

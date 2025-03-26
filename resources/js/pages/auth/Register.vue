@@ -21,7 +21,7 @@ const form = useForm({
 
 const submit = () => {
     form.post(route('register'), {
-        forceFormData: true, // Ensures the file is sent correctly
+        // forceFormData: true, // Ensures the file is sent correctly
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
@@ -34,7 +34,7 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
     <AuthBase title="Create an account" description="Enter your details below to create your account">
         <Head title="Register" />
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
+        <form @submit.prevent="submit" class="flex flex-col gap-6" enctype="multipart/form-data">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>

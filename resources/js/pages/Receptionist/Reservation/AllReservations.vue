@@ -8,18 +8,19 @@
           <p class="mt-2 text-gray-400">Showing all reservations in the system</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a
+          <Link
+            v-if="isAdmin"
             href="/receptionist/reservations"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             Pending Reservations
-          </a>
-          <a
+          </Link>
+          <Link
             href="/receptionist/clients/my-approved"
             class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
             My Approved Clients
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -88,18 +89,18 @@
               >
                 Approve
               </button>
-              <a
+              <Link
                 :href="`/receptionist/reservations/${row.id}`"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 View
-              </a>
-              <a
+              </Link>
+              <Link
                 :href="`/receptionist/reservations/${row.id}/edit`"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 Edit
-              </a>
+              </Link>
               <button
                 @click="confirmDelete(row.id)"
                 class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
@@ -111,7 +112,28 @@
         </DataTable>
       </div>
 
-
+      <!-- Reservation Statistics Dashboard -->
+      <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
+        <h3 class="text-xl font-semibold mb-4 text-gray-100">Reservation Statistics</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="p-4 rounded-lg bg-gray-700">
+            <div class="text-sm text-gray-400">Total Pending Reservations</div>
+            <div class="text-2xl font-bold text-gray-100">{{ reservationStats.totalPending }}</div>
+          </div>
+          <div class="p-4 rounded-lg bg-blue-900">
+            <div class="text-sm text-gray-300">Confirmed Reservations</div>
+            <div class="text-2xl font-bold text-gray-100">{{ reservationStats.confirmedReservations }}</div>
+          </div>
+          <div class="p-4 rounded-lg bg-green-900">
+            <div class="text-sm text-gray-300">Checked-in Guests</div>
+            <div class="text-2xl font-bold text-gray-100">{{ reservationStats.checkedInGuests }}</div>
+          </div>
+          <div class="p-4 rounded-lg bg-purple-900">
+            <div class="text-sm text-gray-300">Total Revenue</div>
+            <div class="text-2xl font-bold text-gray-100">${{ reservationStats.totalRevenue }}</div>
+          </div>
+        </div>
+      </div>
 
       <!-- Delete Confirmation Dialog -->
       <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -166,7 +188,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 import DataTable from '@/components/ui/DataTable.vue';
 
 // Props
@@ -174,6 +196,19 @@ const props = defineProps({
   reservations: {
     type: Object,
     required: true
+  },
+  reservationStats: {
+    type: Object,
+    default: () => ({
+      totalPending: 0,
+      confirmedReservations: 0,
+      checkedInGuests: 0,
+      totalRevenue: 0
+    })
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -275,26 +310,16 @@ const cancelDelete = () => {
 
 const deleteReservation = () => {
   if (!selectedReservationId.value) return;
-  
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = `/receptionist/reservations/${selectedReservationId.value}`;
-  
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  const csrfInput = document.createElement('input');
-  csrfInput.type = 'hidden';
-  csrfInput.name = '_token';
-  csrfInput.value = csrfToken;
-  
-  const methodInput = document.createElement('input');
-  methodInput.type = 'hidden';
-  methodInput.name = '_method';
-  methodInput.value = 'DELETE';
-  
-  form.appendChild(csrfInput);
-  form.appendChild(methodInput);
-  document.body.appendChild(form);
-  form.submit();
+
+  router.delete(`/receptionist/reservations/${selectedReservationId.value}`, {}, {
+    onSuccess: () => {
+      showDeleteDialog.value = false;
+      selectedReservationId.value = null;
+    },
+    onError: (errors) => {
+      console.error('Error deleting reservation:', errors);
+    }
+  });
 };
 
 const approveReservation = (id) => {
@@ -309,47 +334,31 @@ const cancelApprove = () => {
 
 const confirmApproveReservation = () => {
   if (!selectedReservationId.value) return;
-  
+
   // Find the reservation data
   const reservation = props.reservations.data.find(r => r.id === selectedReservationId.value);
   if (!reservation) return;
-  
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = `/receptionist/reservations/${selectedReservationId.value}`;
-  
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  const csrfInput = document.createElement('input');
-  csrfInput.type = 'hidden';
-  csrfInput.name = '_token';
-  csrfInput.value = csrfToken;
-  
-  const methodInput = document.createElement('input');
-  methodInput.type = 'hidden';
-  methodInput.name = '_method';
-  methodInput.value = 'PUT';
-  
-  // Add all required fields
-  const createInput = (name, value) => {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = name;
-    input.value = value;
-    return input;
+
+  // Prepare data for the update
+  const data = {
+    status: 'confirmed',
+    room_id: reservation.room_id,
+    accompany_number: reservation.accompany_number,
+    check_in_date: reservation.check_in_date,
+    check_out_date: reservation.check_out_date,
+    price_paid: reservation.price_paid,
+    client_id: reservation.client_id
   };
-  
-  form.appendChild(csrfInput);
-  form.appendChild(methodInput);
-  form.appendChild(createInput('status', 'confirmed'));
-  form.appendChild(createInput('room_id', reservation.room_id));
-  form.appendChild(createInput('accompany_number', reservation.accompany_number));
-  form.appendChild(createInput('check_in_date', reservation.check_in_date));
-  form.appendChild(createInput('check_out_date', reservation.check_out_date));
-  form.appendChild(createInput('price_paid', reservation.price_paid));
-  form.appendChild(createInput('client_id', reservation.client_id));
-  
-  document.body.appendChild(form);
-  form.submit();
+
+  router.put(`/receptionist/reservations/${selectedReservationId.value}`, data, {
+    onSuccess: () => {
+      showApproveDialog.value = false;
+      selectedReservationId.value = null;
+    },
+    onError: (errors) => {
+      console.error('Error approving reservation:', errors);
+    }
+  });
 };
 </script>
 

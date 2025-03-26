@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+
 import { Link, router } from '@inertiajs/vue3';
 import { defineProps, onMounted } from 'vue';
 import { route } from 'ziggy-js';

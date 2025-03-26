@@ -142,11 +142,8 @@
                 v-html="page.label"
               ></button>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -154,70 +151,74 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import { router, Link } from '@inertiajs/vue3';
 import DataTable from '@/components/ui/DataTable.vue';
-
+import AppLayout from '@/layouts/AppLayout.vue';
+import { router } from '@inertiajs/vue3';
+import axios from 'axios';
+import { computed, ref } from 'vue';
+defineOptions({ layout: AppLayout });
 // Props
 const props = defineProps({
-  clientsReservations: {
-    type: Object,
-    required: true
-  },
-  clientId: {
-    type: [Number, String],
-    default: null
-  },
-  clientName: {
-    type: String,
-    default: null
-  }
+    clientsReservations: {
+        type: Object,
+        required: true,
+    },
+    clientId: {
+        type: [Number, String],
+        default: null,
+    },
+    clientName: {
+        type: String,
+        default: null,
+    },
 });
 
 // State
 const showApproveDialog = ref(false);
 const selectedReservation = ref(null);
 const currentSort = ref({
-  field: 'created_at',
-  direction: 'desc'
+    field: 'created_at',
+    direction: 'desc',
 });
 const perPage = ref(10);
 
 // Table columns definition
 const columns = [
-  {
-    accessorKey: 'client.name',
-    header: 'Client Name'
-  },
-  {
-    accessorKey: 'accompany_number',
-    header: 'Accompany Number'
-  },
-  {
-    accessorKey: 'room.room_number',
-    header: 'Room Number'
-  },
-  {
-    accessorKey: 'price_paid',
-    header: 'Client Paid Price'
-  },
-  {
-    id: 'actions',
-    header: 'Actions',
-    enableSorting: false
-  }
+    {
+        accessorKey: 'client.name',
+        header: 'Client Name',
+    },
+    {
+        accessorKey: 'accompany_number',
+        header: 'Accompany Number',
+    },
+    {
+        accessorKey: 'room.room_number',
+        header: 'Room Number',
+    },
+    {
+        accessorKey: 'price_paid',
+        header: 'Client Paid Price',
+    },
+    {
+        id: 'actions',
+        header: 'Actions',
+        enableSorting: false,
+    },
 ];
 
 // Computed
 const currentPage = computed(() => {
-  return props.clientsReservations.current_page || 1;
+    return props.clientsReservations.current_page || 1;
 });
 
 // Methods
 // Enhanced pagination with sorting
 const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir = 'desc') => {
-  // Update current sort state
-  currentSort.value = {
-    field: sortBy,
-    direction: sortDir
-  };
+    // Update current sort state
+    currentSort.value = {
+        field: sortBy,
+        direction: sortDir,
+    };
 
   // Prepare parameters
   const params = {
@@ -242,24 +243,24 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  } catch (e) {
-    return dateString;
-  }
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString();
+    } catch (e) {
+        return dateString;
+    }
 };
 
 const approveReservation = async (reservation) => {
-  // Store the selected reservation
-  selectedReservation.value = reservation;
+    // Store the selected reservation
+    selectedReservation.value = reservation;
 
-  // Show confirmation before submitting
-  if (confirm('Are you sure you want to approve this reservation?')) {
-    try {
-      // First, approve the reservation
-      console.log('Approving reservation:', reservation);
+    // Show confirmation before submitting
+    if (confirm('Are you sure you want to approve this reservation?')) {
+        try {
+            // First, approve the reservation
+            console.log('Approving reservation:', reservation);
 
       // Prepare the data to send
       const data = {
@@ -307,20 +308,19 @@ const approveReservation = async (reservation) => {
         alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
       }
     }
-  }
 };
 
 const getStatusClass = (status) => {
-  const classes = {
-    'confirmed': 'bg-green-900 text-green-200',
-    'checked_in': 'bg-blue-900 text-blue-200',
-    'checked-in': 'bg-blue-900 text-blue-200',
-    'checked_out': 'bg-gray-700 text-gray-200',
-    'checked-out': 'bg-gray-700 text-gray-200',
-    'pending': 'bg-yellow-900 text-yellow-200',
-    'cancelled': 'bg-red-900 text-red-200'
-  };
-  return classes[status] || 'bg-gray-700 text-gray-200';
+    const classes = {
+        confirmed: 'bg-green-900 text-green-200',
+        checked_in: 'bg-blue-900 text-blue-200',
+        'checked-in': 'bg-blue-900 text-blue-200',
+        checked_out: 'bg-gray-700 text-gray-200',
+        'checked-out': 'bg-gray-700 text-gray-200',
+        pending: 'bg-yellow-900 text-yellow-200',
+        cancelled: 'bg-red-900 text-red-200',
+    };
+    return classes[status] || 'bg-gray-700 text-gray-200';
 };
 
 const handlePageChange = (pageIndex) => {
@@ -340,18 +340,18 @@ const navigateTo = (url) => {
 
 <style scoped>
 .pagination-link {
-  @apply px-3 py-1 rounded-md text-sm;
+    @apply rounded-md px-3 py-1 text-sm;
 }
 
 .pagination-link-active {
-  @apply bg-blue-600 text-white;
+    @apply bg-blue-600 text-white;
 }
 
 .pagination-link-inactive {
-  @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
 }
 
 .pagination-link-disabled {
-  @apply bg-gray-800 text-gray-500 cursor-not-allowed;
+    @apply cursor-not-allowed bg-gray-800 text-gray-500;
 }
 </style>

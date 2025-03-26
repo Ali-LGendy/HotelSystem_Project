@@ -108,9 +108,6 @@
                 Delete
               </button>
             </div>
-          </template>
-        </DataTable>
-      </div>
 
       <!-- Reservation Statistics Dashboard -->
       <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
@@ -135,55 +132,106 @@
         </div>
       </div>
 
-      <!-- Delete Confirmation Dialog -->
-      <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
-          <p class="mt-2 text-gray-400">
-            Are you sure you want to delete this reservation? This action cannot be undone.
-          </p>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-              @click="cancelDelete"
-            >
-              Cancel
-            </button>
-            <button
-              class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-              @click="deleteReservation"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
+                    <!-- Room Number Cell Template -->
+                    <template #cell-room.room_number="{ row }">
+                        {{ row.room ? row.room.room_number : 'N/A' }}
+                    </template>
 
-      <!-- Approve Confirmation Dialog -->
-      <div v-if="showApproveDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-100">Confirm Approval</h3>
-          <p class="mt-2 text-gray-400">
-            Are you sure you want to approve this reservation?
-          </p>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-              @click="cancelApprove"
-            >
-              Cancel
-            </button>
-            <button
-              class="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
-              @click="confirmApproveReservation"
-            >
-              Approve
-            </button>
-          </div>
+                    <!-- Price Cell Template -->
+                    <template #cell-price_paid="{ row }"> ${{ row.price_paid }} </template>
+
+                    <!-- Check-in Date Cell Template -->
+                    <template #cell-check_in_date="{ row }">
+                        {{ formatDate(row.check_in_date) }}
+                    </template>
+
+                    <!-- Check-out Date Cell Template -->
+                    <template #cell-check_out_date="{ row }">
+                        {{ formatDate(row.check_out_date) }}
+                    </template>
+
+                    <!-- Status Cell Template -->
+                    <template #cell-status="{ row }">
+                        <span :class="['rounded-full px-2 py-1 text-xs font-medium', getStatusClass(row.status)]">
+                            {{ row.status }}
+                        </span>
+                    </template>
+
+                    <!-- Actions Cell Template -->
+                    <template #cell-actions="{ row }">
+                        <div class="flex space-x-2">
+                            <button
+                                v-if="row.status === 'pending'"
+                                @click="approveReservation(row.id)"
+                                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                            >
+                                Approve
+                            </button>
+                            <a
+                                :href="`/receptionist/reservations/${row.id}`"
+                                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+                            >
+                                View
+                            </a>
+                            <a
+                                :href="`/receptionist/reservations/${row.id}/edit`"
+                                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
+                            >
+                                Edit
+                            </a>
+                            <button
+                                @click="confirmDelete(row.id)"
+                                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </template>
+                </DataTable>
+            </div>
+
+            <!-- Delete Confirmation Dialog -->
+            <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
+                    <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
+                    <p class="mt-2 text-gray-400">Are you sure you want to delete this reservation? This action cannot be undone.</p>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button
+                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
+                            @click="cancelDelete"
+                        >
+                            Cancel
+                        </button>
+                        <button class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600" @click="deleteReservation">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approve Confirmation Dialog -->
+            <div v-if="showApproveDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
+                    <h3 class="text-xl font-semibold text-gray-100">Confirm Approval</h3>
+                    <p class="mt-2 text-gray-400">Are you sure you want to approve this reservation?</p>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button
+                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
+                            @click="cancelApprove"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            class="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+                            @click="confirmApproveReservation"
+                        >
+                            Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -191,7 +239,10 @@ import { ref, computed } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import DataTable from '@/components/ui/DataTable.vue';
-
+import AppLayout from '@/layouts/AppLayout.vue';
+import { router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+defineOptions({ layout: AppLayout });
 // Props
 const props = defineProps({
   reservations: {
@@ -220,93 +271,93 @@ const selectedReservationId = ref(null);
 
 // Table columns definition
 const columns = [
-  {
-    accessorKey: 'client.name',
-    header: 'Client Name'
-  },
-  {
-    accessorKey: 'room.room_number',
-    header: 'Room Number'
-  },
-  {
-    accessorKey: 'accompany_number',
-    header: 'Accompany Number'
-  },
-  {
-    accessorKey: 'price_paid',
-    header: 'Paid Price'
-  },
-  {
-    accessorKey: 'check_in_date',
-    header: 'Check-in Date'
-  },
-  {
-    accessorKey: 'check_out_date',
-    header: 'Check-out Date'
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status'
-  },
-  {
-    id: 'actions',
-    header: 'Actions',
-    enableSorting: false
-  }
+    {
+        accessorKey: 'client.name',
+        header: 'Client Name',
+    },
+    {
+        accessorKey: 'room.room_number',
+        header: 'Room Number',
+    },
+    {
+        accessorKey: 'accompany_number',
+        header: 'Accompany Number',
+    },
+    {
+        accessorKey: 'price_paid',
+        header: 'Paid Price',
+    },
+    {
+        accessorKey: 'check_in_date',
+        header: 'Check-in Date',
+    },
+    {
+        accessorKey: 'check_out_date',
+        header: 'Check-out Date',
+    },
+    {
+        accessorKey: 'status',
+        header: 'Status',
+    },
+    {
+        id: 'actions',
+        header: 'Actions',
+        enableSorting: false,
+    },
 ];
 
 // Computed
 const currentPage = computed(() => {
-  return props.reservations.current_page || 1;
+    return props.reservations.current_page || 1;
 });
 
 // Methods
 const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  } catch (e) {
-    return dateString;
-  }
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString();
+    } catch (e) {
+        return dateString;
+    }
 };
 
 const getStatusClass = (status) => {
-  const classes = {
-    'confirmed': 'bg-green-900 text-green-200',
-    'checked_in': 'bg-blue-900 text-blue-200',
-    'checked-in': 'bg-blue-900 text-blue-200',
-    'checked_out': 'bg-gray-700 text-gray-200',
-    'checked-out': 'bg-gray-700 text-gray-200',
-    'pending': 'bg-yellow-900 text-yellow-200',
-    'cancelled': 'bg-red-900 text-red-200'
-  };
-  return classes[status] || 'bg-gray-700 text-gray-200';
+    const classes = {
+        confirmed: 'bg-green-900 text-green-200',
+        checked_in: 'bg-blue-900 text-blue-200',
+        'checked-in': 'bg-blue-900 text-blue-200',
+        checked_out: 'bg-gray-700 text-gray-200',
+        'checked-out': 'bg-gray-700 text-gray-200',
+        pending: 'bg-yellow-900 text-yellow-200',
+        cancelled: 'bg-red-900 text-red-200',
+    };
+    return classes[status] || 'bg-gray-700 text-gray-200';
 };
 
 const handlePageChange = (pageIndex) => {
-  const page = pageIndex + 1;
-  const baseUrl = `/receptionist/all-reservations`;
+    const page = pageIndex + 1;
+    const baseUrl = `/receptionist/all-reservations`;
 
-  // Build query parameters
-  const params = new URLSearchParams();
-  params.append('page', page);
+    // Build query parameters
+    const params = new URLSearchParams();
+    params.append('page', page);
 
-  router.visit(`${baseUrl}?${params.toString()}`, {
-    preserveScroll: true,
-    preserveState: false,
-    replace: true
-  });
+    router.visit(`${baseUrl}?${params.toString()}`, {
+        preserveScroll: true,
+        preserveState: false,
+        replace: true,
+    });
 };
 
 const confirmDelete = (id) => {
-  selectedReservationId.value = id;
-  showDeleteDialog.value = true;
+    selectedReservationId.value = id;
+    showDeleteDialog.value = true;
 };
 
 const cancelDelete = () => {
-  showDeleteDialog.value = false;
-  selectedReservationId.value = null;
+    showDeleteDialog.value = false;
+    selectedReservationId.value = null;
 };
 
 const deleteReservation = () => {
@@ -324,13 +375,13 @@ const deleteReservation = () => {
 };
 
 const approveReservation = (id) => {
-  selectedReservationId.value = id;
-  showApproveDialog.value = true;
+    selectedReservationId.value = id;
+    showApproveDialog.value = true;
 };
 
 const cancelApprove = () => {
-  showApproveDialog.value = false;
-  selectedReservationId.value = null;
+    showApproveDialog.value = false;
+    selectedReservationId.value = null;
 };
 
 // Navigation method using Inertia
@@ -416,18 +467,18 @@ const confirmApproveReservation = async () => {
 
 <style scoped>
 .pagination-link {
-  @apply px-3 py-1 rounded-md text-sm;
+    @apply rounded-md px-3 py-1 text-sm;
 }
 
 .pagination-link-active {
-  @apply bg-blue-600 text-white;
+    @apply bg-blue-600 text-white;
 }
 
 .pagination-link-inactive {
-  @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
 }
 
 .pagination-link-disabled {
-  @apply bg-gray-800 text-gray-500 cursor-not-allowed;
+    @apply cursor-not-allowed bg-gray-800 text-gray-500;
 }
 </style>

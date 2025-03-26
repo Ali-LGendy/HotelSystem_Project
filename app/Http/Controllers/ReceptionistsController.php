@@ -108,7 +108,7 @@ class ReceptionistsController extends Controller
     public function edit(User $user)
     {
         //
-        if(auth()->user()->id == $user->manager_id || auth()->user()->hasRole('admin')){
+        if(auth()->user()->id == $user->manager_id && auth()->user()->hasRole('admin')){
             return Inertia::render('Admin/Users/Receptionists/Edit', [
             'receptionist' => $user,
             'menuLinks' => $this->getAdminMenuLinks()
@@ -127,7 +127,7 @@ class ReceptionistsController extends Controller
      */
     public function update(StoreManagerRequest $request, User $user)
     {
-         if(auth()->user()->id != $user->manager_id && !auth()->user()->hasRole('admin')){
+         if(auth()->user()->id !== $user->manager_id && !auth()->user()->hasRole('admin')){
             abort(403, 'Unauthorized action.');
         }
         //\Log::info('Received request data:', $request->all());
@@ -182,7 +182,7 @@ class ReceptionistsController extends Controller
      */
       public function ban(User $user)
     {
-        if(auth()->user()->id != $user->manager_id && !auth()->user()->hasRole('admin')){
+        if(auth()->user()->id !== $user->manager_id && !auth()->user()->hasRole('admin')){
             abort(403, 'Unauthorized action.');
         }
         
@@ -200,11 +200,15 @@ class ReceptionistsController extends Controller
     }
     public function destroy(User $user)
     {
-        if(auth()->user()->id != $user->manger_id && !auth()->user()->hasRole('admin')){
-            abort(403, 'Unauthorized action.');
-        }
-        $user->delete();
-        return redirect()->route('admin.users.receptionists.index')->with('error', 'You cannot delete an admin user.');
+        if (auth()->user()->id !== $user->manager_id && !auth()->user()->hasRole('admin')) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // Delete the receptionist
+    $user->delete();
+
+    return redirect()->route('admin.users.receptionists.index')
+        ->with('success', 'Receptionist deleted successfully.');
         
     }
 }

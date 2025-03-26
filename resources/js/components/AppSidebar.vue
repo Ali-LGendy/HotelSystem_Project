@@ -56,23 +56,11 @@ const footerNavItems: NavItem[] = [
         <SidebarContent>
             <!-- <NavMain :items="mainNavItems" /> -->
             <NavMain :items="menuLinks" />
-            <!-- <h4>HIIIIIIIIIIIIIIIIIIIIIIIIIIIII</h4> -->
-            <!-- <aside class="min-h-screen w-1/4 bg-gray-800 p-4 text-white"> -->
-            <h2 class="mb-4 text-xl font-bold">Admin Dashboard</h2>
-
-            <!-- Dynamic Links -->
-            <ul>
-                <li v-for="link in menuLinks" :key="link.name" class="mb-2">
-                    <Link :href="link.route" class="block rounded bg-gray-700 p-2 hover:bg-gray-600">
-                        {{ link.name }}
-                    </Link>
-                </li>
-            </ul>
-            <!-- </aside> -->
+            
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <!-- <NavFooter :items="footerNavItems" /> -->
             <NavUser />
         </SidebarFooter>
     </Sidebar>

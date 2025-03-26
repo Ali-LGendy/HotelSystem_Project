@@ -26,7 +26,8 @@ class DashboardController extends Controller
                 'menuLinks' => [
                 ['title' => 'Manage Managers', 'href' => route('admin.users.managers.store')],
                 ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.store')],
-                // ['name' => 'Manage Clients', 'route' => route('admin.users.clients.store')],
+                ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
+
             ]
             ]);
         }
@@ -39,11 +40,10 @@ class DashboardController extends Controller
                 'my_floors' => Floor::where('manager_id', $user->id)->count(),
                 'my_rooms' => Room::where('manager_id', $user->id)->count(),
                 'menuLinks' => [
-                // ['title' => 'Manage Floors', 'href' => route('admin.floors.index')],
-                // ['title' => 'Manage Rooms', 'href' => route('admin.rooms.index')],
-                // ['title' => 'Manage Reservations', 'href' => route('admin.reservations.index')],
-                ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.store')],
-                ['title' => 'Manage Clients', 'href' => route('admin.users.clients.store')],
+                ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.index')],
+                ['title' => 'Manage Floors', 'href' => route('floors.index')],
+                ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
+                ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
             ]
             ]);
         }

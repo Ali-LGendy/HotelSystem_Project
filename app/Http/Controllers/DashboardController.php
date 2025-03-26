@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Reservation;
 use Inertia\Inertia;
 
+
 class DashboardController extends Controller
 {
     public function index()
@@ -30,7 +31,7 @@ class DashboardController extends Controller
             ]);
         }
         if ($user->hasRole('manager')) {
-            return Inertia::render('Manager/Dashboard',[
+            return Inertia::render('Admin/Dashboard',[
                 'total_clients' => User::role('client')->get()->count(),
                 'my_receptionists' => User::where('manager_id', $user->id)->count(),
                 // 'total_reservations' => Reservation::where('manager_id', $user->id)->count(),
@@ -46,19 +47,19 @@ class DashboardController extends Controller
             ]
             ]);
         }
-        // if ($user->hasRole('receptionist')) {
-        //     return Inertia::render('Receptionist/Dashboard',[
-        //         'clients_to_approve' => User::role('client')->where('is_approved', false)->get(),
-        //         'approved_clients' => User::role('client')->where('is_approved', true)->get(),
-        //         'total_reservations' => Reservation::where('is_approved', true)->where('manager_id', $user->id),
-        //     ]);
-        // }
-        // if ($user->hasRole('client')) {
-        //     return Inertia::render('Client/Dashboard',[
-        //         'my_reservations' => Reservation::where('client_id', $user->id)->get(),
-        //         'avialable_rooms' => Room::where('status', 'available')->get(),
-        //     ]);
-        // }
+        if ($user->hasRole('receptionist')) {
+            return Inertia::render('Admin/Dashboard',[
+                'clients_to_approve' => User::role('client')->where('is_approved', false)->get(),
+                'approved_clients' => User::role('client')->where('is_approved', true)->get(),
+                // 'total_reservations' => Reservation::where('is_approved', true)->where('manager_id', $user->id),
+            ]);
+        }
+        if ($user->hasRole('client')) {
+            return Inertia::render('Admin/Dashboard',[
+                'my_reservations' => Reservation::where('client_id', $user->id)->get(),
+                'avialable_rooms' => Room::where('status', 'available')->get(),
+            ]);
+        }
         
     }
 }

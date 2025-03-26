@@ -21,8 +21,15 @@ abstract class Controller
             ['title' => 'Manage Floors', 'href' => route('floors.index')],
             ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
             ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
-
-
+        ];
+    }
+    protected function getreceptionistMenuLinks()
+    {
+        return [
+            ['title' => 'Manage Reservations', 'href' => route('admin.users.receptionists.index')],
+            ['title' => 'Manage Floors', 'href' => route('floors.index')],
+            ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
+            ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
         ];
     }
 }

@@ -70,18 +70,18 @@
               >
                 Approve
               </Button>
-              <Link
-                :href="route('receptionist.reservations.show', { reservation: row.original ? row.original.id : row.id })"
+              <Button
+                @click="viewReservation(row.original ? row.original.id : row.id)"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 View
-              </Link>
-              <Link
-                :href="route('receptionist.reservations.edit', { reservation: row.original ? row.original.id : row.id })"
+              </Button>
+              <Button
+                @click="editReservation(row.original ? row.original.id : row.id)"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 Edit
-              </Link>
+              </Button>
               <Button
                 variant="destructive"
                 size="sm"
@@ -120,6 +120,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
+import axios from 'axios'
 
 // Shadcn UI Components
 import { Link } from '@/Components/ui/link'
@@ -268,34 +269,75 @@ const deleteReservation = () => {
   }
 }
 
-const approveReservation = (row) => {
-  const reservation = row.original || row
+const viewReservation = (id) => {
+  router.visit(route('receptionist.reservations.show', { reservation: id }), {
+    preserveScroll: false,
+    preserveState: false
+  });
+};
 
-  if (!reservation || !reservation.id) {
-    console.error('Invalid reservation object')
-    return
-  }
+const editReservation = (id) => {
+  router.visit(route('receptionist.reservations.edit', { reservation: id }), {
+    preserveScroll: false,
+    preserveState: false
+  });
+};
 
-  const data = {
-    status: 'confirmed',
-    ...reservation  // Spread other existing reservation details
-  }
+const approveReservation = async (row) => {
+  try {
+    const reservation = row.original || row
 
-  router.put(
-    route('receptionist.reservations.update', { 
-      reservation: reservation.id 
-    }), 
-    data,
-    {
-      onSuccess: () => {
-        // Optional: Add success toast notification
-      },
-      onError: (errors) => {
-        console.error('Reservation approval error:', errors)
-        // Optional: Add error toast notification
-      }
+    if (!reservation || !reservation.id) {
+      console.error('Invalid reservation object')
+      return
     }
-  )
+
+    const data = {
+      status: 'confirmed',
+      ...reservation  // Spread other existing reservation details
+    }
+
+    // Use axios directly instead of Inertia to handle the JSON response
+    const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    // Check if the request was successful
+    if (response.data.success) {
+      alert('Reservation approved successfully!');
+
+      // Check if client is already approved
+      const clientApproved = response.data.client_approved;
+
+      // Refresh the current page to show updated data
+      if (reservation.client_id && !clientApproved) {
+        // If client is not approved, redirect to clients page
+        router.visit('/receptionist/clients', {
+          preserveScroll: false,
+          preserveState: false,
+          replace: false
+        });
+      } else {
+        // Otherwise, refresh the current page with updated data
+        window.location.reload(); // Full page reload to ensure data is refreshed
+      }
+    } else {
+      alert('Could not approve reservation. Please try again.');
+    }
+  } catch (error) {
+    console.error('Error approving reservation:', error);
+
+    // Show more detailed error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      alert(`Error: ${error.response.data.message}`);
+    } else {
+      alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+    }
+  }
 }
 </script>
 

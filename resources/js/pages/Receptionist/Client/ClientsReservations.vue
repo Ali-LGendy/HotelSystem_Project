@@ -270,27 +270,42 @@ const approveReservation = async (reservation) => {
         price_paid: reservation.price_paid
       };
 
-      // Use Inertia to make the request
-      router.put(`/receptionist/reservations/${reservation.id}`, data, {
-        onSuccess: (page) => {
-          alert('Reservation approved successfully!');
-
-          // Check if client is already approved from the response
-          const clientApproved = page.props.flash?.client_approved;
-
-          // If the client is not approved, redirect to the clients page
-          if (reservation.client_id && !clientApproved) {
-            navigateTo('/receptionist/clients');
-          }
-        },
-        onError: (errors) => {
-          console.error('Error approving reservation:', errors);
-          alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+      // Use axios directly instead of Inertia to handle the JSON response
+      const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       });
+
+      // Check if the request was successful
+      if (response.data.success) {
+        alert('Reservation approved successfully!');
+
+        // Check if client is already approved
+        const clientApproved = response.data.client_approved;
+
+        // Refresh the current page to show updated data
+        if (reservation.client_id && !clientApproved) {
+          // If client is not approved, redirect to clients page
+          navigateTo('/receptionist/clients');
+        } else {
+          // Otherwise, refresh the current page with updated data
+          window.location.reload(); // Full page reload to ensure data is refreshed
+        }
+      } else {
+        alert('Could not approve reservation. Please try again.');
+      }
     } catch (error) {
       console.error('Error approving reservation:', error);
-      alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+
+      // Show more detailed error message if available
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+      }
     }
   }
 };

@@ -15,7 +15,7 @@ interface MenuLink {
 
 // Accept the menuLinks prop
 defineProps<{
-    menuLinks: MenuLink[];
+    menuLinks: NavItem[];
 }>();
 const mainNavItems: NavItem[] = [
     {

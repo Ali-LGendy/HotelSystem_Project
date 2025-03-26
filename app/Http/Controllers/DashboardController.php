@@ -23,6 +23,7 @@ class DashboardController extends Controller
                 'menuLinks' => [
                 ['name' => 'Manage Managers', 'route' => route('admin.users.managers.store')],
                 ['name' => 'Manage Receptionists', 'route' => route('admin.users.receptionists.store')],
+                ['name' => 'Manage Floors', 'route' => route('floors.index')],
                 // ['name' => 'Manage Clients', 'route' => route('admin.users.clients.store')],
             ]
             ]);

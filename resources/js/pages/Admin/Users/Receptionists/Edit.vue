@@ -9,18 +9,18 @@ import { defineOptions, defineProps } from 'vue';
 import { route } from 'ziggy-js';
 
 // Props from the controller (manager object)
-const props = defineProps({ manager: Object });
+const props = defineProps({ receptionist: Object });
 
 defineOptions({ layout: AppLayout });
 
 // Initialize form with existing manager data
 const form = useForm({
     _method: 'PUT',
-    name: props.manager.name || '', // Ensure non-null value
-    email: props.manager.email || '', // Ensure non-null value
+    name: props.receptionist.name || '', // Ensure non-null value
+    email: props.receptionist.email || '', // Ensure non-null value
     password: '', // Keep as optional
-    national_id: props.manager.national_id || '', // Ensure non-null value
-    avatar_img: props.manager.avatar_img || null,
+    national_id: props.receptionist.national_id || '', // Ensure non-null value
+    avatar_img: props.receptionist.avatar_img || null,
 });
 
 // Handle avatar upload
@@ -49,11 +49,11 @@ const submitForm = () => {
     }
 
     // Use axios directly for more control
-    router.post(route('admin.users.managers.update', props.manager.id), formData, {
+    router.post(route('admin.users.receptionists.update', props.receptionist.id), formData, {
         forceFormData: true, // Important for file uploads
         onSuccess: () => {
             console.log('Update successful');
-            router.visit(route('admin.users.managers.index'));
+            router.visit(route('admin.users.receptionists.index'));
         },
         onError: (errors) => {
             console.error('Update errors:', errors);
@@ -85,7 +85,7 @@ const handleImageError = (event) => {
     event.target.style.display = 'none';
     event.target.parentNode.innerHTML = `
         <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-            ${getInitials(manager.name)}
+            ${getInitials(receptionist.name)}
         </div>
     `;
 };
@@ -104,7 +104,7 @@ const getInitials = (name) => {
 <template>
     <Card class="mx-auto max-w-2xl rounded-lg bg-white shadow-lg dark:bg-gray-900">
         <CardHeader>
-            <CardTitle class="text-gray-900 dark:text-gray-100">Update Manager</CardTitle>
+            <CardTitle class="text-gray-900 dark:text-gray-100">Update Receptionist</CardTitle>
         </CardHeader>
         <CardContent>
             <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
@@ -166,7 +166,7 @@ const getInitials = (name) => {
                 </div>
 
                 <!-- Submit Button -->
-                <Button type="submit" class="w-full">Update Manager</Button>
+                <Button type="submit" class="w-full">Update Receptionist</Button>
             </form>
         </CardContent>
     </Card>

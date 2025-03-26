@@ -25,9 +25,9 @@ class User extends Authenticatable implements BannableInterface
     protected $fillable = [
         'name',
         'email',
+        'mobile',
         'password',
         'role',
-        'national_id',
         'avatar_img',
         'country',
         'gender',
@@ -56,6 +56,8 @@ class User extends Authenticatable implements BannableInterface
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_approved' => 'boolean',
+            'is_banned' => 'boolean',
         ];
     }
 

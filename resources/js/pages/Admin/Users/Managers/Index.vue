@@ -19,13 +19,7 @@ onMounted(() => {
     console.log('Managers data:', props.managers);
 });
 defineOptions({ layout: AppLayout });
-// Function to handle deletion (for demonstration)
-// const deleteManager = (id) => {
-//     if (confirm('Are you sure you want to delete this manager?')) {
-//         // Example: Implement deletion logic with Inertia
-//         router.delete(route('admin.users.managers.destroy', id));
-//     }
-// };
+
 const getImageUrl = (path) => {
     if (!path) return '/dafaults/user.png';
 
@@ -47,17 +41,7 @@ const handleImageError = (event) => {
         </div>
     `;
 };
-// const banManager = (id) => {
-//     if (confirm('Are you sure you want to ban this manager?')) {
-//         // Example: Implement ban logic with Inertia
-//         props.managers.data.forEach((manager) => {
-//             if (manager.id === id) {
-//                 manager.is_banned = !manager.is_banned;
-//             }
-//         });
-//         router.patch(route('admin.users.managers.ban', id));
-//     }
-// };
+
 const banManager = (id) => {
     if (confirm('Are you sure you want to change the ban status of this manager?')) {
         router.patch(route('admin.users.managers.ban', id), {
@@ -72,6 +56,11 @@ const banManager = (id) => {
     }
 };
 
+const confirmDelete = (id) => {
+    if (confirm('Are you sure you want to delete this user?')) {
+        router.delete(route('admin.users.managers.destroy', id));
+    }
+};
 // Get initials from name
 const getInitials = (name) => {
     return name
@@ -98,7 +87,6 @@ const getInitials = (name) => {
                 <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Password</TableHead>
                     <TableHead>National ID</TableHead>
                     <TableHead>Avatar Image</TableHead>
                     <TableHead>Actions</TableHead>
@@ -109,7 +97,6 @@ const getInitials = (name) => {
                 <TableRow v-for="manager in managers.data" :key="manager.id" class="transition hover:bg-gray-800">
                     <TableCell>{{ manager.name }}</TableCell>
                     <TableCell>{{ manager.email }}</TableCell>
-                    <TableCell>{{ manager.password }}</TableCell>
                     <TableCell>{{ manager.national_id }}</TableCell>
                     <TableCell class="border-t border-gray-700 p-4">
                         <img
@@ -129,6 +116,9 @@ const getInitials = (name) => {
                             <Link :href="route('admin.users.managers.edit', manager)">
                                 <Button variant="outline">Edit</Button>
                             </Link>
+                            <Link :href="route('admin.users.managers.show', manager)">
+                                <Button variant="secondary">View</Button>
+                            </Link>
 
                             <!-- Delete Button -->
                             <Link
@@ -136,6 +126,7 @@ const getInitials = (name) => {
                                 :href="route('admin.users.managers.destroy', manager)"
                                 as="button"
                                 class="text-red-500 transition-colors duration-200 hover:text-red-400"
+                                @click.prevent="confirmDelete(manager.id)"
                             >
                                 <Button variant="destructive">Delete</Button>
                             </Link>

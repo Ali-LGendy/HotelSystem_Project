@@ -117,7 +117,15 @@ class ClientController extends Controller
         // Get current user role and admin status
         $userRole = Auth::user()->getRoleNames()->first();
         $isAdmin = Auth::user()->hasRole('admin');
+        $isManager = Auth::user()->hasRole('manager');
 
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else if($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }else {
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
         return Inertia::render('Receptionist/Client/Index', [
             'pendingClients' => $pendingClients,
             'approvedClientsCount' => $approvedClientsCount,
@@ -127,6 +135,8 @@ class ClientController extends Controller
             'currentUserId' => $currentUserId,
             'userRole' => $userRole,
             'isAdmin' => $isAdmin,
+            'menuLinks' => $menuLinks
+            
         ]);
     }
 

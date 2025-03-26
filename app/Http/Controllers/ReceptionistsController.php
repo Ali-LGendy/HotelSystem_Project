@@ -31,13 +31,19 @@ class ReceptionistsController extends Controller
             // Retrieve distinct managers for the receptionists
            
             }
+        if($is_admin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
 
         return Inertia::render('Admin/Users/Receptionists/Index', [
             'receptionists' => $receptionists,
             'is_admin' => $is_admin,
             'user' => $user->id,
             // 'managers' => $managers,
-            'menuLinks' => $this->getAdminMenuLinks()
+
+            'menuLinks' => $menuLinks
         ]);
     }
 

@@ -84,6 +84,7 @@ Route::middleware(['auth', 'permission:manage reservations'])
         Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
         // Add route for all reservations
         Route::get('all-reservations', [ReservationController::class, 'allReservations'])->name('reservations.all');
+        Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
 
         // Client management routes
         Route::get('clients', [ClientController::class, 'index'])->name('clients.index');

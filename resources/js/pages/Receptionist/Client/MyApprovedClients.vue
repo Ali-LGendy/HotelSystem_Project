@@ -127,32 +127,21 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
-                    <!-- Show actions only for admin role -->
-                    <template v-if="isAdmin">
-                      <button
-                        v-if="!client.is_banned"
-                        @click="banClient(client.id)"
-                        class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                      >
-                        Ban
-                      </button>
-                      <button
-                        v-else
-                        @click="unbanClient(client.id)"
-                        class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                      >
-                        Unban
-                      </button>
-                    </template>
-                    <!-- For receptionist role, show status instead of actions -->
-                    <template v-else>
-                      <span
-                        :class="client.is_banned ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'"
-                        class="px-2 py-1 text-xs font-medium rounded-full"
-                      >
-                        {{ client.is_banned ? 'Banned' : 'Active' }}
-                      </span>
-                    </template>
+                    <!-- Status indicator for all roles -->
+                    <span
+                      :class="client.is_banned ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'"
+                      class="px-2 py-1 text-xs font-medium rounded-full"
+                    >
+                      {{ client.is_banned ? 'Banned' : 'Active' }}
+                    </span>
+
+                    <!-- View Reservations button -->
+                    <a
+                      :href="`/receptionist/clients/${client.id}/reservations`"
+                      class="rounded-md bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
+                    >
+                      View Reservations
+                    </a>
                   </div>
                 </td>
               </tr>
@@ -297,32 +286,7 @@
         </div>
       </div>
 
-      <!-- Confirmation Dialog - Only shown for admin role -->
-      <div v-if="showConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-100">{{ confirmDialogTitle }}</h3>
-          <p class="mt-2 text-gray-400">{{ confirmDialogMessage }}</p>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-              @click="cancelConfirmation"
-            >
-              Cancel
-            </button>
-            <button
-              :class="[
-                'rounded-md px-4 py-2 text-sm font-medium text-white',
-                confirmAction === 'ban'
-                  ? 'bg-red-700 hover:bg-red-600'
-                  : 'bg-green-700 hover:bg-green-600'
-              ]"
-              @click="confirmAction === 'ban' ? confirmBan() : confirmUnban()"
-            >
-              {{ confirmAction === 'ban' ? 'Ban' : 'Unban' }}
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Confirmation Dialog has been removed -->
     </div>
   </div>
 </template>
@@ -369,11 +333,7 @@ const props = defineProps({
 });
 
 // State
-const showConfirmDialog = ref(false);
-const confirmDialogTitle = ref('');
-const confirmDialogMessage = ref('');
-const confirmAction = ref('');
-const selectedClientId = ref(null);
+// Ban-related state variables have been removed
 const currentSort = ref({
   field: 'created_at',
   direction: 'desc'
@@ -436,86 +396,7 @@ const getStatusClass = (status) => {
   return classes[status] || 'bg-gray-700 text-gray-200';
 };
 
-const banClient = (clientId) => {
-  // Only allow admin to ban clients
-  if (!props.isAdmin) return;
-
-  selectedClientId.value = clientId;
-  confirmAction.value = 'ban';
-  confirmDialogTitle.value = 'Confirm Client Ban';
-  confirmDialogMessage.value = 'Are you sure you want to ban this client? They will not be able to make new reservations.';
-  showConfirmDialog.value = true;
-};
-
-const unbanClient = (clientId) => {
-  // Only allow admin to unban clients
-  if (!props.isAdmin) return;
-
-  selectedClientId.value = clientId;
-  confirmAction.value = 'unban';
-  confirmDialogTitle.value = 'Confirm Client Unban';
-  confirmDialogMessage.value = 'Are you sure you want to unban this client? They will be able to make reservations again.';
-  showConfirmDialog.value = true;
-};
-
-const cancelConfirmation = () => {
-  showConfirmDialog.value = false;
-  selectedClientId.value = null;
-};
-
-const confirmBan = async () => {
-  // Only allow admin to confirm ban
-  if (!props.isAdmin || !selectedClientId.value) return;
-
-  try {
-    // Show loading state
-    showConfirmDialog.value = false;
-
-    // Use axios to make the request
-    await axios.post(`/receptionist/clients/${selectedClientId.value}/ban`);
-
-    // Use Inertia router to reload the page with fresh data
-    router.visit(window.location.pathname, {
-      method: 'get',
-      preserveScroll: false,
-      preserveState: false,
-      replace: true,
-      onSuccess: () => {
-        console.log('Client banned successfully');
-      }
-    });
-  } catch (error) {
-    console.error('Error banning client:', error);
-    alert('Could not ban client due to a technical issue. Please try refreshing the page.');
-  }
-};
-
-const confirmUnban = async () => {
-  // Only allow admin to confirm unban
-  if (!props.isAdmin || !selectedClientId.value) return;
-
-  try {
-    // Show loading state
-    showConfirmDialog.value = false;
-
-    // Use axios to make the request
-    await axios.post(`/receptionist/clients/${selectedClientId.value}/unban`);
-
-    // Use Inertia router to reload the page with fresh data
-    router.visit(window.location.pathname, {
-      method: 'get',
-      preserveScroll: false,
-      preserveState: false,
-      replace: true,
-      onSuccess: () => {
-        console.log('Client unbanned successfully');
-      }
-    });
-  } catch (error) {
-    console.error('Error unbanning client:', error);
-    alert('Could not unban client due to a technical issue. Please try refreshing the page.');
-  }
-};
+// Ban/unban methods and related confirmation methods have been removed
 </script>
 
 <style scoped>

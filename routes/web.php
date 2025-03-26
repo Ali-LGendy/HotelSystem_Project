@@ -1,18 +1,14 @@
 <?php
 
 // use App\Http\Controllers\Receptionist\ClientController;
-use App\Http\Controllers\EssamClientController;
-use App\Http\Controllers\Client\ClientController as ClientUserController;
-use App\Http\Controllers\Client\ReservationController as ClientReservationController;
+
 use App\Http\Controllers\Receptionist\ClientController;
 use App\Http\Controllers\Receptionist\ReservationController;
 use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ManagersController;
-use App\Http\Controllers\ManageReceptionistsController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\RoomController;
 use App\Models\Floor;
@@ -75,6 +71,7 @@ Route::middleware(['auth', 'permission:manage reservations'])
         Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
         // Add route for all reservations
         Route::get('all-reservations', [ReservationController::class, 'allReservations'])->name('reservations.all');
+        Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
 
         // Client management routes
         Route::get('clients', [ClientController::class, 'index'])->name('clients.index');

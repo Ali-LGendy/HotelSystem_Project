@@ -1,201 +1,151 @@
 <template>
-    <div class="mx-auto max-w-7xl px-4 py-8">
-        <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-            <!-- Header with Navigation -->
-            <div class="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                <div>
-                    <h2 class="text-3xl font-bold">My Approved Clients</h2>
-                    <p class="mt-2 text-gray-400">Clients that you have approved</p>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <a href="/receptionist/clients" class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700">
-                        Manage Clients
-                    </a>
-                    <a
-                        href="/receptionist/clients/reservations"
-                        class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
-                    >
-                        Clients Reservations
-                    </a>
-                    <!-- Only show Pending Reservations button to admin -->
-                    <a
-                        v-if="isAdmin"
-                        href="/receptionist/reservations"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-                    >
-                        Pending Reservations
-                    </a>
-                    <!-- Only show All Clients button to admin -->
-                    <a
-                        v-if="isAdmin"
-                        href="/receptionist/clients/all"
-                        class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
-                    >
-                        All Clients
-                    </a>
-                </div>
-            </div>
+  <div class="mx-auto max-w-7xl px-4 py-8">
+    <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
+      <!-- Header with Navigation -->
+      <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-3xl font-bold">My Approved Clients</h2>
+          <p class="mt-2 text-gray-400">Clients that you have approved</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button
+            @click="navigateTo('/receptionist/clients')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Manage Clients
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Clients Reservations
+          </button>
+          <!-- Pending Reservations button - only visible to admin -->
+          <button
+            v-if="isAdmin"
+            @click="navigateTo('/receptionist/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Pending Reservations
+          </button>
+          <!-- Only show All Clients button to admin -->
+          <button
+            v-if="isAdmin"
+            @click="navigateTo('/receptionist/clients/all')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            All Clients
+          </button>
+        </div>
+      </div>
 
-            <!-- My Approved Clients Section -->
-            <div>
-                <div v-if="myApprovedClients.data.length === 0" class="py-8 text-center">
-                    <p class="text-lg text-gray-300">You haven't approved any clients yet.</p>
-                    <p class="mt-2 text-gray-400">
-                        Go to <a href="/receptionist/clients" class="text-blue-400 hover:underline">Manage Clients</a> to approve new clients.
-                    </p>
-                    <div v-if="debug" class="mx-auto mt-4 max-w-lg rounded-lg bg-gray-800 p-4">
-                        <p class="text-sm text-yellow-400">
-                            Debug Info: Make sure you have approved clients with your user ID as manager_id and is_approved set to 1.
-                        </p>
-                    </div>
-                </div>
+      <!-- My Approved Clients Section -->
+      <div>
+        <div v-if="myApprovedClients.data.length === 0" class="text-center py-8">
+          <p class="text-lg text-gray-300">You haven't approved any clients yet.</p>
+          <p class="mt-2 text-gray-400">Go to <Link href="/receptionist/clients" class="text-blue-400 hover:underline">Manage Clients</Link> to approve new clients.</p>
+        </div>
 
-                <div v-else class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead class="bg-gray-800">
-                            <tr>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            10,
-                                            'name',
-                                            currentSort.field === 'name' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Client Name
-                                    <span v-if="currentSort.field === 'name'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            10,
-                                            'email',
-                                            currentSort.field === 'email' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Email
-                                    <span v-if="currentSort.field === 'email'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            10,
-                                            'mobile',
-                                            currentSort.field === 'mobile' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Mobile
-                                    <span v-if="currentSort.field === 'mobile'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            10,
-                                            'country',
-                                            currentSort.field === 'country' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Country
-                                    <span v-if="currentSort.field === 'country'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            10,
-                                            'gender',
-                                            currentSort.field === 'gender' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Gender
-                                    <span v-if="currentSort.field === 'gender'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">
-                                    {{ isAdmin ? 'Actions' : 'Status' }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700 bg-gray-800">
-                            <tr v-for="client in myApprovedClients.data" :key="client.id" class="hover:bg-gray-700">
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.email }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.mobile || 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.country || 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.gender || 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                    <div class="flex space-x-2">
-                                        <!-- Show actions only for admin role -->
-                                        <template v-if="isAdmin">
-                                            <button
-                                                v-if="!client.is_banned"
-                                                @click="banClient(client.id)"
-                                                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                                            >
-                                                Ban
-                                            </button>
-                                            <button
-                                                v-else
-                                                @click="unbanClient(client.id)"
-                                                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                                            >
-                                                Unban
-                                            </button>
-                                        </template>
-                                        <!-- For receptionist role, show status instead of actions -->
-                                        <template v-else>
-                                            <span
-                                                :class="client.is_banned ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'"
-                                                class="rounded-full px-2 py-1 text-xs font-medium"
-                                            >
-                                                {{ client.is_banned ? 'Banned' : 'Active' }}
-                                            </span>
-                                        </template>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-700">
+            <thead class="bg-gray-800">
+              <tr>
+                <th
+                  @click="sortAndPaginate(1, 10, 'name', currentSort.field === 'name' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                >
+                  Client Name
+                  <span v-if="currentSort.field === 'name'" class="ml-1">
+                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th
+                  @click="sortAndPaginate(1, 10, 'email', currentSort.field === 'email' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                >
+                  Email
+                  <span v-if="currentSort.field === 'email'" class="ml-1">
+                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th
+                  @click="sortAndPaginate(1, 10, 'mobile', currentSort.field === 'mobile' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                >
+                  Mobile
+                  <span v-if="currentSort.field === 'mobile'" class="ml-1">
+                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th
+                  @click="sortAndPaginate(1, 10, 'country', currentSort.field === 'country' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                >
+                  Country
+                  <span v-if="currentSort.field === 'country'" class="ml-1">
+                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th
+                  @click="sortAndPaginate(1, 10, 'gender', currentSort.field === 'gender' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                >
+                  Gender
+                  <span v-if="currentSort.field === 'gender'" class="ml-1">
+                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  {{ isAdmin ? 'Actions' : 'Status' }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-gray-800 divide-y divide-gray-700">
+              <tr v-for="client in myApprovedClients.data" :key="client.id" class="hover:bg-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-300">{{ client.email }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-300">{{ client.mobile || 'N/A' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-300">{{ client.country || 'N/A' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-300">{{ client.gender || 'N/A' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex space-x-2">
+                    <!-- Status indicator for all roles -->
+                    <span
+                      :class="client.is_banned ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'"
+                      class="px-2 py-1 text-xs font-medium rounded-full"
+                    >
+                      {{ client.is_banned ? 'Banned' : 'Active' }}
+                    </span>
+
+                    <!-- View Reservations button -->
+                    <button
+                      @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
+                      class="rounded-md bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
+                    >
+                      View Reservations
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
             <!-- Enhanced Pagination -->
             <div v-if="myApprovedClients.data.length > 0" class="mt-4 flex items-center justify-between">
@@ -252,19 +202,6 @@
                 </div>
             </div>
 
-            <!-- Debug Information (Always visible for now) -->
-            <div class="mt-8 rounded-lg border border-red-700 bg-red-900 p-6">
-                <h3 class="mb-4 text-xl font-semibold text-gray-100">Debug Information</h3>
-                <div class="overflow-x-auto">
-                    <p class="mb-2 text-sm text-gray-300">isAdmin prop: {{ isAdmin }}</p>
-                    <p class="mb-2 text-sm text-gray-300">userRole prop: {{ userRole }}</p>
-                    <p class="mb-2 text-sm text-gray-300">Admin button should show: {{ isAdmin }}</p>
-                    <p class="mb-2 text-sm text-gray-300">isAdmin prop: {{ isAdmin }}</p>
-                    <p class="mb-2 text-sm text-gray-300">userRole prop: {{ userRole }}</p>
-                    <p class="mb-2 text-sm text-gray-300">Admin button should show: {{ isAdmin }}</p>
-                    <pre class="text-xs text-gray-300">{{ JSON.stringify(debug, null, 2) }}</pre>
-                </div>
-            </div>
 
             <!-- Client Statistics Dashboard -->
             <div class="mt-8 rounded-lg border border-gray-700 bg-gray-800 p-6">
@@ -328,82 +265,45 @@
                 </div>
             </div>
 
-            <!-- Confirmation Dialog - Only shown for admin role -->
-            <div v-if="showConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-                    <h3 class="text-xl font-semibold text-gray-100">{{ confirmDialogTitle }}</h3>
-                    <p class="mt-2 text-gray-400">{{ confirmDialogMessage }}</p>
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button
-                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            @click="cancelConfirmation"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            :class="[
-                                'rounded-md px-4 py-2 text-sm font-medium text-white',
-                                confirmAction === 'ban' ? 'bg-red-700 hover:bg-red-600' : 'bg-green-700 hover:bg-green-600',
-                            ]"
-                            @click="confirmAction === 'ban' ? confirmBan() : confirmUnban()"
-                        >
-                            {{ confirmAction === 'ban' ? 'Ban' : 'Unban' }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <!-- Confirmation Dialog has been removed -->
     </div>
 </template>
 
 <script setup>
-import AppLayout from '@/layouts/AppLayout.vue';
-import { router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import axios from 'axios';
-import { ref } from 'vue';
-defineOptions({ layout: AppLayout });
+import { router, Link } from '@inertiajs/vue3';
+
 // Props
 const props = defineProps({
-    myApprovedClients: {
-        type: Object,
-        required: true,
-    },
-    clientStats: {
-        type: Object,
-        default: () => ({
-            totalApproved: 0,
-            activeReservations: 0,
-            pendingReservations: 0,
-        }),
-    },
-    recentReservations: {
-        type: Array,
-        default: () => [],
-    },
-    userRole: {
-        type: String,
-        default: 'receptionist',
-    },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
-    debug: {
-        type: Object,
-        default: null,
-    },
+  myApprovedClients: {
+    type: Object,
+    required: true
+  },
+  clientStats: {
+    type: Object,
+    default: () => ({
+      totalApproved: 0,
+      activeReservations: 0,
+      pendingReservations: 0
+    })
+  },
+  recentReservations: {
+    type: Array,
+    default: () => []
+  },
+  userRole: {
+    type: String,
+    default: 'receptionist'
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // State
-const showConfirmDialog = ref(false);
-const confirmDialogTitle = ref('');
-const confirmDialogMessage = ref('');
-const confirmAction = ref('');
-const selectedClientId = ref(null);
+// Ban-related state variables have been removed
 const currentSort = ref({
     field: 'created_at',
     direction: 'desc',
@@ -414,11 +314,21 @@ const perPage = ref(10);
 
 // Methods
 const goToPage = (url) => {
-    if (!url) return;
-    router.visit(url, {
-        preserveScroll: true,
-        preserveState: false,
-    });
+  if (!url) return;
+  router.get(url, {}, {
+    preserveScroll: true,
+    preserveState: true,
+    only: ['myApprovedClients', 'clientStats', 'recentReservations']
+  });
+};
+
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
+  });
 };
 
 // Enhanced pagination with sorting
@@ -429,18 +339,18 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
         direction: sortDir,
     };
 
-    // Navigate with new parameters
-    router.visit(window.location.pathname, {
-        data: {
-            page,
-            per_page: perPage,
-            sort_by: sortBy,
-            sort_dir: sortDir,
-        },
-        preserveScroll: true,
-        preserveState: false,
-        replace: true,
-    });
+  // Navigate with new parameters using Inertia's get method
+  router.get(window.location.pathname, {
+    page,
+    per_page: perPage,
+    sort_by: sortBy,
+    sort_dir: sortDir
+  }, {
+    preserveScroll: true,
+    preserveState: true, // Keep component state between requests
+    only: ['myApprovedClients', 'clientStats', 'recentReservations'], // Only refresh these data props
+    replace: true // Replace current history entry instead of adding a new one
+  });
 };
 
 const formatDate = (dateString) => {
@@ -466,86 +376,7 @@ const getStatusClass = (status) => {
     return classes[status] || 'bg-gray-700 text-gray-200';
 };
 
-const banClient = (clientId) => {
-    // Only allow admin to ban clients
-    if (!props.isAdmin) return;
-
-    selectedClientId.value = clientId;
-    confirmAction.value = 'ban';
-    confirmDialogTitle.value = 'Confirm Client Ban';
-    confirmDialogMessage.value = 'Are you sure you want to ban this client? They will not be able to make new reservations.';
-    showConfirmDialog.value = true;
-};
-
-const unbanClient = (clientId) => {
-    // Only allow admin to unban clients
-    if (!props.isAdmin) return;
-
-    selectedClientId.value = clientId;
-    confirmAction.value = 'unban';
-    confirmDialogTitle.value = 'Confirm Client Unban';
-    confirmDialogMessage.value = 'Are you sure you want to unban this client? They will be able to make reservations again.';
-    showConfirmDialog.value = true;
-};
-
-const cancelConfirmation = () => {
-    showConfirmDialog.value = false;
-    selectedClientId.value = null;
-};
-
-const confirmBan = async () => {
-    // Only allow admin to confirm ban
-    if (!props.isAdmin || !selectedClientId.value) return;
-
-    try {
-        // Show loading state
-        showConfirmDialog.value = false;
-
-        // Use axios to make the request
-        await axios.post(`/receptionist/clients/${selectedClientId.value}/ban`);
-
-        // Use Inertia router to reload the page with fresh data
-        router.visit(window.location.pathname, {
-            method: 'get',
-            preserveScroll: false,
-            preserveState: false,
-            replace: true,
-            onSuccess: () => {
-                console.log('Client banned successfully');
-            },
-        });
-    } catch (error) {
-        console.error('Error banning client:', error);
-        alert('Could not ban client due to a technical issue. Please try refreshing the page.');
-    }
-};
-
-const confirmUnban = async () => {
-    // Only allow admin to confirm unban
-    if (!props.isAdmin || !selectedClientId.value) return;
-
-    try {
-        // Show loading state
-        showConfirmDialog.value = false;
-
-        // Use axios to make the request
-        await axios.post(`/receptionist/clients/${selectedClientId.value}/unban`);
-
-        // Use Inertia router to reload the page with fresh data
-        router.visit(window.location.pathname, {
-            method: 'get',
-            preserveScroll: false,
-            preserveState: false,
-            replace: true,
-            onSuccess: () => {
-                console.log('Client unbanned successfully');
-            },
-        });
-    } catch (error) {
-        console.error('Error unbanning client:', error);
-        alert('Could not unban client due to a technical issue. Please try refreshing the page.');
-    }
-};
+// Ban/unban methods and related confirmation methods have been removed
 </script>
 
 <style scoped>

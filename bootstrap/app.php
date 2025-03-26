@@ -1,5 +1,6 @@
 <?php
 
+//use App\Http\Middleware\ClientApproved; // Removed
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;

@@ -33,22 +33,30 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|min:3',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'national_id' => 'required|digits:14|unique:users,national_id',
+            'password' => ['required', 'min:6', 'confirmed', Rules\Password::defaults()],
+            'gender' => 'required|in:male,female',
+            'avatar_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'country' => 'required',
+
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'national_id' => $request->national_id,
-            'gender' => $request->gender,
+            'gender'=> $request->gender,
+            'country' => $request->country,
+            'avatar_img' => $request->avatar_image 
+                ? $request->file('avatar_image')->store('avatars', 'public') 
+                : null,
+            // 'role' => 'client'
         ]);
+        $user->assignRole('client');
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return to_route('dashboard')->with('success', 'Registration successful! Your account is pending approval by a receptionist.');
+        return to_route('dashboard');
     }
 }

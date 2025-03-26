@@ -22,24 +22,24 @@ class StoreManagerRequest extends FormRequest
      */
     public function rules(): array
     {
-         $userId = $this->route('user') ? $this->route('user')->id : null;
+          $userId = $this->route('user')->id; // Get the current user's ID
 
-        return [
-            'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users', 'email')->ignore($userId),
-            ],
-            'password' => $userId ? 'sometimes|nullable|min:6' : 'required|min:6',
-            'national_id' => [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('users', 'national_id')->ignore($userId),
-            ],
-            'avatar_img' => 'nullable|image|max:8048',
-        ];
+    return [
+        'name' => ['sometimes', 'string', 'max:255'],
+        'email' => [
+            'sometimes', 
+            'email', 
+            'max:255', 
+            Rule::unique('users', 'email')->ignore($userId)
+        ],
+        'password' => ['nullable', 'min:6'],
+        'national_id' => [
+            'sometimes', 
+            'string', 
+            Rule::unique('users', 'national_id')->ignore($userId)
+        ],
+        'avatar_img' => ['nullable', 'image', 'max:5120'], // 5MB max
+    ];
     }
     
     public function messages(): array

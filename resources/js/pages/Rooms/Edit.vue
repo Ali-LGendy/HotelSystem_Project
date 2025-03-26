@@ -115,6 +115,7 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 const props = defineProps({
   room: Object,
@@ -127,6 +128,9 @@ const props = defineProps({
     default: () => ({})
   }
 });
+
+defineOptions({ layout: AppLayout });
+
 
 const form = useForm({
   room_number: props.room?.room_number || '',

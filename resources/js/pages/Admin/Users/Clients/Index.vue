@@ -1,90 +1,186 @@
 <script setup>
+import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
-import { defineProps, onMounted } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 
-// Props for passing manager data
-
 const props = defineProps({
-    clients: {
-        type: Object, // Changed from Array to Object since it's paginated
+    unapprovedClients: {
+        type: Object,
         default: () => ({ data: [] }),
     },
+    approvedClients: {
+        type: Object,
+        default: () => ({ data: [] }),
+    },
+    allClients: {
+        type: Object,
+        default: () => ({ data: [] }),
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+    },
+    isReceptionist: {
+        type: Boolean,
+        default: false,
+    }
 });
-onMounted(() => {
-    console.log('DOM is ready');
-    console.log('Managers data:', props.clients);
+
+const currentView = ref('unapproved');
+
+// Determine which clients to display based on user role and current view
+const displayClients = computed(() => {
+    if (props.isReceptionist) {
+        return currentView.value === 'unapproved' 
+            ? props.unapprovedClients.data 
+            : props.approvedClients.data;
+    }
+    return props.allClients.data;
 });
+
+// Determine if actions column should be shown
+const showActionsColumn = computed(() => {
+    // Show actions for:
+    // 1. All non-receptionist users
+    // 2. Receptionist viewing unapproved clients
+    return !props.isReceptionist || currentView.value === 'unapproved';
+});
+
 defineOptions({ layout: AppLayout });
-// Function to handle deletion (for demonstration)
-// const deleteManager = (id) => {
-//     if (confirm('Are you sure you want to delete this manager?')) {
-//         // Example: Implement deletion logic with Inertia
-//         router.delete(route('admin.users.managers.destroy', id));
-//     }
-// };
+
+// Function to approve a client
+const approveClient = (client) => {
+    router.patch(route('admin.users.clients.approve', client.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Optionally, you can add a toast or notification here
+            console.log('Client approved successfully');
+        }
+    });
+};
 </script>
 
 <template>
-    <div class="min-h-screen rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
+    <div class="min-h-screen bg-background text-foreground p-8">
         <h1 class="mb-8 text-3xl font-bold">Manage Clients</h1>
 
-        <!-- Add Manager Button -->
-        <!-- <Link :href="route('admin.users.managers.create')">
-            <Button class="mb-6">Add Manager</Button>
-        </Link> -->
+        <!-- Receptionist Buttons -->
+        <div v-if="isReceptionist" class="mb-6 flex gap-4">
+            <Button 
+                @click="currentView = 'unapproved'" 
+                :variant="currentView === 'unapproved' ? 'default' : 'outline'"
+            >
+                Unapproved Clients
+            </Button>
+            <Button 
+                @click="currentView = 'approved'" 
+                :variant="currentView === 'approved' ? 'default' : 'outline'"
+            >
+                My Approved Clients
+            </Button>
+        </div>
 
-        <!-- Managers Table -->
-        <Table v-if="clients && clients.data.length > 0" class="w-full overflow-hidden rounded-lg border border-gray-700">
+        <Table 
+            v-if="displayClients.length > 0" 
+            class="w-full overflow-hidden rounded-lg border border-border"
+        >
             <TableHeader>
                 <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Password</TableHead>
-                    <TableHead>National ID</TableHead>
+                    <TableHead>Gender</TableHead>
+                    <TableHead>Country</TableHead>
                     <TableHead>Avatar Image</TableHead>
-                    <TableHead>Actions</TableHead>
+                    
+                    <!-- Conditionally render Approved By column for non-receptionist users -->
+                    <TableHead v-if="!isReceptionist">Approved By</TableHead>
+                    
+                    <!-- Conditionally render Actions column -->
+                    <TableHead v-if="showActionsColumn">Actions</TableHead>
                 </TableRow>
             </TableHeader>
 
             <TableBody>
-                <TableRow v-for="client in clients.data" :key="client.id" class="transition hover:bg-gray-800">
+                <TableRow 
+                    v-for="client in displayClients" 
+                    :key="client.id" 
+                    class="transition hover:bg-accent/10"
+                >
                     <TableCell>{{ client.name }}</TableCell>
                     <TableCell>{{ client.email }}</TableCell>
-                    <TableCell>{{ client.password }}</TableCell>
-                    <TableCell>{{ client.national_id }}</TableCell>
-                    <TableCell class="border-t border-gray-700 p-4">
-                        <img v-if="client.avatar_img" :src="client.avatar_img" alt="Avatar" class="h-10 w-10 rounded-full border border-gray-600" />
-                        <span v-else class="text-gray-500">No Avatar</span>
-                    </TableCell>
+                    <TableCell>{{ client.gender }}</TableCell>
+                    <TableCell>{{ client.country }}</TableCell>
                     <TableCell>
+                        <img 
+                            v-if="client.avatar_img" 
+                            :src="`/storage/${client.avatar_img}`" 
+                            alt="Avatar" 
+                            class="h-10 w-10 rounded-full border border-border"
+                        />
+                        <span v-else class="text-muted-foreground">No Avatar</span>
+                    </TableCell>
+                    
+                    <!-- Approved By column for non-receptionist users -->
+                    <TableCell v-if="!isReceptionist">
+                        {{ client.manager ? client.manager.name : 'Not Approved' }}
+                    </TableCell>
+                    
+                    <!-- Conditionally render Actions cell -->
+                    <TableCell v-if="showActionsColumn">
                         <div class="flex gap-4">
-                            <!-- Edit Button -->
-                            <Link :href="route('admin.users.managers.edit', client)">
-                                <Button variant="outline">Edit</Button>
-                            </Link>
-
-                            <!-- Delete Button -->
-                            <Link
-                                method="delete"
-                                :href="route('admin.users.managers.destroy', client)"
-                                as="button"
-                                class="text-red-500 transition-colors duration-200 hover:text-red-400"
+                            <!-- Approve Button for Non-Receptionists -->
+                            <Button 
+                                v-if="!isReceptionist"
+                                @click="approveClient(client)"
+                                :disabled="client.is_approved"
+                                variant="default"
                             >
-                                <Button variant="destructive">Delete</Button>
-                            </Link>
+                                {{ client.is_approved ? 'Approved' : 'Approve' }}
+                            </Button>
+
+                            <!-- Approve Button for Unapproved Clients (Receptionists) -->
+                            <Button 
+                                v-if="!client.is_approved && isReceptionist" 
+                                @click="approveClient(client)"
+                                variant="default"
+                            >
+                                Approve
+                            </Button>
+
+                            <!-- Edit and Delete Buttons for Admin -->
+                            <template v-if="isAdmin">
+                                <Link :href="route('admin.users.clients.edit', client)">
+                                    <Button variant="outline">Edit</Button>
+                                </Link>
+                                <Link
+                                    method="delete"
+                                    :href="route('admin.users.clients.destroy', client)"
+                                    as="button"
+                                >
+                                    <Button variant="destructive">Delete</Button>
+                                </Link>
+                            </template>
                         </div>
                     </TableCell>
                 </TableRow>
-
-                <!-- Empty State -->
-                <TableRow v-show="clients.length === 0">
-                    <TableCell colspan="5" class="py-4 text-center text-gray-500">No Clients found.</TableCell>
-                </TableRow>
             </TableBody>
         </Table>
+
+        <!-- Empty State -->
+        <div 
+            v-else 
+            class="text-center text-muted-foreground py-8 border rounded-lg"
+        >
+            {{ 
+                isReceptionist 
+                    ? (currentView === 'unapproved' 
+                        ? 'No Unapproved Clients' 
+                        : 'No Approved Clients') 
+                    : 'No Clients Found' 
+            }}
+        </div>
     </div>
 </template>

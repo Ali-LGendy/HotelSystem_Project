@@ -1,5 +1,7 @@
 <?php
 
+// use App\Http\Controllers\Receptionist\ClientController;
+use App\Http\Controllers\EssamClientController;
 use App\Http\Controllers\Client\ClientController as ClientUserController;
 use App\Http\Controllers\Client\ReservationController as ClientReservationController;
 use App\Http\Controllers\Receptionist\ClientController;
@@ -9,10 +11,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\ManageClientsController;
 use App\Http\Controllers\ManagersController;
 use App\Http\Controllers\ManageReceptionistsController;
 use App\Http\Controllers\FloorController;
+use App\Http\Controllers\RoomController;
 use App\Models\Floor;
 use App\Http\Controllers\ReceptionistsController;
 
@@ -25,11 +27,11 @@ Route::get('/', function () {
 })->name('home');
 
     
-Route::middleware(['auth',])->get('/dashboardd', [DashboardController::class, 'index'])->name('dashboard.index');
+Route::middleware(['auth',])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 
-Route::middleware(['auth','permission:manage managers'])->prefix('admin/users/managers')->name('admin.users.managers.')->group(function () {
+Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/users/managers')->name('admin.users.managers.')->group(function () {
     Route::get('/', [ManagersController::class, 'index'])->name('index');        // List all managers
     Route::get('/create', [ManagersController::class, 'create'])->name('create'); // Show create form
     Route::post('/', [ManagersController::class, 'store'])->name('store');        // Store a new manager
@@ -37,11 +39,12 @@ Route::middleware(['auth','permission:manage managers'])->prefix('admin/users/ma
     Route::get('/{user}/edit', [ManagersController::class, 'edit'])->name('edit'); // Edit manager form
     Route::put('/{user}', [ManagersController::class, 'update'])->name('update');  // Update manager
     Route::delete('/{user}', [ManagersController::class, 'destroy'])->name('destroy'); // Delete manager
+    Route::patch('/{user}/ban', [ManagersController::class, 'ban'])->name('ban'); // Delete manager
 });
 
 
-Route::middleware(['auth','permission:manage receptionists'])->patch('/admin/users/managers/{user}/ban', [ManagersController::class, 'ban'])
-    ->name('admin.users.managers.ban');
+// Route::middleware(['auth','permission:manage receptionists'])->patch('/admin/users/managers/{user}/ban', [ManagersController::class, 'ban'])
+//     ->name('admin.users.managers.ban');
 
 
 Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
@@ -52,22 +55,24 @@ Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/us
     Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); // Edit receptionist form
     Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  // Update a receptionist
     Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); // Delete a receptionist
+     Route::patch('/{user}/ban', [ReceptionistsController::class, 'ban'])->name('ban');
 });
 
-// Route::middleware(['auth', 'role:admin'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
-//     Route::get('/', [ManageClientsController::class, 'index'])->name('index');        // List all clients
-//     Route::get('/create', [ManageClientsController::class, 'create'])->name('create'); // Show create form
-//     Route::post('/', [ManageClientsController::class, 'store'])->name('store');        // Store a new client
-//     Route::get('/{user}', [ManageClientsController::class, 'show'])->name('show');     // Show a specific client
-//     Route::get('/{user}/edit', [ManageClientsController::class, 'edit'])->name('edit'); // Edit client form
-//     Route::put('/{user}', [ManageClientsController::class, 'update'])->name('update');  // Update a client
-//     Route::delete('/{user}', [ManageClientsController::class, 'destroy'])->name('destroy'); // Delete a client
-// });
+Route::middleware(['auth', 'permission:manage clients'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
+    Route::get('/', [EssamClientController::class, 'index'])->name('index');        // List all clients
+    Route::get('/create', [EssamClientController::class, 'create'])->name('create'); // Show create form
+    Route::post('/', [EssamClientController::class, 'store'])->name('store');        // Store a new client
+    Route::get('/{user}', [EssamClientController::class, 'show'])->name('show');     // Show a specific client
+    Route::get('/{user}/edit', [EssamClientController::class, 'edit'])->name('edit'); // Edit client form
+    Route::put('/{user}', [EssamClientController::class, 'update'])->name('update');  // Update a client
+    Route::delete('/{user}', [EssamClientController::class, 'destroy'])->name('destroy'); // Delete a client
+    Route::patch('/{user}/approve', [EssamClientController::class, 'approve'])->name('approve'); // Approve Client
+});
 
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 
 // Receptionist Routes
@@ -126,6 +131,16 @@ Route::group(['middleware' => ['auth', 'permission:manage floors']], function ()
     Route::delete('/floors/{floor}', [FloorController::class, 'destroy'])->name('floors.destroy');
 });
 
+Route::group(['middleware' => ['auth', 'permission:manage rooms']], function () {
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+    Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+    Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+});
+
 // can be remove at deploy
 Route::get('/debug/floors', function() {
     $floors = Floor::with('manager')->get();
@@ -138,3 +153,16 @@ Route::get('/debug/floors', function() {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+
+/*Manage Conflicts*/ // ==>>> Essan Controller
+
+// Route::middleware(['auth', 'role:admin'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
+//     Route::get('/', [ManageClientsController::class, 'index'])->name('index');        // List all clients
+//     Route::get('/create', [ManageClientsController::class, 'create'])->name('create'); // Show create form
+//     Route::post('/', [ManageClientsController::class, 'store'])->name('store');        // Store a new client
+//     Route::get('/{user}', [ManageClientsController::class, 'show'])->name('show');     // Show a specific client
+//     Route::get('/{user}/edit', [ManageClientsController::class, 'edit'])->name('edit'); // Edit client form
+//     Route::put('/{user}', [ManageClientsController::class, 'update'])->name('update');  // Update a client
+//     Route::delete('/{user}', [ManageClientsController::class, 'destroy'])->name('destroy'); // Delete a client
+// });

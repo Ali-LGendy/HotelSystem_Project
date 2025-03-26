@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Rules\EgyMobile;
 
 class RegisteredUserController extends Controller
 {
@@ -35,6 +36,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'min:6', 'confirmed', Rules\Password::defaults()],
             'gender' => 'required|in:male,female',
+            'mobile' => ['required', 'numeric', new EgyMobile],
             'avatar_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'country' => 'required',
 
@@ -45,6 +47,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'gender'=> $request->gender,
+            'mobile' => $request->mobile,
             'country' => $request->country,
             'avatar_img' => $request->avatar_image 
                 ? $request->file('avatar_image')->store('avatars', 'public') 

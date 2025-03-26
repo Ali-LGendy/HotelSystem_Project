@@ -1,3 +1,8 @@
 *
 !.gitignore
+
+# Allow the avatars folder
+!storage/app/public/avatars/
+
+# Allow the default avatar file
 !storage/app/public/avatars/default_avatar.jpg

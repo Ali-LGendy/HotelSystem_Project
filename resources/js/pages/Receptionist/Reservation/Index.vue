@@ -23,10 +23,10 @@
             Pending Reservations
           </a>
           <a
-            href="/receptionist/reservations/create"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            href="/receptionist/clients/my-approved"
+            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
-            New Reservation
+            My Approved Clients
           </a>
         </div>
       </div>
@@ -144,21 +144,6 @@ const navigationLinks = [
   {
     href: '/receptionist/all-reservations',
     text: 'All Reservations',
-    bgClass: 'bg-purple-600 text-white hover:bg-purple-700'
-  },
-  {
-    href: '/receptionist/clients',
-    text: 'Manage Clients',
-    bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
-  },
-  {
-    href: route('receptionist.clients.my-approved'),
-    text: 'My Approved Clients',
-    bgClass: 'bg-green-600 text-white hover:bg-green-700'
-  },
-  {
-    href: route('receptionist.clients.reservations'),
-    text: 'Clients Reservations',
     bgClass: 'bg-purple-600 text-white hover:bg-purple-700'
   },
   {

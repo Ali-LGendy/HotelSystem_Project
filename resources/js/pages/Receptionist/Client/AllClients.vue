@@ -21,6 +21,12 @@
             My Approved Clients
           </a>
           <a
+            href="/receptionist/clients/reservations"
+            class="rounded-lg bg-teal-600 px-4 py-2 font-semibold text-white transition hover:bg-teal-700"
+          >
+            All My Clients Reservations
+          </a>
+          <a
             href="/receptionist/reservations"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
@@ -118,6 +124,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
+                    <!-- View Reservations button for all roles -->
+                    <a
+                      :href="`/receptionist/clients/${client.id}/reservations`"
+                      class="rounded-md bg-purple-700 px-3 py-1 text-sm font-medium text-white hover:bg-purple-600"
+                    >
+                      View Reservations
+                    </a>
+
                     <!-- Edit/Delete Actions (Admin Only) -->
                     <button
                       v-if="isAdmin"

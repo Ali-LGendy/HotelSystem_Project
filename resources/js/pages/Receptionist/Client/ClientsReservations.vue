@@ -5,13 +5,13 @@
       <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 class="text-3xl font-bold">
-            {{ clientId ? 'Client Reservations' : 'Clients Reservations' }}
+            {{ clientId ? 'Client Reservations' : 'My Approved Clients Reservations' }}
             <span v-if="clientName" class="text-lg ml-2 text-gray-300">
               ({{ clientName }})
             </span>
           </h2>
           <p class="mt-2 text-gray-400">
-            {{ clientId ? `Showing reservations for client: ${clientName}` : 'Showing reservations for all clients approved by you' }}
+            {{ clientId ? `Showing all reservations for client: ${clientName}` : 'Showing reservations for all clients approved by you' }}
           </p>
         </div>
         <div class="flex flex-wrap gap-3">

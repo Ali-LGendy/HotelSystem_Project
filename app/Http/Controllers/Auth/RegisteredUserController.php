@@ -34,14 +34,14 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255|min:3',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'national_id' => 'required|digits:14|unique:users,national_id',
+            // 'national_id' => 'required|digits:14|unique:users,national_id',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'national_id' => $request->national_id,
+            // 'national_id' => $request->national_id,
             'gender' => $request->gender,
         ]);
 

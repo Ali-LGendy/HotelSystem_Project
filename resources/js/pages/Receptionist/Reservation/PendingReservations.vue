@@ -9,34 +9,10 @@
         </div>
         <div class="flex flex-wrap gap-3">
           <a
-            href="/receptionist/reservations"
-            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-          >
-            Pending Reservations
-          </a>
-          <a
-            href="/receptionist/clients/pending"
-            class="rounded-lg bg-yellow-600 px-4 py-2 font-semibold text-white transition hover:bg-yellow-700"
-          >
-            Clients Pending Approval
-          </a>
-          <a
             href="/receptionist/clients/my-approved"
             class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
             My Approved Clients
-          </a>
-          <a
-            href="/receptionist/clients/reservations"
-            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-          >
-            Clients Reservations
-          </a>
-          <a
-            href="/receptionist/reservations/create"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
-          >
-            New Reservation
           </a>
         </div>
       </div>

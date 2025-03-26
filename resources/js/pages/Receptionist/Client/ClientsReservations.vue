@@ -94,9 +94,57 @@
             </div>
           </template>
         </DataTable>
+
+        <!-- Enhanced Pagination -->
+        <div v-if="clientsReservations.data.length > 0" class="mt-4 flex justify-between items-center">
+          <div class="text-sm text-gray-400">
+            Showing {{ clientsReservations.from }} to {{ clientsReservations.to }} of {{ clientsReservations.total }} reservations
+          </div>
+
+          <!-- Page Size Selector -->
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <span class="text-sm text-gray-400 mr-2">Per page:</span>
+              <select
+                v-model="perPage"
+                @change="sortAndPaginate(1, perPage, currentSort.field, currentSort.direction)"
+                class="bg-gray-700 text-gray-200 rounded-md px-2 py-1 text-sm"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+
+            <!-- Page Navigation -->
+            <div class="flex space-x-2">
+              <button
+                v-for="page in clientsReservations.links"
+                :key="page.label"
+                @click="page.url && sortAndPaginate(
+                  page.label === '&laquo; Previous' ? clientsReservations.current_page - 1 :
+                  page.label === 'Next &raquo;' ? clientsReservations.current_page + 1 :
+                  parseInt(page.label),
+                  perPage,
+                  currentSort.field,
+                  currentSort.direction
+                )"
+                :disabled="!page.url"
+                :class="[
+                  'px-3 py-1 rounded-md text-sm',
+                  page.active
+                    ? 'bg-blue-600 text-white'
+                    : page.url
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                      : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                ]"
+                v-html="page.label"
+              ></button>
+            </div>
+          </div>
+        </div>
       </div>
-
-
     </div>
   </div>
 </template>
@@ -126,6 +174,11 @@ const props = defineProps({
 // State
 const showApproveDialog = ref(false);
 const selectedReservation = ref(null);
+const currentSort = ref({
+  field: 'created_at',
+  direction: 'desc'
+});
+const perPage = ref(10);
 
 // Table columns definition
 const columns = [
@@ -158,6 +211,29 @@ const currentPage = computed(() => {
 });
 
 // Methods
+// Enhanced pagination with sorting
+const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir = 'desc') => {
+  // Update current sort state
+  currentSort.value = {
+    field: sortBy,
+    direction: sortDir
+  };
+
+  // Navigate with new parameters
+  router.visit(window.location.pathname, {
+    data: {
+      page,
+      per_page: perPage,
+      sort_by: sortBy,
+      sort_dir: sortDir,
+      id: props.clientId // Keep the client ID if we're viewing a specific client's reservations
+    },
+    preserveScroll: true,
+    preserveState: false,
+    replace: true
+  });
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A';
   try {

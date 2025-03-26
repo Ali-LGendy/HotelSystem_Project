@@ -31,6 +31,9 @@ class DatabaseSeeder extends Seeder
         User::factory(30)->receptionist()->create();
         User::factory(70)->client()->create();
 
+        // Create approved clients
+        $this->call([ApprovedClientSeeder::class]);
+
         // Create floors and rooms
         $floors = Floor::factory(10)->create();
 

@@ -108,6 +108,9 @@
                 Delete
               </button>
             </div>
+          </template>
+        </DataTable>
+      </div>
 
       <!-- Reservation Statistics Dashboard -->
       <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
@@ -132,106 +135,48 @@
         </div>
       </div>
 
-                    <!-- Room Number Cell Template -->
-                    <template #cell-room.room_number="{ row }">
-                        {{ row.room ? row.room.room_number : 'N/A' }}
-                    </template>
-
-                    <!-- Price Cell Template -->
-                    <template #cell-price_paid="{ row }"> ${{ row.price_paid }} </template>
-
-                    <!-- Check-in Date Cell Template -->
-                    <template #cell-check_in_date="{ row }">
-                        {{ formatDate(row.check_in_date) }}
-                    </template>
-
-                    <!-- Check-out Date Cell Template -->
-                    <template #cell-check_out_date="{ row }">
-                        {{ formatDate(row.check_out_date) }}
-                    </template>
-
-                    <!-- Status Cell Template -->
-                    <template #cell-status="{ row }">
-                        <span :class="['rounded-full px-2 py-1 text-xs font-medium', getStatusClass(row.status)]">
-                            {{ row.status }}
-                        </span>
-                    </template>
-
-                    <!-- Actions Cell Template -->
-                    <template #cell-actions="{ row }">
-                        <div class="flex space-x-2">
-                            <button
-                                v-if="row.status === 'pending'"
-                                @click="approveReservation(row.id)"
-                                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                            >
-                                Approve
-                            </button>
-                            <a
-                                :href="`/receptionist/reservations/${row.id}`"
-                                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            >
-                                View
-                            </a>
-                            <a
-                                :href="`/receptionist/reservations/${row.id}/edit`"
-                                class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            >
-                                Edit
-                            </a>
-                            <button
-                                @click="confirmDelete(row.id)"
-                                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </template>
-                </DataTable>
-            </div>
-
-            <!-- Delete Confirmation Dialog -->
-            <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-                    <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
-                    <p class="mt-2 text-gray-400">Are you sure you want to delete this reservation? This action cannot be undone.</p>
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button
-                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            @click="cancelDelete"
-                        >
-                            Cancel
-                        </button>
-                        <button class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600" @click="deleteReservation">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Approve Confirmation Dialog -->
-            <div v-if="showApproveDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-                    <h3 class="text-xl font-semibold text-gray-100">Confirm Approval</h3>
-                    <p class="mt-2 text-gray-400">Are you sure you want to approve this reservation?</p>
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button
-                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            @click="cancelApprove"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            class="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
-                            @click="confirmApproveReservation"
-                        >
-                            Approve
-                        </button>
-                    </div>
-                </div>
-            </div>
+      <!-- Delete Confirmation Dialog -->
+      <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
+          <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
+          <p class="mt-2 text-gray-400">Are you sure you want to delete this reservation? This action cannot be undone.</p>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button
+              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              @click="cancelDelete"
+            >
+              Cancel
+            </button>
+            <button class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600" @click="deleteReservation">
+              Delete
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Approve Confirmation Dialog -->
+      <div v-if="showApproveDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
+          <h3 class="text-xl font-semibold text-gray-100">Confirm Approval</h3>
+          <p class="mt-2 text-gray-400">Are you sure you want to approve this reservation?</p>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button
+              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              @click="cancelApprove"
+            >
+              Cancel
+            </button>
+            <button
+              class="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+              @click="confirmApproveReservation"
+            >
+              Approve
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -240,8 +185,6 @@ import { router, Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import DataTable from '@/components/ui/DataTable.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
 defineOptions({ layout: AppLayout });
 // Props
 const props = defineProps({

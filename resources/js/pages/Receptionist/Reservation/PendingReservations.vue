@@ -1,185 +1,186 @@
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8">
-    <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-      <!-- Header with Navigation -->
-      <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 class="text-3xl font-bold">Pending Reservations</h2>
-          <p class="mt-2 text-gray-400">Showing reservations that need your approval</p>
-        </div>
-        <div class="flex flex-wrap gap-3">
-          <button
-            @click="navigateTo('/receptionist/all-reservations')"
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            All Reservations
-          </button>
-          <button
-            @click="navigateTo('/receptionist/clients/my-approved')"
-            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            My Approved Clients
-          </button>
-          <button
-            @click="navigateTo('/receptionist/clients')"
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            Manage Clients
-          </button>
-        </div>
-      </div>
-
-      <div v-if="reservations.data.length === 0" class="text-center py-8">
-        <p class="text-lg text-gray-300">No pending reservations found.</p>
-      </div>
-
-      <!-- Data Table -->
-      <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
-        <DataTable
-          :columns="columns"
-          :data="reservations.data"
-          :pagination="{
-            pageSize: perPage,
-            pageIndex: currentPage - 1,
-            totalItems: reservations.total,
-            manualPagination: true
-          }"
-          @page-change="handlePageChange"
-          class="text-gray-200"
-        >
-          <!-- Status Cell Template -->
-          <template #cell-status="{ row }">
-            <Badge :variant="getStatusVariant(row.status)" class="text-xs font-medium">
-              {{ row.status }}
-            </Badge>
-          </template>
-
-          <!-- Actions Cell Template -->
-          <template #cell-actions="{ row }">
-            <div class="flex items-center gap-2">
-              <button
-                v-if="row.original && row.original.status === 'pending'"
-                class="inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-1 text-xs font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                @click.prevent="approveReservation(row)"
-              >
-                Approve
-              </button>
-              <button
-                @click="navigateTo('/receptionist/reservations/' + (row.original ? row.original.id : row.id))"
-                class="inline-flex items-center justify-center rounded-md bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              >
-                View
-              </button>
-              <button
-                @click="navigateTo('/receptionist/reservations/' + (row.original ? row.original.id : row.id) + '/edit')"
-                class="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              >
-                Edit
-              </button>
-              <button
-                class="inline-flex items-center justify-center rounded-md bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground shadow-sm transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                @click="confirmDelete(row)"
-              >
-                Delete
-              </button>
-            </div>
-          </template>
-        </DataTable>
-
-        <!-- Enhanced Pagination -->
-        <div v-if="reservations.data.length > 0" class="mt-4 flex justify-between items-center p-4 bg-gray-800">
-          <div class="text-sm text-gray-400">
-            Showing {{ reservations.from }} to {{ reservations.to }} of {{ reservations.total }} reservations
-          </div>
-
-          <!-- Page Size Selector -->
-          <div class="flex items-center space-x-4">
-            <div class="flex items-center">
-              <span class="text-sm text-gray-400 mr-2">Per page:</span>
-              <select
-                v-model="perPage"
-                @change="sortAndPaginate(1, perPage, currentSort.field, currentSort.direction)"
-                class="h-9 w-20 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
+    <div class="mx-auto max-w-7xl px-4 py-8">
+        <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
+            <!-- Header with Navigation -->
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold">Pending Reservations</h2>
+                    <p class="mt-2 text-gray-400">Showing reservations that need your approval</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        @click="navigateTo('/receptionist/all-reservations')"
+                        class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        All Reservations
+                    </button>
+                    <button
+                        @click="navigateTo('/receptionist/clients/my-approved')"
+                        class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        My Approved Clients
+                    </button>
+                    <button
+                        @click="navigateTo('/receptionist/clients')"
+                        class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        Manage Clients
+                    </button>
+                </div>
             </div>
 
-            <!-- Page Navigation -->
-            <div class="flex space-x-2">
-              <button
-                v-for="page in reservations.links"
-                :key="page.label"
-                @click="page.url && sortAndPaginate(
-                  page.label === '&laquo; Previous' ? reservations.current_page - 1 :
-                  page.label === 'Next &raquo;' ? reservations.current_page + 1 :
-                  parseInt(page.label),
-                  perPage,
-                  currentSort.field,
-                  currentSort.direction
-                )"
-                :disabled="!page.url"
-                :class="[
-                  'inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
-                  page.active
-                    ? 'bg-primary text-primary-foreground shadow hover:bg-primary/90'
-                    : page.url
-                      ? 'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground'
-                      : 'bg-muted text-muted-foreground cursor-not-allowed'
-                ]"
-                v-html="page.label"
-              ></button>
+            <div v-if="reservations.data.length === 0" class="text-center py-8">
+                <p class="text-lg text-gray-300">No pending reservations found.</p>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Delete Confirmation Dialog -->
-      <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
-          <p class="mt-2 text-gray-400">
-            Are you sure you want to delete this reservation? This action cannot be undone.
-          </p>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              @click="showDeleteDialog = false"
-            >
-              Cancel
-            </button>
-            <button
-              class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              @click="deleteReservation"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
+            <!-- Data Table -->
+            <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
+                <DataTable
+                    :columns="columns"
+                    :data="reservations.data"
+                    :pagination="{
+                        pageSize: perPage,
+                        pageIndex: currentPage - 1,
+                        totalItems: reservations.total,
+                        manualPagination: true
+                    }"
+                    @page-change="handlePageChange"
+                    class="text-gray-200"
+                >
+                    <!-- Status Cell Template -->
+                    <template #cell-status="{ row }">
+                        <Badge :variant="getStatusVariant(row.status)" class="text-xs font-medium">
+                            {{ row.status }}
+                        </Badge>
+                    </template>
 
-      <!-- Reservation Statistics Dashboard -->
-      <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
-        <h3 class="text-xl font-semibold mb-4 text-gray-100">Reservation Statistics</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div class="p-4 rounded-lg bg-gray-700">
-            <div class="text-sm text-gray-400">Total Pending Reservations</div>
-            <div class="text-2xl font-bold text-gray-100">{{ reservationStats.totalPending }}</div>
-          </div>
-          <div class="p-4 rounded-lg bg-blue-900">
-            <div class="text-sm text-gray-300">Confirmed Reservations</div>
-            <div class="text-2xl font-bold text-gray-100">{{ reservationStats.confirmedReservations }}</div>
-          </div>
-          <div class="p-4 rounded-lg bg-green-900">
-            <div class="text-sm text-gray-300">Checked-in Guests</div>
-            <div class="text-2xl font-bold text-gray-100">{{ reservationStats.checkedInGuests }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <!-- Actions Cell Template -->
+                    <template #cell-actions="{ row }">
+                        <div class="flex items-center gap-2">
+                            <button
+                                v-if="row.original && row.original.status === 'pending'"
+                                class="inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-1 text-xs font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                                @click.prevent="approveReservation(row)"
+                            >
+                                Approve
+                            </button>
+                            <button
+                                @click="navigateTo('/receptionist/reservations/' + (row.original ? row.original.id : row.id))"
+                                class="inline-flex items-center justify-center rounded-md bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                            >
+                                View
+                            </button>
+                            <button
+                                @click="navigateTo('/receptionist/reservations/' + (row.original ? row.original.id : row.id) + '/edit')"
+                                class="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                class="inline-flex items-center justify-center rounded-md bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground shadow-sm transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                                @click="confirmDelete(row)"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </template>
+                </DataTable>
+
+                <!-- Enhanced Pagination -->
+                <div v-if="reservations.data.length > 0" class="mt-4 flex justify-between items-center p-4 bg-gray-800">
+                    <div class="text-sm text-gray-400">
+                        Showing {{ reservations.from }} to {{ reservations.to }} of {{ reservations.total }} reservations
+                    </div>
+
+                    <!-- Page Size Selector -->
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-400 mr-2">Per page:</span>
+                            <select
+                                v-model="perPage"
+                                @change="sortAndPaginate(1, perPage, currentSort.field, currentSort.direction)"
+                                class="h-9 w-20 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+
+                        <!-- Page Navigation -->
+                        <div class="flex space-x-2">
+                            <button
+                                v-for="page in reservations.links"
+                                :key="page.label"
+                                @click="page.url && sortAndPaginate(
+                                  page.label === '&laquo; Previous' ? reservations.current_page - 1 :
+                                  page.label === 'Next &raquo;' ? reservations.current_page + 1 :
+                                  parseInt(page.label),
+                                  perPage,
+                                  currentSort.field,
+                                  currentSort.direction
+                                )"
+                                :disabled="!page.url"
+                                :class="[
+                                  'inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+                                  page.active
+                                    ? 'bg-primary text-primary-foreground shadow hover:bg-primary/90'
+                                    : page.url
+                                      ? 'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground'
+                                      : 'bg-muted text-muted-foreground cursor-not-allowed'
+                                ]"
+                                v-html="page.label"
+                              ></button>
+                        </div>
+                    </div>
+                </div>  <!-- Closing enhanced pagination div -->
+            </div>  <!-- Closing v-else div (Data Table container) -->
+
+            <!-- Delete Confirmation Dialog -->
+            <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
+                    <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
+                    <p class="mt-2 text-gray-400">
+                        Are you sure you want to delete this reservation? This action cannot be undone.
+                    </p>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button
+                            class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                            @click="showDeleteDialog = false"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                            @click="deleteReservation"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservation Statistics Dashboard -->
+            <div class="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4 text-gray-100">Reservation Statistics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="p-4 rounded-lg bg-gray-700">
+                        <div class="text-sm text-gray-400">Total Pending Reservations</div>
+                        <div class="text-2xl font-bold text-gray-100">{{ reservationStats.totalPending }}</div>
+                    </div>
+                    <div class="p-4 rounded-lg bg-blue-900">
+                        <div class="text-sm text-gray-300">Confirmed Reservations</div>
+                        <div class="text-2xl font-bold text-gray-100">{{ reservationStats.confirmedReservations }}</div>
+                    </div>
+                    <div class="p-4 rounded-lg bg-green-900">
+                        <div class="text-sm text-gray-300">Checked-in Guests</div>
+                        <div class="text-2xl font-bold text-gray-100">{{ reservationStats.checkedInGuests }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>  <!-- Closing main content div (rounded-lg bg-gray-900) -->
+    </div>  <!-- Closing root div (mx-auto max-w-7xl) -->
 </template>
 
 <script setup>

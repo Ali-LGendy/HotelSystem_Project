@@ -23,7 +23,7 @@ Route::get('/', function () {
 })->name('home');
 
     
-Route::middleware(['auth','CkeckBan'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 

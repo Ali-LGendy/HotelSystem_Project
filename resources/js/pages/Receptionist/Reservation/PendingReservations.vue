@@ -189,6 +189,8 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { Badge } from '@/components/ui/badge';
 import axios from 'axios';
 import { router, Link } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+defineOptions({ layout: AppLayout });
 
 // Props
 const props = defineProps({

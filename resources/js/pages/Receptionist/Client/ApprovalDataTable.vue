@@ -126,6 +126,7 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
+
 import axios from 'axios';
 defineOptions({ layout: AppLayout });
 // Props

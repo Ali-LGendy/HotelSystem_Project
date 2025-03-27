@@ -63,6 +63,7 @@ class ReceptionistsController extends Controller
      */
     public function store(StoreManagerRequest $request)
     {
+
          $validated = $request->validated();
         if($request->hasFile('avatar_img')){
             $path = $request->file('avatar_img')->store('managers','public');
@@ -77,6 +78,8 @@ class ReceptionistsController extends Controller
             'name' => $validated['name'],
             'national_id' => $validated['national_id'],
             'avatar_img' => $validated['avatar_img'],
+            'manager_id' => auth()->user()->id,
+            'is_approved' => true,
         ]);
         $user->assignRole('receptionist');
         return redirect()->route('admin.users.receptionists.index')->with([

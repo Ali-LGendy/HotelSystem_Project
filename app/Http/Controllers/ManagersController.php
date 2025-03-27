@@ -54,6 +54,7 @@ class ManagersController extends Controller
             'name' => $validated['name'],
             'national_id' => $validated['national_id'],
             'avatar_img' => $validated['avatar_img'],
+            'is_approved' => true,
         ]);
         $user->assignRole('manager');
         return redirect()->route('admin.users.managers.index')->with([

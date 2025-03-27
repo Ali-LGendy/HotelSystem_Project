@@ -36,6 +36,7 @@ class FloorController extends Controller
             'isManager' => $isManager,
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
+
     
         return Inertia::render('Floors/index', [
             'floors' => $floors,

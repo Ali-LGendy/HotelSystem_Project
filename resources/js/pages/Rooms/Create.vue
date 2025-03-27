@@ -114,7 +114,7 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
   managers: Array,
@@ -140,6 +140,11 @@ const submit = () => {
 };
 
 const cancel = () => {
-  form.get(route('rooms.index'));
+  router.visit(route('rooms.index'), {
+    method: 'get',
+    preserveState: false,
+    preserveScroll: false,
+    only: []
+  });
 };
 </script>

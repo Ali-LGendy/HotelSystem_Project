@@ -16,7 +16,7 @@ class ApprovedClient
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // if (Auth::check()) {
+        if (Auth::check()) {
             // Check if the authenticated user is banned
             if (!Auth::user()->is_approved) {
                 // Logout the user
@@ -31,7 +31,7 @@ class ApprovedClient
                     'error' => 'Your account has not been approved yet. an email will be sent to you upon approval.',
                 ]);
             }
-        // }
+        }
         return $next($request);
     }
 }

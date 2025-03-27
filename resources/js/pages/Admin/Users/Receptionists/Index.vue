@@ -144,7 +144,7 @@ const canManageReceptionist = (receptionist) => {
                         {{ receptionist.manager ? receptionist.manager.name : 'No Manager' }}
                     </TableCell>
 
-                    <TableCell v-if="user.roles.some(role => role.name === 'admin') || receptionist.manager_id == manager">
+                    <TableCell v-if="user.roles.some(role => role.name === 'admin') || receptionist.manager_id == user.id">
                         <div class="flex gap-4">
                             <!-- Edit Button -->
                             <Link :href="route('admin.users.receptionists.edit', receptionist)">

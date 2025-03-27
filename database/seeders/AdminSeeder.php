@@ -20,6 +20,7 @@ class AdminSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'national_id' => 123451234512,
                 'gender' => 'male',
+                'is_approved' => true,
             ]
         );
 

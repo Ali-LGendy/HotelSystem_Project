@@ -8,24 +8,30 @@
           <p class="mt-2 text-gray-400">System-wide view of all clients</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a
-            href="/receptionist/clients"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+          <button
+            @click="navigateTo('/receptionist/clients')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Manage Clients
-          </a>
-          <a
-            href="/receptionist/clients/my-approved"
-            class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/my-approved')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             My Approved Clients
-          </a>
-          <a
-            href="/receptionist/reservations"
-            class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            All My Clients Reservations
+          </button>
+          <button
+            @click="navigateTo('/receptionist/reservations')"
+            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             Pending Reservations
-          </a>
+          </button>
         </div>
       </div>
 
@@ -118,18 +124,26 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
+                    <!-- View Reservations button for all roles -->
+                    <button
+                      @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
+                      class="inline-flex items-center justify-center rounded-md bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      View Reservations
+                    </button>
+
                     <!-- Edit/Delete Actions (Admin Only) -->
                     <button
                       v-if="isAdmin"
                       @click="editClient(client.id)"
-                      class="rounded-md bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
+                      class="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     >
                       Edit
                     </button>
                     <button
                       v-if="isAdmin"
                       @click="deleteClient(client.id)"
-                      class="rounded-md bg-red-700 px-3 py-1 text-sm font-medium text-white hover:bg-red-600"
+                      class="inline-flex items-center justify-center rounded-md bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground shadow-sm transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     >
                       Delete
                     </button>
@@ -154,7 +168,7 @@
             <select
               v-model="perPage"
               @change="sortAndPaginate(1, perPage, currentSort.field, currentSort.direction)"
-              class="bg-gray-700 text-gray-200 rounded-md px-2 py-1 text-sm"
+              class="h-9 w-20 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="5">5</option>
               <option value="10">10</option>
@@ -178,12 +192,12 @@
               )"
               :disabled="!page.url"
               :class="[
-                'px-3 py-1 rounded-md text-sm',
+                'inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
                 page.active
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-primary text-primary-foreground shadow hover:bg-primary/90'
                   : page.url
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                    : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                    ? 'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
               ]"
               v-html="page.label"
             ></button>
@@ -270,13 +284,13 @@
           <p class="mt-2 text-gray-400">{{ confirmDialogMessage }}</p>
           <div class="mt-6 flex justify-end space-x-3">
             <button
-              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
+              class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               @click="cancelConfirmation"
             >
               Cancel
             </button>
             <button
-              class="rounded-md px-4 py-2 text-sm font-medium text-white bg-red-700 hover:bg-red-600"
+              class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               @click="confirmDelete()"
             >
               Delete
@@ -289,9 +303,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import axios from 'axios';
-import { router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { router, Link } from '@inertiajs/vue3';
 
 // Props
 const props = defineProps({
@@ -340,14 +353,28 @@ const currentSort = ref({
 });
 const perPage = ref(10);
 
-// No need for co need for computed property, using the prop directly
-
 // Methods
 const goToPage = (url) => {
   if (!url) return;
-  router.visit(url, {
+
+  // Extract the query parameters from the URL
+  const urlObj = new URL(url, window.location.origin);
+  const params = Object.fromEntries(urlObj.searchParams.entries());
+
+  // Use Inertia's get method with the extracted parameters
+  router.get(urlObj.pathname, params, {
     preserveScroll: true,
-    preserveState: false
+    preserveState: true,
+    only: ['allClients', 'clientStats', 'recentReservations']
+  });
+};
+
+// Navigation method using Inertia
+const navigateTo = (url) => {
+  router.get(url, {}, {
+    preserveScroll: false,
+    preserveState: false,
+    replace: false
   });
 };
 
@@ -359,17 +386,17 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
     direction: sortDir
   };
 
-  // Navigate with new parameters
-  router.visit(window.location.pathname, {
-    data: {
-      page,
-      per_page: perPage,
-      sort_by: sortBy,
-      sort_dir: sortDir
-    },
+  // Navigate with new parameters using Inertia's get method
+  router.get(window.location.pathname, {
+    page,
+    per_page: perPage,
+    sort_by: sortBy,
+    sort_dir: sortDir
+  }, {
     preserveScroll: true,
-    preserveState: false,
-    replace: true
+    preserveState: true, // Keep component state between requests
+    only: ['allClients', 'clientStats', 'recentReservations'], // Only refresh these data props
+    replace: true // Replace current history entry instead of adding a new one
   });
 };
 
@@ -405,11 +432,7 @@ const getStatusClass = (client) => {
 };
 
 const getStatusText = (client) => {
-  if (client.is_approved) {
-    return 'Approved';
-  } else {
-    return 'Pending';
-  }
+  return client.is_approved ? 'Approved' : 'Pending';
 };
 
 const cancelConfirmation = () => {
@@ -420,9 +443,8 @@ const cancelConfirmation = () => {
 // Edit client method
 const editClient = (clientId) => {
   // Navigate to the edit page using Inertia
-  router.visit(`/receptionist/clients/${clientId}/edit`, {
-    method: 'get',
-    preserveState: false
+  router.get(`/receptionist/clients/${clientId}/edit`, {}, {
+    preserveState: false // Don't preserve state when navigating to a different page
   });
 };
 
@@ -435,30 +457,24 @@ const deleteClient = (clientId) => {
 };
 
 // Confirm delete method
-const confirmDelete = async () => {
+const confirmDelete = () => {
   if (!selectedClientId.value) return;
 
-  try {
-    // Show loading state
-    showConfirmDialog.value = false;
+  // Hide dialog first
+  showConfirmDialog.value = false;
 
-    // Use axios to make the request
-    await axios.delete(`/receptionist/clients/${selectedClientId.value}`);
-
-    // Use Inertia router to reload the page with fresh data
-    router.visit(window.location.pathname, {
-      method: 'get',
-      preserveScroll: false,
-      preserveState: false,
-      replace: true,
-      onSuccess: () => {
-        console.log('Client deleted successfully');
-      }
-    });
-  } catch (error) {
-    console.error('Error deleting client:', error);
-    alert('Could not delete client due to a technical issue. Please try refreshing the page.');
-  }
+  // Use Inertia's delete method
+  router.delete(`/receptionist/clients/${selectedClientId.value}`, {}, {
+    onSuccess: () => {
+      // Success is handled automatically by Inertia refreshing the page data
+      selectedClientId.value = null;
+    },
+    onError: (errors) => {
+      console.error('Error deleting client:', errors);
+      alert('Could not delete client due to a technical issue. Please try again.');
+    },
+    preserveScroll: true
+  });
 };
 </script>
 

@@ -1,18 +1,14 @@
 <?php
 
 // use App\Http\Controllers\Receptionist\ClientController;
-use App\Http\Controllers\EssamClientController;
-use App\Http\Controllers\Client\ClientController as ClientUserController;
-use App\Http\Controllers\Client\ReservationController as ClientReservationController;
+
 use App\Http\Controllers\Receptionist\ClientController;
 use App\Http\Controllers\Receptionist\ReservationController;
 use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ManagersController;
-use App\Http\Controllers\ManageReceptionistsController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\RoomController;
 use App\Models\Floor;
@@ -33,7 +29,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 });
 
     
-Route::middleware(['auth',])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 
@@ -53,14 +49,14 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/us
 //     ->name('admin.users.managers.ban');
 
 
-Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
-    Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         // List all receptionists
-    Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); // Show create form
-    Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        // Store a new receptionist
-    Route::get('/{user}', [ReceptionistsController::class, 'show'])->name('show');     // Show a specific receptionist
-    Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); // Edit receptionist form
-    Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  // Update a receptionist
-    Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); // Delete a receptionist
+Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
+    Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         
+    Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); 
+    Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        
+    Route::get('/{user}', [ReceptionistsController::class, 'show'])->name('show');     
+    Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); 
+    Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  
+    Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); 
      Route::patch('/{user}/ban', [ReceptionistsController::class, 'ban'])->name('ban');
 });
 
@@ -73,54 +69,42 @@ Route::middleware(['auth', 'permission:manage receptionists'])->prefix('admin/us
 
 
 // Receptionist Routes
-Route::middleware(['auth', 'permission:manage clients'])
-    ->prefix('receptionist')
-    ->name('receptionist.')
-    ->group(function () {
-        // Client management routes
-        Route::get('clients', [ClientController::class, 'approvedClients'])->name('clients.index');
-        Route::get('clients/approved', [ClientController::class, 'approvedClients'])->name('clients.approved');
-        Route::get('clients/my-approved', [ClientController::class, 'myApprovedClients'])->name('clients.my-approved');
-        Route::post('clients/{id}/approve', [ClientController::class, 'approveClient'])->name('clients.approve');
-        Route::post('clients/{id}/reject', [ClientController::class, 'rejectClient'])->name('clients.reject');
-        Route::post('clients/{id}/ban', [ClientController::class, 'banClient'])->name('clients.ban');
-        Route::post('clients/{id}/unban', [ClientController::class, 'unbanClient'])->name('clients.unban');
-        Route::get('clients/reservations', [ClientController::class, 'clientReservations'])->name('clients.reservations');
-        Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
-    });
-
 Route::middleware(['auth', 'permission:manage reservations'])
     ->prefix('receptionist')
     ->name('receptionist.')
     ->group(function () {
-        // Use resource routing for ReservationController
-        Route::resource('reservations', ReservationController::class);
+        // Use resource routing for ReservationController (except create and store)
+        Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
         // Add route for all reservations
         Route::get('all-reservations', [ReservationController::class, 'allReservations'])->name('reservations.all');
+        Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
+
+        // Client management routes
+        Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
+        Route::get('clients/my-approved', [ClientController::class, 'myApprovedClients'])->name('clients.my-approved');
+        Route::get('clients/all', [ClientController::class, 'allClients'])->name('clients.all');
+        Route::get('clients/reservations/{id?}', [ClientController::class, 'clientReservations'])->name('clients.reservations');
+
+        // Client approval/rejection routes
+        Route::post('clients/{id}/approve', [ClientController::class, 'approveClient'])->name('clients.approve');
+        Route::post('clients/{id}/reject', [ClientController::class, 'rejectClient'])->name('clients.reject');
+
+        // Client ban/unban routes
+        Route::post('clients/{id}/ban', [ClientController::class, 'banClient'])->name('clients.ban');
+        Route::post('clients/{id}/unban', [ClientController::class, 'unbanClient'])->name('clients.unban');
+
+        // API endpoint for client approval
+        Route::post('api/clients/{id}/approve', [ClientController::class, 'approveClientApi'])->name('api.clients.approve');
+
+        // Admin-only client management routes
+        Route::middleware('role:admin')->group(function () {
+            Route::get('clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+            Route::put('clients/{id}', [ClientController::class, 'update'])->name('clients.update');
+            Route::delete('clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
+        });
     });
 
-// Client Routes
-Route::middleware(['auth', 'role:client', 'client.approved'])
-    ->prefix('client')
-    ->name('client.')
-    ->group(function () {
-        // Client dashboard
-        Route::get('dashboard', [ClientUserController::class, 'dashboard'])->name('dashboard');
-
-        // Client profile
-        Route::get('profile', [ClientUserController::class, 'profile'])->name('profile');
-        Route::put('profile', [ClientUserController::class, 'updateProfile'])->name('profile.update');
-
-        // Client reservations
-        Route::get('reservations', [ClientReservationController::class, 'index'])->name('reservations.index');
-        Route::get('reservations/{reservation}', [ClientReservationController::class, 'show'])->name('reservations.show');
-        Route::post('reservations/{reservation}/cancel', [ClientReservationController::class, 'cancel'])->name('reservations.cancel');
-
-        // Make new reservations
-        Route::get('available-rooms', [ClientReservationController::class, 'availableRooms'])->name('available-rooms');
-        Route::get('reservations/rooms/{roomId}/create', [ClientReservationController::class, 'create'])->name('reservations.create');
-        Route::post('reservations/rooms/{roomId}', [ClientReservationController::class, 'store'])->name('reservations.store');
-    });
+// Client Routes have been removed
 
 // Stripe Payment Routes
 Route::middleware(['auth', 'permission:pay for reservations'])->group(function () {
@@ -165,14 +149,4 @@ require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
 
-/*Manage Conflicts*/ // ==>>> Essan Controller
 
-// Route::middleware(['auth', 'role:admin'])->prefix('admin/users/clients')->name('admin.users.clients.')->group(function () {
-//     Route::get('/', [ManageClientsController::class, 'index'])->name('index');        // List all clients
-//     Route::get('/create', [ManageClientsController::class, 'create'])->name('create'); // Show create form
-//     Route::post('/', [ManageClientsController::class, 'store'])->name('store');        // Store a new client
-//     Route::get('/{user}', [ManageClientsController::class, 'show'])->name('show');     // Show a specific client
-//     Route::get('/{user}/edit', [ManageClientsController::class, 'edit'])->name('edit'); // Edit client form
-//     Route::put('/{user}', [ManageClientsController::class, 'update'])->name('update');  // Update a client
-//     Route::delete('/{user}', [ManageClientsController::class, 'destroy'])->name('destroy'); // Delete a client
-// });

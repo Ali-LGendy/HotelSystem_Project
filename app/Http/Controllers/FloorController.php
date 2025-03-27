@@ -19,6 +19,11 @@ class FloorController extends Controller
         $perPage = $request->input('per_page', 10);
         $floors = Floor::with('manager')->withCount('room')->paginate($perPage);
     
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
         $floors->getCollection()->transform(function ($floor) use ($isAdmin, $user) {
             return [
                 'id' => $floor->id,
@@ -27,8 +32,9 @@ class FloorController extends Controller
                 'manager_name' => $isAdmin ? ($floor->manager ? $floor->manager->name : null) : null,
                 'rooms_count' => $floor->room_count,
                 'can_edit' => $isAdmin || $floor->manager_id === $user->id,
+                
             ];
-        });
+        }); // logical error???????????????????????????????????????????????????
 
         // Debug the role and permissions  // i think i dont need that anymore
         \Log::debug('User role and permissions', [
@@ -43,7 +49,9 @@ class FloorController extends Controller
             'isAdmin' => $isAdmin,
             'isManager' => $isManager,
             'permissions' => $user->getAllPermissions()->pluck('name'),
-            'success' => session('success')
+            'success' => session('success'),
+            'menuLinks' => $menuLinks
+
         ]);
     }
 
@@ -68,7 +76,7 @@ class FloorController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
-
+        
         $validated = $request->validate([
             'name' => 'required|unique:floors,name|string|min:3',
             'manager_id' => 'nullable|exists:users,id'

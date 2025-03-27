@@ -18,9 +18,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $isClient = Auth::user()->hasRole('client');
+
         return Inertia::render('settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'isClient' => $isClient
         ]);
     }
 

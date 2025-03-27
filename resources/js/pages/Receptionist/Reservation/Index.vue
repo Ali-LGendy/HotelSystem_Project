@@ -8,34 +8,37 @@
           <p class="mt-2 text-gray-400">{{ showAll ? 'Showing all reservations in the system' : 'Showing reservations that need your approval' }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a
+          <Link
             v-if="!showAll"
-            href="/receptionist/all-reservations"
+            :href="route('receptionist.all-reservations')"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             All Reservations
-          </a>
-          <a
+          </Link>
+          <Link
             v-else
-            href="/receptionist/reservations"
+            :href="route('receptionist.reservations')"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             Pending Reservations
-          </a>
-          <a
-            href="/receptionist/reservations/create"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+          </Link>
+          <Link
+            :href="route('receptionist.clients.approved')"
+            class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
-            New Reservation
-          </a>
+            My Approved Clients
+          </Link>
         </div>
       </div>
 
+      <!-- No Reservations Message -->
       <div v-if="reservations.data.length === 0" class="text-center py-8">
-        <p class="text-lg text-gray-300">{{ showAll ? 'No reservations found.' : 'No pending reservations found.' }}</p>
+        <p class="text-lg text-gray-300">
+          {{ showAll ? 'No reservations found.' : 'No pending reservations found.' }}
+        </p>
       </div>
 
-      <!-- Data Table -->
+      <!-- Reservations Table -->
       <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
         <DataTable
           :columns="columns"
@@ -59,71 +62,79 @@
           <!-- Actions Cell Template -->
           <template #cell-actions="{ row }">
             <div class="flex items-center gap-2">
-              <button
+              <Button
                 v-if="row.original && row.original.status === 'pending'"
-                class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                variant="success"
+                size="sm"
                 @click.prevent="approveReservation(row)"
               >
                 Approve
-              </button>
-              <a
-                :href="'/receptionist/reservations/' + (row.original ? row.original.id : row.id)"
+              </Button>
+              <Button
+                @click="viewReservation(row.original ? row.original.id : row.id)"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 View
-              </a>
-              <a
-                :href="'/receptionist/reservations/' + (row.original ? row.original.id : row.id) + '/edit'"
+              </Button>
+              <Button
+                @click="editReservation(row.original ? row.original.id : row.id)"
                 class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
               >
                 Edit
-              </a>
-              <button
-                class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
                 @click="confirmDelete(row)"
               >
                 Delete
-              </button>
+              </Button>
             </div>
-          </template>
-        </DataTable>
-      </div>
 
       <!-- Delete Confirmation Dialog -->
-      <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-100">Confirm Deletion</h3>
-          <p class="mt-2 text-gray-400">
-            Are you sure you want to delete this reservation? This action cannot be undone.
-          </p>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-              @click="showDeleteDialog = false"
-            >
+      <Dialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this reservation? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" @click="showDeleteDialog = false">
               Cancel
-            </button>
-            <button
-              class="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-              @click="deleteReservation"
-            >
+            </Button>
+            <Button variant="destructive" @click="deleteReservation">
               Delete
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import DataTable from '@/components/ui/DataTable.vue';
-import { Badge } from '@/components/ui/badge';
-import axios from 'axios';
-import { router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
+import axios from 'axios'
 
-// Props
+// Shadcn UI Components
+import { Link } from '@/Components/ui/link'
+import { Button } from '@/Components/ui/button'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/Components/ui/dialog'
+import { Badge } from '@/Components/ui/badge'
+
+// Custom Components
+import DataTable from '@/Components/ui/DataTable.vue'
+
+// Props Definition
 const props = defineProps({
   reservations: {
     type: Object,
@@ -133,56 +144,21 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
-});
+})
 
-// State
-const showDeleteDialog = ref(false);
-const selectedReservation = ref(null);
+// State Management
+const showDeleteDialog = ref(false)
+const selectedReservation = ref(null)
 
-// Navigation Links
-const navigationLinks = [
-  {
-    href: '/receptionist/all-reservations',
-    text: 'All Reservations',
-    bgClass: 'bg-purple-600 text-white hover:bg-purple-700'
-  },
-  {
-    href: '/receptionist/clients',
-    text: 'Manage Clients',
-    bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
-  },
-  {
-    href: route('receptionist.clients.my-approved'),
-    text: 'My Approved Clients',
-    bgClass: 'bg-green-600 text-white hover:bg-green-700'
-  },
-  {
-    href: route('receptionist.clients.reservations'),
-    text: 'Clients Reservations',
-    bgClass: 'bg-purple-600 text-white hover:bg-purple-700'
-  },
-  {
-    href: route('receptionist.reservations.create'),
-    text: 'New Reservation',
-    bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
-  }
-];
+// Computed Properties
+const currentPage = computed(() => {
+  return props.reservations.current_page || 1
+})
 
-// Handle navigation button clicks
-const handleNavigation = (route) => {
-  console.log('Navigating to:', route);
-  router.get(route, {}, {
-    preserveScroll: true,
-    onError: (errors) => {
-      console.error('Navigation error:', errors);
-    }
-  });
-};
-
-// Table Columns
+// Table Columns Configuration
 const columns = [
   {
-    accessorKey: 'client.name', // Changed from user.name to client.name
+    accessorKey: 'client.name',
     header: 'Client Name'
   },
   {
@@ -194,19 +170,25 @@ const columns = [
     header: 'Accompany Number'
   },
   {
-    accessorKey: 'price_paid', // Using the correct column name from the database
+    accessorKey: 'price_paid',
     header: 'Paid Price',
-    cell: ({ row }) => row.original && row.original.price_paid ? `$${row.original.price_paid}` : 'N/A'
+    cell: ({ row }) => row.original && row.original.price_paid 
+      ? `$${row.original.price_paid}` 
+      : 'N/A'
   },
   {
     accessorKey: 'check_in_date',
     header: 'Check-in Date',
-    cell: ({ row }) => row.original ? formatDate(row.original.check_in_date) : 'N/A'
+    cell: ({ row }) => row.original 
+      ? formatDate(row.original.check_in_date) 
+      : 'N/A'
   },
   {
     accessorKey: 'check_out_date',
     header: 'Check-out Date',
-    cell: ({ row }) => row.original ? formatDate(row.original.check_out_date) : 'N/A'
+    cell: ({ row }) => row.original 
+      ? formatDate(row.original.check_out_date) 
+      : 'N/A'
   },
   {
     accessorKey: 'status',
@@ -216,206 +198,171 @@ const columns = [
     id: 'actions',
     header: 'Actions'
   }
-];
+]
 
-// Computed
-const currentPage = computed(() => {
-  return props.reservations.current_page || 1;
-});
-
-// Methods
+// Utility Functions
 const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
+  if (!dateString) return 'N/A'
   try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    const date = new Date(dateString)
+    return date.toLocaleDateString()
   } catch (e) {
-    return dateString;
+    return dateString
   }
-};
+}
 
 const getStatusVariant = (status) => {
   const variants = {
     'confirmed': 'success',
     'checked_in': 'info',
-    'checked-in': 'info',     // Support both formats for backward compatibility
+    'checked-in': 'info',
     'checked_out': 'secondary',
-    'checked-out': 'secondary', // Support both formats for backward compatibility
+    'checked-out': 'secondary',
     'pending': 'warning',
     'cancelled': 'destructive'
-  };
-  return variants[status] || 'default';
-};
+  }
+  return variants[status] || 'default'
+}
 
+// Pagination Handler
 const handlePageChange = (pageIndex) => {
-  const page = pageIndex + 1;
+  const page = pageIndex + 1
   const url = props.showAll
-    ? `/receptionist/all-reservations?page=${page}`
-    : `/receptionist/reservations?page=${page}`;
+    ? route('receptionist.all-reservations', { page })
+    : route('receptionist.reservations', { page })
 
   router.visit(url, {
     preserveScroll: true,
-    preserveState: false,
+    preserveState: true,
     replace: true
+  })
+}
+
+// Reservation Management Methods
+const confirmDelete = (reservation) => {
+  selectedReservation.value = reservation.original || reservation
+  showDeleteDialog.value = true
+}
+
+const deleteReservation = () => {
+  if (selectedReservation.value) {
+    router.delete(
+      route('receptionist.reservations.destroy', { 
+        reservation: selectedReservation.value.id 
+      }),
+      {
+        onSuccess: () => {
+          showDeleteDialog.value = false
+          selectedReservation.value = null
+          // Optional: Add toast notification
+        },
+        onError: (errors) => {
+          console.error('Error deleting reservation:', errors)
+          // Optional: Add error toast notification
+        }
+      }
+    )
+  }
+}
+
+const viewReservation = (id) => {
+  router.visit(route('receptionist.reservations.show', { reservation: id }), {
+    preserveScroll: false,
+    preserveState: false
   });
 };
 
-
-
-const confirmDelete = (reservation) => {
-  // Store the reservation object with the correct structure
-  selectedReservation.value = reservation.original || reservation;
-  showDeleteDialog.value = true;
-};
-
-const deleteReservation = () => {
-  console.log('Deleting reservation:', selectedReservation.value);
-  if (selectedReservation.value) {
-    try {
-      const id = selectedReservation.value.id;
-
-      // Get CSRF token from cookie if available
-      let csrfToken = '';
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith('XSRF-TOKEN=')) {
-          csrfToken = decodeURIComponent(cookie.substring('XSRF-TOKEN='.length));
-          break;
-        }
-      }
-
-      // Prepare headers
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-
-      // Add CSRF token if available
-      if (csrfToken) {
-        headers['X-XSRF-TOKEN'] = csrfToken;
-      }
-
-      fetch(`/receptionist/reservations/${id}`, {
-        method: 'DELETE',
-        headers: headers
-      })
-      .then(response => {
-        if (response.ok) {
-          showDeleteDialog.value = false;
-          selectedReservation.value = null;
-          alert('Reservation deleted successfully!');
-          window.location.reload();
-        } else {
-          console.error('Error deleting reservation, status:', response.status);
-          alert('Could not delete reservation. Please try again.');
-        }
-      })
-      .catch(error => {
-        console.error('Error deleting reservation:', error);
-        alert('Error deleting reservation. Please try again.');
-      });
-    } catch (error) {
-      console.error('Exception in deleteReservation:', error);
-      alert('An unexpected error occurred. Please try again.');
-    }
-  }
+const editReservation = (id) => {
+  router.visit(route('receptionist.reservations.edit', { reservation: id }), {
+    preserveScroll: false,
+    preserveState: false
+  });
 };
 
 const approveReservation = async (row) => {
   try {
-    // Get the reservation data, handling both possible structures
-    let reservation;
-
-    if (row.original) {
-      reservation = row.original;
-    } else {
-      reservation = row;
-    }
+    const reservation = row.original || row
 
     if (!reservation || !reservation.id) {
-      console.error('Invalid reservation object:', reservation);
-      alert('Error: Could not identify reservation. Please try again.');
-      return;
+      console.error('Invalid reservation object')
+      return
     }
 
-    console.log('Approving reservation:', reservation);
-
-    // Create the data object with all required fields
     const data = {
       status: 'confirmed',
-      _method: 'PUT' // For method spoofing
-    };
+      ...reservation  // Spread other existing reservation details
+    }
 
-    // Add other fields if they exist in the reservation data
-    if (reservation.room_id) data.room_id = reservation.room_id;
-    if (reservation.accompany_number) data.accompany_number = reservation.accompany_number;
-    if (reservation.check_in_date) data.check_in_date = reservation.check_in_date;
-    if (reservation.check_out_date) data.check_out_date = reservation.check_out_date;
-    if (reservation.price_paid) data.price_paid = reservation.price_paid;
-    if (reservation.client_id) data.client_id = reservation.client_id;
-    if (reservation.receptionist_id) data.receptionist_id = reservation.receptionist_id;
+    // Use axios directly instead of Inertia to handle the JSON response
+    const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
 
-    console.log('Sending data for approval:', data);
+    // Check if the request was successful
+    if (response.data.success) {
+      alert('Reservation approved successfully!');
 
-    // First, update the reservation status using axios
-    const response = await axios.post(`/receptionist/reservations/${reservation.id}`, data);
-    console.log('Reservation approval response:', response.data);
+      // Check if client is already approved
+      const clientApproved = response.data.client_approved;
 
-    // Show success message for the reservation
-    alert('Reservation approved successfully!');
-
-    // If the client needs to be approved, redirect to the clients page
-    if (reservation.client_id) {
-      router.visit('/receptionist/clients', {
-        onSuccess: () => {
-          console.log('Redirected to clients page to approve the client');
-        }
-      });
+      // Refresh the current page to show updated data
+      if (reservation.client_id && !clientApproved) {
+        // If client is not approved, redirect to clients page
+        router.visit('/receptionist/clients', {
+          preserveScroll: false,
+          preserveState: false,
+          replace: false
+        });
+      } else {
+        // Otherwise, refresh the current page with updated data
+        window.location.reload(); // Full page reload to ensure data is refreshed
+      }
     } else {
-      // Otherwise, just reload the current page
-      router.visit(window.location.pathname, {
-        method: 'get',
-        preserveScroll: false,
-        preserveState: false,
-        replace: true,
-        onSuccess: () => {
-          console.log('Page reloaded after reservation approval');
-        }
-      });
+      alert('Could not approve reservation. Please try again.');
     }
   } catch (error) {
     console.error('Error approving reservation:', error);
-    alert('Could not approve reservation. Please try again.');
+
+    // Show more detailed error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      alert(`Error: ${error.response.data.message}`);
+    } else {
+      alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+    }
   }
-};
+}
 </script>
 
 <style scoped>
+/* Existing custom styles */
 label {
-  color: #e5e7eb;
+    color: #e5e7eb;
 }
 
 :deep(.data-table) {
-  --background: #1f2937;
-  --text: #e5e7eb;
-  --border: #374151;
-  --header-background: #111827;
-  --header-text: #f9fafb;
-  --row-hover: #2d3748;
+    --background: #1f2937;
+    --text: #e5e7eb;
+    --border: #374151;
+    --header-background: #111827;
+    --header-text: #f9fafb;
+    --row-hover: #2d3748;
 }
 
 :deep(.data-table th) {
-  background-color: #111827;
-  color: #f9fafb;
-  font-weight: 600;
+    background-color: #111827;
+    color: #f9fafb;
+    font-weight: 600;
 }
 
 :deep(.data-table td) {
-  border-color: #374151;
+    border-color: #374151;
 }
 
 :deep(.data-table tr:hover td) {
-  background-color: #2d3748;
+    background-color: #2d3748;
 }
 </style>

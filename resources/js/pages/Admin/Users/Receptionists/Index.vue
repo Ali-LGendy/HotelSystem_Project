@@ -5,6 +5,17 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { defineProps, onMounted } from 'vue';
 import { route } from 'ziggy-js';
+import { usePage } from '@inertiajs/vue3';
+
+function useCurrentUser() {
+    const page = usePage();
+    return page.props.auth.user;
+}
+
+const user = useCurrentUser();
+
+
+console.log('user in index',user);
 
 // Props for passing manager data
 
@@ -107,7 +118,7 @@ const canManageReceptionist = (receptionist) => {
                     <TableHead>Email</TableHead>
                     <TableHead>National ID</TableHead>
                     <TableHead>Avatar Image</TableHead>
-                    <TableHead v-if="is_admin == true">Manager</TableHead>
+                    <TableHead v-if="user.roles.some(role => role.name === 'admin')">Manager</TableHead>
                     <TableHead>Actions</TableHead>
                 </TableRow>
             </TableHeader>
@@ -129,11 +140,11 @@ const canManageReceptionist = (receptionist) => {
                             {{ getInitials(receptionist.name) }}
                         </div>
                     </TableCell>
-                    <TableCell v-if="is_admin">
+                    <TableCell v-if="user.roles.some(role => role.name === 'admin')">
                         {{ receptionist.manager ? receptionist.manager.name : 'No Manager' }}
                     </TableCell>
 
-                    <TableCell v-if="is_admin || receptionist.manager_id == manager">
+                    <TableCell v-if="user.roles.some(role => role.name === 'admin') || receptionist.manager_id == user.id">
                         <div class="flex gap-4">
                             <!-- Edit Button -->
                             <Link :href="route('admin.users.receptionists.edit', receptionist)">
@@ -166,5 +177,19 @@ const canManageReceptionist = (receptionist) => {
                 </TableRow>
             </TableBody>
         </Table>
+        <div class="mt-6 flex items-center justify-center gap-2">
+            <Link
+                v-for="page in receptionists.last_page"
+                :key="page"
+                :href="`?page=${page}`"
+                class="rounded-lg px-4 py-2"
+                :class="{
+                    'bg-blue-600 text-white': page === receptionists.current_page,
+                    'bg-gray-700 text-gray-300 hover:bg-gray-600': page !== receptionists.current_page,
+                }"
+            >
+                {{ page }}
+            </Link>
+        </div>
     </div>
 </template>

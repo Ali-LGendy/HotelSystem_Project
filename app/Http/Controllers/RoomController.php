@@ -44,12 +44,20 @@ class RoomController extends Controller
             ];
         });
 
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+
         return Inertia::render('Rooms/Index', [
             'rooms' => $rooms,
             'isAdmin' => $isAdmin,
             'isManager' => $isManager,
             'permissions' => $user->getAllPermissions()->pluck('name'),
-            'success' => session('success')
+            'success' => session('success'),
+            'menuLinks' => $menuLinks
+
         ]);
     }
 
@@ -73,10 +81,17 @@ class RoomController extends Controller
         // Get floors for dropdown
         $floors = Floor::all(['id', 'name', 'number']);
 
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
         return Inertia::render('Rooms/Create', [
             'managers' => $managers,
             'floors' => $floors,
-            'statuses' => ['available', 'occupied', 'maintenance']
+            'statuses' => ['available', 'occupied', 'maintenance'],
+            'menuLinks' => $menuLinks
+
         ]);
     }
 
@@ -89,8 +104,8 @@ class RoomController extends Controller
         $isAdmin = $user->hasRole('admin');
 
         $validated = $request->validate([
-            'room_number' => 'required|unique:rooms,room_number|string',
-            'price' => 'required|numeric|min:1000|max:1000000',
+            'room_number' => 'required|unique:rooms,room_number|integer|min:1000|max:9999',
+            'price' => 'required|numeric|min:10|max:1000000',
             'room_capacity' => 'required|integer|min:1|max:100',
             'status' => 'required|in:available,occupied,maintenance',
             'floor_id' => 'required|exists:floors,id',
@@ -120,6 +135,12 @@ class RoomController extends Controller
                 ->withErrors(['error' => 'You are not authorized to view this room.']);
         }
 
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+
         return Inertia::render('Rooms/Show', [
             'room' => [
                 'id' => $room->id,
@@ -135,7 +156,9 @@ class RoomController extends Controller
                 'manager' => $room->manager ? [
                     'id' => $room->manager->id,
                     'name' => $room->manager->name
-                ] : null
+                ] : null,
+                'menuLinks' => $menuLinks
+
             ]
         ]);
     }
@@ -164,11 +187,19 @@ class RoomController extends Controller
         // Get floors for dropdown
         $floors = Floor::all(['id', 'name', 'number']);
 
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }else {
+            $menuLinks = $this->getManagerMenuLinks();
+        }
         return Inertia::render('Rooms/Edit', [
             'room' => $room,
             'managers' => $managers,
             'floors' => $floors,
-            'statuses' => ['available', 'occupied', 'maintenance']
+            'statuses' => ['available', 'occupied', 'maintenance'],
+            'isAdmin' => $isAdmin,
+            'menuLinks' => $menuLinks
+
         ]);
     }
 
@@ -186,17 +217,18 @@ class RoomController extends Controller
         }
 
         $validated = $request->validate([
-            'room_number' => 'required|string|unique:rooms,room_number,' . $room->id,
-            'price' => 'required|numeric|min:1000|max:1000000',
+            // 'room_number' => 'required|string|unique:rooms,room_number,' . $room->id,
+            'price' => 'required|numeric|min:10|max:10000',
             'room_capacity' => 'required|integer|min:1|max:100',
             'status' => 'required|in:available,occupied,maintenance',
             'floor_id' => 'required|exists:floors,id',
             'manager_id' => 'nullable|exists:users,id'
         ]);
 
-        if (!$isAdmin) {
-            $validated['manager_id'] = $room->manager_id;
-        }
+        // if (!$isAdmin) {
+        //     $validated['manager_id'] = $room->manager_id;
+        // }
+        $validated['price'] *= 100;
 
         $room->update($validated);
 

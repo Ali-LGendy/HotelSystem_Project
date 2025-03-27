@@ -3,6 +3,7 @@ import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import   Select  from '@/Components/ui/input/Select.vue'; // Import the new Select component
 import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -16,24 +17,29 @@ const form = useForm({
     password_confirmation: '',
     avatar_image: '',
     country: '  ',
+    mobile: ''
 });
 
 const submit = () => {
     form.post(route('register'), {
-        forceFormData: true, // Ensures the file is sent correctly
+        // forceFormData: true, // Ensures the file is sent correctly
         onFinish: () => form.reset('password', 'password_confirmation'),
-        // forceFormData: true // Required for file uploads
     });
 };
 
-const countries = ['USA', 'UK', 'Canada', 'Germany', 'France'];
+const props = defineProps<{
+    countries: { id: number; name: string }[]; // Define it as an array of objects
+}>();
+
+
+// const countries = ["USA", "UK", "Canada", "Germany", "France"];
 </script>
 
 <template>
     <AuthBase title="Create an account" description="Enter your details below to create your account">
         <Head title="Register" />
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6" enctype="multipart/form-data">
+        <form @submit.prevent="submit" class="flex flex-col gap-6">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
@@ -49,10 +55,17 @@ const countries = ['USA', 'UK', 'Canada', 'Germany', 'France'];
 
                 <div class="grid gap-2">
                     <Label for="avatar_image">Avatar Image</Label>
-                    <Input id="avatar_image" type="file" name="avatar_image" :tabindex="1" @change="form.avatar_image = $event.target.files[0]" />
+                    <Input 
+                        id="avatar_image" 
+                        type="file" 
+                        name="avatar_image" 
+                        :tabindex="1" 
+                        @change="form.avatar_image = $event.target.files[0]" 
+                    />
                     <InputError :message="form.errors.avatar_image" />
+                                    
                 </div>
-
+                        
                 <div class="grid gap-3">
                     <Label for="gender">Gender</Label>
 
@@ -66,15 +79,28 @@ const countries = ['USA', 'UK', 'Canada', 'Germany', 'France'];
                             <Label for="female">Female</Label>
                         </div>
                     </div>
-
+                    
                     <InputError :message="form.errors.gender" />
                 </div>
 
+                <div class="grid gap-2">
+                    <Label for="mobile">Phone Number</Label>
+                    <Input 
+                        id="mobile" 
+                        type="tel" 
+                        :tabindex="2" 
+                        v-model="form.mobile"
+                        placeholder="01*********"
+                        autocomplete="tel"
+                    />
+                    <InputError :message="form.errors.mobile" />
+                </div>
+                        
                 <div class="grid gap-3">
                     <Label for="country">Country</Label>
                     <Select v-model="form.country" id="country">
-                        <option v-for="country in countries" :key="country" :value="country">
-                            {{ country }}
+                        <option v-for="country in countries" :key="country.id" :value="country.name">
+                            {{ country.name }}
                         </option>
                     </Select>
                     <InputError :message="form.errors.country" />
@@ -82,7 +108,14 @@ const countries = ['USA', 'UK', 'Canada', 'Germany', 'France'];
 
                 <div class="grid gap-2">
                     <Label for="password">Password</Label>
-                    <Input id="password" type="password" :tabindex="3" autocomplete="new-password" v-model="form.password" placeholder="Password" />
+                    <Input
+                        id="password"
+                        type="password"
+                        :tabindex="3"
+                        autocomplete="new-password"
+                        v-model="form.password"
+                        placeholder="Password"
+                    />
                     <InputError :message="form.errors.password" />
                 </div>
 
@@ -112,3 +145,4 @@ const countries = ['USA', 'UK', 'Canada', 'Germany', 'France'];
         </form>
     </AuthBase>
 </template>
+

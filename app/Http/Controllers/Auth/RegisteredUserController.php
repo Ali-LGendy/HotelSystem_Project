@@ -13,6 +13,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Rules\EgyMobile;
+use Nnjeim\World\World;
 
 class RegisteredUserController extends Controller
 {
@@ -21,7 +22,15 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('auth/Register');
+        $action =  World::countries();
+
+        if ($action->success) {
+          $countries = $action->data;
+        }
+
+        return Inertia::render('auth/Register', [
+            'countries' => $countries
+        ]);
     }
 
     /**

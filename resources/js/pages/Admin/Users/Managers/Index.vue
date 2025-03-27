@@ -1,4 +1,4 @@
-<script setup>
+<script setup >
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -6,6 +6,18 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { defineProps, onMounted } from 'vue';
 import { route } from 'ziggy-js';
+
+import { usePage } from '@inertiajs/vue3';
+
+function useCurrentUser() {
+    const page = usePage();
+    return page.props.auth.user;
+}
+
+const user = useCurrentUser();
+
+
+console.log('user in index',user);
 
 // Props for passing manager data
 

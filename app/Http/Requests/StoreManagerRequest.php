@@ -22,21 +22,19 @@ class StoreManagerRequest extends FormRequest
      */
     public function rules(): array
     {
-          $userId = $this->route('user')->id; // Get the current user's ID
-
     return [
         'name' => ['sometimes', 'string', 'max:255'],
         'email' => [
             'sometimes', 
             'email', 
             'max:255', 
-            Rule::unique('users', 'email')->ignore($userId)
+            Rule::unique('users', 'email')
         ],
         'password' => ['nullable', 'min:6'],
         'national_id' => [
             'sometimes', 
             'string', 
-            Rule::unique('users', 'national_id')->ignore($userId)
+            Rule::unique('users', 'national_id')
         ],
         'avatar_img' => ['nullable', 'image', 'max:5120'], // 5MB max
     ];

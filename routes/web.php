@@ -22,8 +22,14 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
+// Public Client Routes (no authentication required)
+Route::prefix('hotel')->name('hotel.')->group(function () {
+    Route::get('/', [RoomController::class, 'clientIndex'])->name('landing');
+    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+});
+
     
-Route::middleware(['auth','CkeckBan'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 

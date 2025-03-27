@@ -16,7 +16,7 @@ const props = defineProps({
     is_admin: {
         type: Boolean,
     },
-    manager: {
+    user_id: {
         type: Number,
     },
 });
@@ -133,7 +133,7 @@ const canManageReceptionist = (receptionist) => {
                         {{ receptionist.manager ? receptionist.manager.name : 'No Manager' }}
                     </TableCell>
 
-                    <TableCell v-if="is_admin || receptionist.manager_id == manager">
+                    <TableCell v-if="is_admin || receptionist.manager_id == user_id">
                         <div class="flex gap-4">
                             <!-- Edit Button -->
                             <Link :href="route('admin.users.receptionists.edit', receptionist)">

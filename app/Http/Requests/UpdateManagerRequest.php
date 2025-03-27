@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreManagerRequest extends FormRequest
+class UpdateManagerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,19 +22,22 @@ class StoreManagerRequest extends FormRequest
      */
     public function rules(): array
     {
+          $userId = $this->route('user')->id; 
+
+
     return [
         'name' => ['sometimes', 'string', 'max:255'],
         'email' => [
             'sometimes', 
             'email', 
             'max:255', 
-            Rule::unique('users', 'email')
+            Rule::unique('users', 'email')->ignore($userId)
         ],
         'password' => ['nullable', 'min:6'],
         'national_id' => [
             'sometimes', 
             'string', 
-            Rule::unique('users', 'national_id')
+            Rule::unique('users', 'national_id')->ignore($userId)
         ],
         'avatar_img' => ['nullable', 'image', 'max:5120'], // 5MB max
     ];

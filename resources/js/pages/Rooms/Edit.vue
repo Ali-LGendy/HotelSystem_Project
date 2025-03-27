@@ -114,8 +114,7 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
+import { useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
   room: Object,
@@ -146,6 +145,11 @@ const submit = () => {
 };
 
 const cancel = () => {
-  form.get(route('rooms.index'));
+  router.visit(route('rooms.index'), {
+    method: 'get',
+    preserveState: false,
+    preserveScroll: false,
+    only: []
+  });
 };
 </script>

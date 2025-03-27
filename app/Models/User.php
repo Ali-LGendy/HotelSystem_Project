@@ -27,7 +27,7 @@ class User extends Authenticatable implements BannableInterface
         'email',
         'mobile',
         'password',
-        'role',
+        'national_id',
         'avatar_img',
         'country',
         'gender',

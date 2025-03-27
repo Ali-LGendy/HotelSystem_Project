@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -92,6 +92,11 @@ const submit = () => {
 };
 
 const cancel = () => {
-  form.get(route('floors.index'));
+  router.visit(route('floors.index'), {
+    method: 'get',
+    preserveState: false,
+    preserveScroll: false,
+    only: []
+  });
 };
 </script>

@@ -15,13 +15,24 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { getInitials } = useInitials();
 
+const getImageUrl = (path) => {
+    if (!path) return '/dafaults/user.png';
+
+    // For full URLs
+    if (path.startsWith('http')) {
+        return path;
+    }
+
+    // For local storage files
+    return `/storage/${path}`;
+};
 // Compute whether we should show the avatar image
 const showAvatar = computed(() => props.user.avatar_img && props.user.avatar_img !== '');
 </script>
 
 <template>
     <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-        <AvatarImage v-if="showAvatar" :src="user.avatar_img" :alt="user.name" />
+        <AvatarImage v-if="showAvatar" :src="getImageUrl(user.avatar_img)" :alt="user.name" />
         <AvatarFallback class="rounded-lg text-black dark:text-white">
             {{ getInitials(user.name) }}
         </AvatarFallback>

@@ -27,8 +27,12 @@ const submit = () => {
     });
 };
 
+const props = defineProps<{
+    countries: { id: number; name: string }[]; // Define it as an array of objects
+}>();
 
-const countries = ["USA", "UK", "Canada", "Germany", "France"];
+
+// const countries = ["USA", "UK", "Canada", "Germany", "France"];
 </script>
 
 <template>
@@ -95,8 +99,8 @@ const countries = ["USA", "UK", "Canada", "Germany", "France"];
                 <div class="grid gap-3">
                     <Label for="country">Country</Label>
                     <Select v-model="form.country" id="country">
-                        <option v-for="country in countries" :key="country" :value="country">
-                            {{ country }}
+                        <option v-for="country in countries" :key="country.id" :value="country.name">
+                            {{ country.name }}
                         </option>
                     </Select>
                     <InputError :message="form.errors.country" />

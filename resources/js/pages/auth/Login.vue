@@ -8,11 +8,17 @@ import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
     canResetPassword: boolean;
 }>();
+
+
+const page = usePage();
+const error = computed(() => page.props.error);
 
 const form = useForm({
     email: '',
@@ -33,6 +39,9 @@ const submit = () => {
 
         <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
             {{ status }}
+        </div>
+        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
+            {{ page.props.error }}
         </div>
 
         <form @submit.prevent="submit" class="flex flex-col gap-6">
@@ -71,6 +80,8 @@ const submit = () => {
                     <InputError :message="form.errors.password" />
                 </div>
 
+                <InputError :message="page.props.error" />
+
                 <div class="flex items-center justify-between" :tabindex="3">
                     <Label for="remember" class="flex items-center space-x-3">
                         <Checkbox id="remember" v-model:checked="form.remember" :tabindex="4" />
@@ -83,11 +94,13 @@ const submit = () => {
                     Log in
                 </Button>
             </div>
-
             <div class="text-center text-sm text-muted-foreground">
                 Don't have an account?
                 <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>
             </div>
+
         </form>
+
+
     </AuthBase>
 </template>

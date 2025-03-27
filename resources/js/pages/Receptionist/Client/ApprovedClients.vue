@@ -1,7 +1,6 @@
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8">
     <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-      <!-- Header with Navigation -->
       <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 class="text-3xl font-bold">Pending Client Approvals</h2>
@@ -26,7 +25,6 @@
           >
             Pending Reservations
           </button>
-          <!-- Only show All Clients button to admin -->
           <button
             v-if="isAdmin"
             @click="navigateTo('/receptionist/clients/all')"
@@ -37,7 +35,6 @@
         </div>
       </div>
 
-      <!-- Pending Clients Section -->
       <div class="mb-8">
         <h3 class="text-2xl font-bold mb-4 text-gray-100">Pending Client Registrations</h3>
 

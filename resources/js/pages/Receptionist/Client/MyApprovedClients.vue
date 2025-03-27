@@ -267,6 +267,7 @@
 
       <!-- Confirmation Dialog has been removed -->
     </div>
+  </div>
 </template>
 
 <script setup>

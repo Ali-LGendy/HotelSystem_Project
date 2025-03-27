@@ -44,13 +44,13 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/us
 
 
 Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
-    Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         // List all receptionists
-    Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); // Show create form
-    Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        // Store a new receptionist
-    Route::get('/{user}', [ReceptionistsController::class, 'show'])->name('show');     // Show a specific receptionist
-    Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); // Edit receptionist form
-    Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  // Update a receptionist
-    Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); // Delete a receptionist
+    Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         
+    Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); 
+    Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        
+    Route::get('/{user}', [ReceptionistsController::class, 'show'])->name('show');     
+    Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); 
+    Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  
+    Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); 
      Route::patch('/{user}/ban', [ReceptionistsController::class, 'ban'])->name('ban');
 });
 

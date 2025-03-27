@@ -1,12 +1,7 @@
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8">
     <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-      <!-- Header with Navigation -->
       <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 class="text-3xl font-bold">Pending Client Approvals</h2>
-          <p class="mt-2 text-gray-400">Review and approve new client registrations</p>
-        </div>
         <div class="flex flex-wrap gap-3">
           <button
             @click="navigateTo('/receptionist/clients/my-approved')"
@@ -26,7 +21,6 @@
           >
             Pending Reservations
           </button>
-          <!-- Only show All Clients button to admin -->
           <button
             v-if="isAdmin"
             @click="navigateTo('/receptionist/clients/all')"
@@ -36,122 +30,9 @@
           </button>
         </div>
       </div>
-
-      <!-- Pending Clients Section -->
-      <div class="mb-8">
-        <h3 class="text-2xl font-bold mb-4 text-gray-100">Pending Client Registrations</h3>
-
-        <div v-if="pendingClients.data.length === 0" class="text-center py-8">
-          <p class="text-lg text-gray-300">No pending client registrations found.</p>
-        </div>
-
-        <div v-else class="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-700">
-            <thead class="bg-gray-800">
-              <tr>
-                <th
-                  @click="sortAndPaginate(1, perPage, 'name', currentSort.field === 'name' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
-                >
-                  Client Name
-                  <span v-if="currentSort.field === 'name'" class="ml-1">
-                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th
-                  @click="sortAndPaginate(1, perPage, 'email', currentSort.field === 'email' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
-                >
-                  Email
-                  <span v-if="currentSort.field === 'email'" class="ml-1">
-                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th
-                  @click="sortAndPaginate(1, perPage, 'mobile', currentSort.field === 'mobile' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
-                >
-                  Mobile
-                  <span v-if="currentSort.field === 'mobile'" class="ml-1">
-                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th
-                  @click="sortAndPaginate(1, perPage, 'country', currentSort.field === 'country' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
-                >
-                  Country
-                  <span v-if="currentSort.field === 'country'" class="ml-1">
-                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th
-                  @click="sortAndPaginate(1, perPage, 'gender', currentSort.field === 'gender' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-700"
-                >
-                  Gender
-                  <span v-if="currentSort.field === 'gender'" class="ml-1">
-                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                  </span>
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-gray-800 divide-y divide-gray-700">
-              <tr v-for="client in pendingClients.data" :key="client.id" class="hover:bg-gray-700">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-300">{{ client.email }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-300">{{ client.mobile || 'N/A' }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-300">{{ client.country || 'N/A' }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-300">{{ client.gender || 'N/A' }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <button
-                      @click="approveClient(client.id)"
-                      class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                    >
-                        My Approved Clients
-                    </a>
-                    <a
-                        href="/receptionist/clients/reservations"
-                        class="rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
-                    >
-                        Clients Reservations
-                    </a>
-                    <a
-                        href="/receptionist/reservations"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-                    >
-                        Pending Reservations
-                    </a>
-                    <!-- Only show All Clients button to admin -->
-                    <a
-                        v-if="isAdmin"
-                        href="/receptionist/clients/all"
-                        class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
-                    >
-                        All Clients
-                    </a>
-                </div>
-            </div>
-
+    </div>
+ 
+     
             <!-- Pending Clients Section -->
             <div class="mb-8">
                 <h3 class="mb-4 text-2xl font-bold text-gray-100">Pending Client Registrations</h3>
@@ -373,57 +254,9 @@
 
             <!-- Approval Data Tables -->
             <ApprovalDataTable :stats="approvalStats" :recent-approvals="recentApprovals" :pending-reservations="pendingReservations" />
-
-            <!-- Debug Information (Only visible in development) -->
-            <div class="mt-8 rounded-lg border border-red-700 bg-red-900 p-6">
-                <h3 class="mb-4 text-xl font-semibold text-gray-100">Debug Information</h3>
-                <div class="overflow-x-auto">
-                    <p class="mb-2 text-sm text-gray-300">isAdmin prop: {{ isAdmin }}</p>
-                    <p class="mb-2 text-sm text-gray-300">userRole prop: {{ userRole }}</p>
-                    <p class="mb-2 text-sm text-gray-300">Admin button should show: {{ isAdmin }}</p>
-                </div>
-            </div>
-
-            <!-- Client Approval Summary -->
-            <div class="mt-8 rounded-lg border border-gray-700 bg-gray-800 p-4">
-                <h3 class="mb-2 text-xl font-semibold text-gray-100">Client Approval Summary</h3>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div class="rounded bg-gray-700 p-3">
-                        <span class="text-gray-300">Pending Approvals:</span>
-                        <span class="ml-2 font-semibold text-white">{{ pendingClients.total }}</span>
-                    </div>
-                    <div class="rounded bg-gray-700 p-3">
-                        <span class="text-gray-300">Total Approved Clients:</span>
-                        <span class="ml-2 font-semibold text-white">{{ approvedClientsCount }}</span>
-                    </div>
-                    <div class="rounded bg-gray-700 p-3">
-                        <span class="text-gray-300">Your Approved Clients:</span>
-                        <span class="ml-2 font-semibold text-white">{{ myApprovedClientsCount }}</span>
-                    </div>
-                </div>
-                <div class="mt-4 rounded bg-blue-900 bg-opacity-50 p-3">
-                    <p class="text-gray-200">
-                        <strong>Note:</strong> After approving a client, they will appear in your "My Approved Clients" list and can make
-                        reservations.
-                    </p>
-                    <div class="mt-2 flex flex-wrap gap-3">
-                        <a
-                            href="/receptionist/clients/my-approved"
-                            class="inline-block rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
-                        >
-                            View My Approved Clients ({{ myApprovedClientsCount }})
-                        </a>
-                        <a
-                            href="/receptionist/clients/reservations"
-                            class="inline-block rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition hover:bg-purple-700"
-                        >
-                            View Client Reservations
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
         </div>
-      </div>
+    
 
 
 
@@ -453,62 +286,9 @@
           </div>
         </div>
       </div>
+   
 
-      <!-- Approval Data Tables -->
-      <ApprovalDataTable
-        :stats="approvalStats"
-        :recent-approvals="recentApprovals"
-        :pending-reservations="pendingReservations"
-      />
-
-      <!-- Debug Information (Only visible in development) -->
-      <div class="mt-8 p-6 bg-red-900 rounded-lg border border-red-700">
-        <h3 class="text-xl font-semibold mb-4 text-gray-100">Debug Information</h3>
-        <div class="overflow-x-auto">
-          <p class="text-sm text-gray-300 mb-2">isAdmin prop: {{ isAdmin }}</p>
-          <p class="text-sm text-gray-300 mb-2">userRole prop: {{ userRole }}</p>
-          <p class="text-sm text-gray-300 mb-2">Admin button should show: {{ isAdmin }}</p>
-        </div>
-      </div>
-
-      <!-- Client Approval Summary -->
-      <div class="mt-8 p-4 bg-gray-800 rounded-lg border border-gray-700">
-        <h3 class="text-xl font-semibold mb-2 text-gray-100">Client Approval Summary</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-3 bg-gray-700 rounded">
-            <span class="text-gray-300">Pending Approvals:</span>
-            <span class="ml-2 text-white font-semibold">{{ pendingClients.total }}</span>
-          </div>
-          <div class="p-3 bg-gray-700 rounded">
-            <span class="text-gray-300">Total Approved Clients:</span>
-            <span class="ml-2 text-white font-semibold">{{ approvedClientsCount }}</span>
-          </div>
-          <div class="p-3 bg-gray-700 rounded">
-            <span class="text-gray-300">Your Approved Clients:</span>
-            <span class="ml-2 text-white font-semibold">{{ myApprovedClientsCount }}</span>
-          </div>
-        </div>
-        <div class="mt-4 p-3 bg-blue-900 bg-opacity-50 rounded">
-          <p class="text-gray-200">
-            <strong>Note:</strong> After approving a client, they will appear in your "My Approved Clients" list and can make reservations.
-          </p>
-          <div class="mt-2 flex flex-wrap gap-3">
-            <button
-              @click="navigateTo('/receptionist/clients/my-approved')"
-              class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              View My Approved Clients ({{ myApprovedClientsCount }})
-            </button>
-            <button
-              @click="navigateTo('/receptionist/clients/reservations')"
-              class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              View All My Clients Reservations
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+     
 </template>
 
 <script setup>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateManagerRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Inertia\Inertia;
@@ -19,7 +20,7 @@ class ManagersController extends Controller
 
         return Inertia::render('Admin/Users/Managers/Index', [
             'managers' => $managers,
-            'menuLinks' => $this->getAdminMenuLinks()
+            'menuLinks' => $this->getAdminMenuLinks(),
         ]);
     }
 
@@ -91,7 +92,7 @@ class ManagersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreManagerRequest $request, User $user)
+    public function update(UpdateManagerRequest $request, User $user)
     {
         //
        \Log::info('Received request data:', $request->all());
@@ -146,8 +147,9 @@ class ManagersController extends Controller
      */
     public function ban(User $user)
     {
-          $user->is_banned = !$user->is_banned;
+        $user->is_banned = !$user->is_banned;
         $user->save();
+        // $user->ban();
 
         // Prepare message based on new ban status
         $message = $user->is_banned 

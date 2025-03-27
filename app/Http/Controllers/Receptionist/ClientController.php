@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Notifications\Notification;
 
 class ClientController extends Controller
 {
@@ -450,7 +451,8 @@ class ClientController extends Controller
 
             // Try to send notification, but don't fail if it doesn't work
             try {
-                $client->notify((new GreetingApprovedClient())->delay(now()->addSeconds(10)));
+                // $client->notify((new GreetingApprovedClient())->delay(now()->addSeconds(10)));
+                // $client->notify(new WelcomeEmailNotification($client)); //Ali
             } catch (\Exception $notifyException) {
                 Log::warning('Failed to send approval notification', [
                     'client_id' => $client->id,

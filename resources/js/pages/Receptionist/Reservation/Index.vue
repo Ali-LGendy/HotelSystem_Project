@@ -117,7 +117,8 @@
 import { ref, computed } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import axios from 'axios'
-
+import AppLayout from '@/layouts/AppLayout.vue';
+defineOptions({ layout: AppLayout });
 // Shadcn UI Components
 import { Link } from '@/Components/ui/link'
 import { Button } from '@/Components/ui/button'

@@ -19,14 +19,27 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         if ($user->hasRole('admin')) {
+            
+            //render to the welcom page for the admin 
             return Inertia::render('Admin/Dashboard', [
-                'total_users' => User::count(),
+                'total_managers' => User::role('manager')->count(),
+                'total_clients' => User::role('client')->count(),
+                'total_receptionists' => User::role('receptionist')->count(),
                 'total_reservations' => Reservation::count(),
                 'total_revenue' => Reservation::sum('price_paid'),
+                'baned_users'=> User::where('is_banned', true)->count(),
+                'approved_clients'=> User::where('is_approved', true)->count(),
+                'pending_clients'=> User::where('is_approved', false)
+        ->whereDoesntHave('roles', function ($query) {
+            $query->whereIn('name', ['manager', 'receptionist', 'admin']);
+        })
+        ->count(),
                 'menuLinks' => [
                 ['title' => 'Manage Managers', 'href' => route('admin.users.managers.store')],
                 ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.store')],
                 ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
+                ['title' => 'Manage Floors', 'href' => route('floors.index')],
+                ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
 
             ]
             ]);

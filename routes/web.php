@@ -1,18 +1,14 @@
 <?php
 
 // use App\Http\Controllers\Receptionist\ClientController;
-use App\Http\Controllers\EssamClientController;
-use App\Http\Controllers\Client\ClientController as ClientUserController;
-use App\Http\Controllers\Client\ReservationController as ClientReservationController;
+
 use App\Http\Controllers\Receptionist\ClientController;
 use App\Http\Controllers\Receptionist\ReservationController;
 use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ManagersController;
-use App\Http\Controllers\ManageReceptionistsController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\RoomController;
 use App\Models\Floor;
@@ -48,13 +44,13 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/us
 
 
 Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
-    Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         // List all receptionists
-    Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); // Show create form
-    Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        // Store a new receptionist
-    Route::get('/{user}', [ReceptionistsController::class, 'show'])->name('show');     // Show a specific receptionist
-    Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); // Edit receptionist form
-    Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  // Update a receptionist
-    Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); // Delete a receptionist
+    Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         
+    Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); 
+    Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        
+    Route::get('/{user}', [ReceptionistsController::class, 'show'])->name('show');     
+    Route::get('/{user}/edit', [ReceptionistsController::class, 'edit'])->name('edit'); 
+    Route::put('/{user}', [ReceptionistsController::class, 'update'])->name('update');  
+    Route::delete('/{user}', [ReceptionistsController::class, 'destroy'])->name('destroy'); 
      Route::patch('/{user}/ban', [ReceptionistsController::class, 'ban'])->name('ban');
 });
 
@@ -75,6 +71,7 @@ Route::middleware(['auth', 'permission:manage reservations'])
         Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
         // Add route for all reservations
         Route::get('all-reservations', [ReservationController::class, 'allReservations'])->name('reservations.all');
+        Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
 
         // Client management routes
         Route::get('clients', [ClientController::class, 'index'])->name('clients.index');

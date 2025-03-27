@@ -142,12 +142,19 @@ const canManageReceptionist = (receptionist) => {
                         {{ receptionist.manager ? receptionist.manager.name : 'No Manager' }}
                     </TableCell>
 
-                    <TableCell v-if="user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id">
+                    <TableCell>
                         <div class="flex gap-4">
                             <!-- Edit Button -->
                             <Link :href="route('admin.users.receptionists.edit', receptionist)">
-                                <Button variant="outline">Edit</Button>
+                                <Button
+                                    variant="outline"
+                                    :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
+                                >
+                                    Edit
+                                </Button>
                             </Link>
+
+                            <!-- View Button (Always Enabled) -->
                             <Link :href="route('admin.users.receptionists.show', receptionist)">
                                 <Button variant="secondary">View</Button>
                             </Link>
@@ -160,9 +167,20 @@ const canManageReceptionist = (receptionist) => {
                                 class="text-red-500 transition-colors duration-200 hover:text-red-400"
                                 @click.prevent="confirmDelete(receptionist.id)"
                             >
-                                <Button variant="destructive">Delete</Button>
+                                <Button
+                                    variant="destructive"
+                                    :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
+                                >
+                                    Delete
+                                </Button>
                             </Link>
-                            <Button @click="banManager(receptionist.id)" :variant="receptionist.is_banned ? 'default' : 'destructive'">
+
+                            <!-- Ban/Unban Button -->
+                            <Button
+                                @click="banManager(receptionist.id)"
+                                :variant="receptionist.is_banned ? 'default' : 'destructive'"
+                                :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
+                            >
                                 {{ receptionist.is_banned ? 'Unban Manager' : 'Ban Manager' }}
                             </Button>
                         </div>

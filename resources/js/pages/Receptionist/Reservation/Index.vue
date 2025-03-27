@@ -90,9 +90,6 @@
                 Delete
               </Button>
             </div>
-          </template>
-        </DataTable>
-      </div>
 
       <!-- Delete Confirmation Dialog -->
       <Dialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
@@ -114,7 +111,6 @@
         </DialogContent>
       </Dialog>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -344,29 +340,29 @@ const approveReservation = async (row) => {
 <style scoped>
 /* Existing custom styles */
 label {
-  color: #e5e7eb;
+    color: #e5e7eb;
 }
 
 :deep(.data-table) {
-  --background: #1f2937;
-  --text: #e5e7eb;
-  --border: #374151;
-  --header-background: #111827;
-  --header-text: #f9fafb;
-  --row-hover: #2d3748;
+    --background: #1f2937;
+    --text: #e5e7eb;
+    --border: #374151;
+    --header-background: #111827;
+    --header-text: #f9fafb;
+    --row-hover: #2d3748;
 }
 
 :deep(.data-table th) {
-  background-color: #111827;
-  color: #f9fafb;
-  font-weight: 600;
+    background-color: #111827;
+    color: #f9fafb;
+    font-weight: 600;
 }
 
 :deep(.data-table td) {
-  border-color: #374151;
+    border-color: #374151;
 }
 
 :deep(.data-table tr:hover td) {
-  background-color: #2d3748;
+    background-color: #2d3748;
 }
 </style>

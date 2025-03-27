@@ -51,6 +51,7 @@ class DashboardController extends Controller
             return Inertia::render('Admin/Dashboard',[
                 'clients_to_approve' => User::role('client')->where('is_approved', false)->get(),
                 'approved_clients' => User::role('client')->where('is_approved', true)->get(),
+                'menuLinks' => $this->getreceptionistMenuLinks(),
                 // 'total_reservations' => Reservation::where('is_approved', true)->where('manager_id', $user->id),
                 // ['title' => 'Manage Floors', 'href' => route('floors.index')],
                 // ['title' => 'Manage Rooms', 'href' => route('rooms.index')],

@@ -134,6 +134,7 @@ const form = useForm({
   floor_id: '',
   manager_id: ''
 });
+defineOptions({ layout: AppLayout });
 
 const submit = () => {
   form.post(route('rooms.store'));

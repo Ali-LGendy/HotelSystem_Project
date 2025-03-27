@@ -14,6 +14,7 @@ import { type BreadcrumbItem, type SharedData, type User } from '@/types';
 interface Props {
     mustVerifyEmail: boolean;
     status?: string;
+    isClient: boolean;
 }
 
 defineProps<Props>();
@@ -102,7 +103,7 @@ const submit = () => {
                 </form>
             </div>
 
-            <DeleteUser />
+            <DeleteUser v-if="isClient" />
         </SettingsLayout>
     </AppLayout>
 </template>

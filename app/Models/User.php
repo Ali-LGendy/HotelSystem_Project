@@ -27,7 +27,7 @@ class User extends Authenticatable implements BannableInterface
         'email',
         'mobile',
         'password',
-        'role',
+        'national_id',
         'avatar_img',
         'country',
         'gender',
@@ -71,9 +71,14 @@ class User extends Authenticatable implements BannableInterface
         return $this->hasMany(Floor::class);
     }
 
-    public function reservations(): HasMany // for both client and receptionist // check it
+    public function reservations(): HasMany // for clients
     {
-        return $this->hasMany(Reservation::class);
+        return $this->hasMany(Reservation::class, 'client_id');
+    }
+
+    public function managedReservations(): HasMany // for receptionists
+    {
+        return $this->hasMany(Reservation::class, 'receptionist_id');
     }
 
     // self relation // check it

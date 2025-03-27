@@ -1,5 +1,7 @@
 <?php
 
+//use App\Http\Middleware\ClientApproved; // Removed
+use App\Http\Middleware\ApprovedClient;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -8,6 +10,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
+use App\Http\Middleware\BannedUserMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Illuminate\Foundation\Providers\HealthCheckServiceProvider;
 
@@ -33,6 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role' => RoleMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'CkeckBan' => BannedUserMiddleware::class,
+            'CkeckApproval' => ApprovedClient::class
+
       ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

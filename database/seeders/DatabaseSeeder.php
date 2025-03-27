@@ -21,15 +21,19 @@ class DatabaseSeeder extends Seeder
         ]);
         $this->call([
             RolesAndPermissionsSeeder::class,
+            WorldSeeder::class,
             //  RoomSeeder::class, // Uncommented if needed
             //  ReservationSeeder::class,
         ]);
         $this->call([AdminSeeder::class]);
 
         // Create users
-        User::factory(20)->manager()->create();
-        User::factory(30)->receptionist()->create();
+        User::factory(20)->manager()->create(['is_approved' => true]);
+        User::factory(30)->receptionist()->create(['is_approved' => true]);
         User::factory(70)->client()->create();
+
+        // Create approved clients
+        $this->call([ApprovedClientSeeder::class]);
 
         // Create floors and rooms
         $floors = Floor::factory(10)->create();

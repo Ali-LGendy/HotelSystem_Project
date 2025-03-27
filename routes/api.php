@@ -21,18 +21,7 @@ Route::middleware(['auth:sanctum', 'permission:manage reservations'])
         Route::delete('reservations/{reservation}', [ReservationController::class, 'destroy']);
     });
 
-// API routes for clients
-Route::middleware(['auth:sanctum'])
-    ->prefix('api')
-    ->name('api.')
-    ->group(function () {
-        Route::get('clients/approved', [App\Http\Controllers\Api\ClientController::class, 'approvedClients'])->name('clients.approved');
-    });
-
-// Direct API route for client approval
-Route::middleware(['auth:sanctum', 'permission:manage clients'])
-    ->post('/api/receptionist/clients/{id}/approve', [App\Http\Controllers\Receptionist\ClientController::class, 'approveClientApi'])
-    ->name('api.receptionist.clients.approve');
+// API routes for the application
 
 Route::get('/user', function (Request $request) {
     return $request->user();

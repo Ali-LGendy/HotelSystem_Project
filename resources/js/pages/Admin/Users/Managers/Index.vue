@@ -1,10 +1,23 @@
-<script setup>
+<script setup >
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+
 import { Link, router } from '@inertiajs/vue3';
 import { defineProps, onMounted } from 'vue';
 import { route } from 'ziggy-js';
+
+import { usePage } from '@inertiajs/vue3';
+
+function useCurrentUser() {
+    const page = usePage();
+    return page.props.auth.user;
+}
+
+const user = useCurrentUser();
+
+
+console.log('user in index',user);
 
 // Props for passing manager data
 
@@ -143,5 +156,19 @@ const getInitials = (name) => {
                 </TableRow>
             </TableBody>
         </Table>
+        <div class="mt-6 flex items-center justify-center gap-2">
+            <Link
+                v-for="page in managers.last_page"
+                :key="page"
+                :href="`?page=${page}`"
+                class="rounded-lg px-4 py-2"
+                :class="{
+                    'bg-blue-600 text-white': page === managers.current_page,
+                    'bg-gray-700 text-gray-300 hover:bg-gray-600': page !== managers.current_page,
+                }"
+            >
+                {{ page }}
+            </Link>
+        </div>
     </div>
 </template>

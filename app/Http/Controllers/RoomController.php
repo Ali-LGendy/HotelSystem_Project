@@ -8,6 +8,7 @@ use App\Models\Floor;
 use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class RoomController extends Controller
 {
@@ -238,5 +239,52 @@ class RoomController extends Controller
         return request()->expectsJson()
             ? response()->json(['success' => 'Room deleted successfully'])
             : redirect()->route('rooms.index')->with('success', 'Room deleted successfully');
+    }
+
+    /**
+     * Display a listing of available rooms for clients.
+     */
+    public function clientIndex(Request $request)
+    {
+        // Get available rooms with pagination
+        $rooms = Room::with(['floor', 'manager'])
+            ->where('status', 'available')
+            ->when($request->filled('capacity'), function (Builder $query) use ($request) {
+                return $query->where('room_capacity', '>=', $request->capacity);
+            })
+            ->when($request->filled('price_min'), function (Builder $query) use ($request) {
+                return $query->where('price', '>=', $request->price_min);
+            })
+            ->when($request->filled('price_max'), function (Builder $query) use ($request) {
+                return $query->where('price', '<=', $request->price_max);
+            })
+            ->paginate(9)
+            ->through(function ($room) {
+                return [
+                    'id' => $room->id,
+                    'room_number' => $room->room_number,
+                    'room_capacity' => $room->room_capacity,
+                    'price' => $room->price,
+                    'status' => $room->status,
+                    'floor_id' => $room->floor_id,
+                    'floor_name' => $room->floor->name ?? 'Unknown',
+                    'floor_number' => $room->floor->number ?? 'N/A',
+                    'manager_id' => $room->manager_id,
+                    'manager_name' => $room->manager->name ?? 'Not Assigned',
+                ];
+            });
+
+        return Inertia::render('Client/landing', [
+            'rooms' => $rooms->items(),
+            'pagination' => [
+                'total' => $rooms->total(),
+                'per_page' => $rooms->perPage(),
+                'current_page' => $rooms->currentPage(),
+                'last_page' => $rooms->lastPage(),
+                'from' => $rooms->firstItem(),
+                'to' => $rooms->lastItem(),
+                'path' => $request->url(),
+            ],
+        ]);
     }
 }

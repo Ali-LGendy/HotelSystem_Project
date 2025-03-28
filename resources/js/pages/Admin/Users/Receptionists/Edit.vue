@@ -8,12 +8,12 @@ import { router, useForm } from '@inertiajs/vue3';
 import { defineOptions, defineProps } from 'vue';
 import { route } from 'ziggy-js';
 
-// Props from the controller (manager object)
+// Props from the controller (receptionist object)
 const props = defineProps({ receptionist: Object });
 
 defineOptions({ layout: AppLayout });
 
-// Initialize form with existing manager data
+// Initialize form with existing receptionist data
 const form = useForm({
     _method: 'PUT',
     name: props.receptionist.name || '', // Ensure non-null value
@@ -62,6 +62,11 @@ const submitForm = () => {
         preserveState: true,
     });
 };
+
+const cancelForm = () => {
+    router.visit(route('admin.users.receptionists.index'));
+};
+
 const getImageUrl = (path) => {
     // If path is a File object
     if (path instanceof File) {
@@ -82,10 +87,11 @@ const getImageUrl = (path) => {
 
 // Fallback to initials if image fails to load
 const handleImageError = (event) => {
+    const receptionistName = props.receptionist.name;
     event.target.style.display = 'none';
     event.target.parentNode.innerHTML = `
-        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-            ${getInitials(receptionist.name)}
+        <div class="h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center text-xl font-bold">
+            ${getInitials(receptionistName)}
         </div>
     `;
 };
@@ -102,78 +108,82 @@ const getInitials = (name) => {
 </script>
 
 <template>
-    <Card class="mx-auto max-w-2xl rounded-lg bg-white shadow-lg dark:bg-gray-900">
-        <CardHeader>
-            <CardTitle class="text-gray-900 dark:text-gray-100">Update Receptionist</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
-                <!-- Name -->
-                <div>
-                    <Label for="name" class="dark:text-gray-300">Name</Label>
-                    <Input v-model="form.name" id="name" placeholder="Enter manager's name" />
-                    <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">
-                        {{ form.errors.name }}
-                    </p>
-                </div>
+    <div class="flex min-h-screen items-center justify-center bg-background p-8 text-foreground">
+        <div class="w-full max-w-3xl">
+            <Card class="w-full p-6">
+                <CardHeader>
+                    <CardTitle class="text-3xl font-bold">Update Receptionist</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-6">
+                            <!-- Name -->
+                            <div>
+                                <Label for="name" class="text-lg">Name</Label>
+                                <Input v-model="form.name" id="name" placeholder="Enter receptionist's name" required class="mt-2 h-12" />
+                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">
+                                    {{ form.errors.name }}
+                                </p>
+                            </div>
 
-                <!-- Email -->
-                <div>
-                    <Label for="email" class="dark:text-gray-300">Email</Label>
-                    <Input v-model="form.email" id="email" type="email" placeholder="Enter manager's email" />
-                    <p v-if="form.errors.email" class="mt-1 text-sm text-red-500">
-                        {{ form.errors.email }}
-                    </p>
-                </div>
+                            <!-- Email -->
+                            <div>
+                                <Label for="email" class="text-lg">Email</Label>
+                                <Input
+                                    v-model="form.email"
+                                    id="email"
+                                    type="email"
+                                    placeholder="Enter receptionist's email"
+                                    required
+                                    class="mt-2 h-12"
+                                />
+                                <p v-if="form.errors.email" class="mt-1 text-sm text-red-500">
+                                    {{ form.errors.email }}
+                                </p>
+                            </div>
 
-                <!-- Password -->
-                <div>
-                    <Label for="password" class="dark:text-gray-300">Password</Label>
-                    <Input v-model="form.password" id="password" type="password" placeholder="Set a password" />
-                    <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
-                        {{ form.errors.password }}
-                    </p>
-                </div>
+                            <!-- Password -->
+                            <div>
+                                <Label for="password" class="text-lg">Password</Label>
+                                <Input v-model="form.password" id="password" type="password" placeholder="Set a new password" class="mt-2 h-12" />
+                                <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
+                                    {{ form.errors.password }}
+                                </p>
+                            </div>
 
-                <!-- National ID -->
-                <div>
-                    <Label for="national_id" class="dark:text-gray-300">National ID</Label>
-                    <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" />
-                    <p v-if="form.errors.national_id" class="mt-1 text-sm text-red-500">
-                        {{ form.errors.national_id }}
-                    </p>
-                </div>
+                            <!-- National ID -->
+                            <div>
+                                <Label for="national_id" class="text-lg">National ID</Label>
+                                <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" required class="mt-2 h-12" />
+                                <p v-if="form.errors.national_id" class="mt-1 text-sm text-red-500">
+                                    {{ form.errors.national_id }}
+                                </p>
+                            </div>
 
-                <!-- Avatar Image -->
-                <div>
-                    <label for="avatar_img" class="mb-2 block text-sm font-semibold">Avatar Image</label>
-                    <input
-                        type="file"
-                        id="avatar_img"
-                        @change="handleFileUpload"
-                        accept="image/*"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-800 p-3"
-                    />
-                    <div class="mt-4">
-                        <p class="mb-2">Current Avatar:</p>
-                        <img
-                            :src="getImageUrl(form.avatar_img)"
-                            alt="Avatar"
-                            class="h-20 w-20 rounded-full border border-gray-500"
-                            @error="handleImageError"
-                        />
-                    </div>
-                </div>
+                            <!-- Avatar Image -->
+                            <div class="col-span-2">
+                                <Label for="avatar_img" class="text-lg">Avatar Image</Label>
+                                <Input id="avatar_img" type="file" @change="handleFileUpload" accept="image/*" class="mt-2" />
+                                <div class="mt-4">
+                                    <p class="mb-2 text-lg">Current Avatar:</p>
+                                    <img
+                                        :src="getImageUrl(form.avatar_img)"
+                                        alt="Avatar"
+                                        class="h-20 w-20 rounded-full border border-gray-500"
+                                        @error="handleImageError"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Submit Button -->
-                <Button type="submit" class="w-full">Update Receptionist</Button>
-            </form>
-        </CardContent>
-    </Card>
+                        <!-- Submit and Cancel Buttons -->
+                        <div class="mt-6 flex space-x-4">
+                            <Button type="button" variant="outline" @click="cancelForm" class="h-12 flex-1 text-lg"> Cancel </Button>
+                            <Button type="submit" class="h-12 flex-1 text-lg">Update Receptionist</Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
 </template>
-
-<style scoped>
-label {
-    color: #4a4a4a;
-}
-</style>

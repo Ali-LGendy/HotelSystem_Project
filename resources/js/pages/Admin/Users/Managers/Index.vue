@@ -1,4 +1,86 @@
-<script setup >
+<template>
+    <div class="min-h-screen bg-background p-8 text-foreground">
+        <div class="mx-auto max-w-7xl">
+            <!-- Header Section with Title and Create Button -->
+            <div class="mb-8 flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-foreground">Manage Managers</h1>
+                <Link :href="route('admin.users.managers.create')">
+                    <Button>+ Add Manager</Button>
+                </Link>
+            </div>
+
+            <!-- Managers Table -->
+            <Table v-if="managers && managers.data.length > 0" class="w-full rounded-lg border border-border">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>National ID</TableHead>
+                        <TableHead>Avatar</TableHead>
+                        <TableHead class="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                    <TableRow v-for="manager in managers.data" :key="manager.id" class="transition-colors hover:bg-accent/10">
+                        <TableCell class="font-medium">{{ manager.name }}</TableCell>
+                        <TableCell>{{ manager.email }}</TableCell>
+                        <TableCell>{{ manager.national_id }}</TableCell>
+                        <TableCell>
+                            <img
+                                v-if="manager.avatar_img"
+                                :src="getImageUrl(manager.avatar_img)"
+                                alt="Avatar"
+                                class="h-10 w-10 rounded-full border border-border"
+                                @error="handleImageError"
+                            />
+                            <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
+                                {{ getInitials(manager.name) }}
+                            </div>
+                        </TableCell>
+                        <TableCell class="text-right">
+                            <div class="flex justify-end space-x-2">
+                                <Link :href="route('admin.users.managers.edit', manager)">
+                                    <Button variant="outline">Edit</Button>
+                                </Link>
+                                <Link :href="route('admin.users.managers.show', manager)">
+                                    <Button variant="secondary">View</Button>
+                                </Link>
+                                <Button @click="banManager(manager.id)" :variant="manager.is_banned ? 'default' : 'destructive'">
+                                    {{ manager.is_banned ? 'Unban' : 'Ban' }}
+                                </Button>
+                                <Button variant="destructive" @click.prevent="confirmDelete(manager.id)"> Delete </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+
+            <!-- Empty State -->
+            <div v-else class="rounded-lg bg-accent/50 p-8 text-center text-muted-foreground">
+                No managers found. Create a new manager by clicking the "Add Manager" button.
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-6 flex items-center justify-center space-x-2">
+                <Link
+                    v-for="page in managers.last_page"
+                    :key="page"
+                    :href="`?page=${page}`"
+                    class="rounded-lg px-4 py-2"
+                    :class="{
+                        'bg-primary text-primary-foreground': page === managers.current_page,
+                        'bg-accent text-accent-foreground hover:bg-accent/80': page !== managers.current_page,
+                    }"
+                >
+                    {{ page }}
+                </Link>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -16,41 +98,36 @@ function useCurrentUser() {
 
 const user = useCurrentUser();
 
-
-console.log('user in index',user);
-
-// Props for passing manager data
-
 const props = defineProps({
     managers: {
-        type: Object, // Changed from Array to Object since it's paginated
+        type: Object,
         default: () => ({ data: [] }),
     },
 });
+
 onMounted(() => {
     console.log('DOM is ready');
     console.log('Managers data:', props.managers);
 });
+
 defineOptions({ layout: AppLayout });
 
 const getImageUrl = (path) => {
-    if (!path) return '/dafaults/user.png';
+    if (!path) return '/defaults/user.png';
 
-    // For full URLs
     if (path.startsWith('http')) {
         return path;
     }
 
-    // For local storage files
     return `/storage/${path}`;
 };
 
-// Fallback to initials if image fails to load
 const handleImageError = (event) => {
+    const manager = event.target.closest('tr').__vnode.key;
     event.target.style.display = 'none';
     event.target.parentNode.innerHTML = `
-        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-            ${getInitials(manager.name)}
+        <div class="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
+            ${getInitials(props.managers.data.find((m) => m.id === manager).name)}
         </div>
     `;
 };
@@ -59,7 +136,6 @@ const banManager = (id) => {
     if (confirm('Are you sure you want to change the ban status of this manager?')) {
         router.patch(route('admin.users.managers.ban', id), {
             onSuccess: () => {
-                // Find and update the manager in the local data
                 const managerIndex = props.managers.data.findIndex((m) => m.id === id);
                 if (managerIndex !== -1) {
                     props.managers.data[managerIndex].is_banned = !props.managers.data[managerIndex].is_banned;
@@ -74,7 +150,7 @@ const confirmDelete = (id) => {
         router.delete(route('admin.users.managers.destroy', id));
     }
 };
-// Get initials from name
+
 const getInitials = (name) => {
     return name
         .split(' ')
@@ -84,91 +160,3 @@ const getInitials = (name) => {
         .substring(0, 2);
 };
 </script>
-
-<template>
-    <div class="min-h-screen rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-        <h1 class="mb-8 text-3xl font-bold">Manage Managers</h1>
-
-        <!-- Add Manager Button -->
-        <Link :href="route('admin.users.managers.create')">
-            <Button class="mb-6">Add Manager</Button>
-        </Link>
-
-        <!-- Managers Table -->
-        <Table v-if="managers && managers.data.length > 0" class="w-full overflow-hidden rounded-lg border border-gray-700">
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>National ID</TableHead>
-                    <TableHead>Avatar Image</TableHead>
-                    <TableHead>Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-
-            <TableBody>
-                <TableRow v-for="manager in managers.data" :key="manager.id" class="transition hover:bg-gray-800">
-                    <TableCell>{{ manager.name }}</TableCell>
-                    <TableCell>{{ manager.email }}</TableCell>
-                    <TableCell>{{ manager.national_id }}</TableCell>
-                    <TableCell class="border-t border-gray-700 p-4">
-                        <img
-                            v-if="manager.avatar_img"
-                            :src="getImageUrl(manager.avatar_img)"
-                            alt="Avatar"
-                            class="h-10 w-10 rounded-full border border-gray-600"
-                            @="handleImageError"
-                        />
-                        <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300">
-                            {{ getInitials(manager.name) }}
-                        </div>
-                    </TableCell>
-                    <TableCell>
-                        <div class="flex gap-4">
-                            <!-- Edit Button -->
-                            <Link :href="route('admin.users.managers.edit', manager)">
-                                <Button variant="outline">Edit</Button>
-                            </Link>
-                            <Link :href="route('admin.users.managers.show', manager)">
-                                <Button variant="secondary">View</Button>
-                            </Link>
-
-                            <!-- Delete Button -->
-                            <Link
-                                method="delete"
-                                :href="route('admin.users.managers.destroy', manager)"
-                                as="button"
-                                class="text-red-500 transition-colors duration-200 hover:text-red-400"
-                                @click.prevent="confirmDelete(manager.id)"
-                            >
-                                <Button variant="destructive">Delete</Button>
-                            </Link>
-                            <Button @click="banManager(manager.id)" :variant="manager.is_banned ? 'default' : 'destructive'">
-                                {{ manager.is_banned ? 'Unban Manager' : 'Ban Manager' }}
-                            </Button>
-                        </div>
-                    </TableCell>
-                </TableRow>
-
-                <!-- Empty State -->
-                <TableRow v-show="managers.length === 0">
-                    <TableCell colspan="5" class="py-4 text-center text-gray-500">No managers found.</TableCell>
-                </TableRow>
-            </TableBody>
-        </Table>
-        <div class="mt-6 flex items-center justify-center gap-2">
-            <Link
-                v-for="page in managers.last_page"
-                :key="page"
-                :href="`?page=${page}`"
-                class="rounded-lg px-4 py-2"
-                :class="{
-                    'bg-blue-600 text-white': page === managers.current_page,
-                    'bg-gray-700 text-gray-300 hover:bg-gray-600': page !== managers.current_page,
-                }"
-            >
-                {{ page }}
-            </Link>
-        </div>
-    </div>
-</template>

@@ -148,6 +148,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/AppLayout.vue';
+defineOptions({ layout: AppLayout });
 import {
   AlertDialog,
   AlertDialogAction,

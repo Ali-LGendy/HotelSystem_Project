@@ -155,6 +155,7 @@ import axios from 'axios';
 import { router, Link } from '@inertiajs/vue3';
 import DataTable from '@/components/ui/DataTable.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+
 defineOptions({ layout: AppLayout });
 // Props
 const props = defineProps({

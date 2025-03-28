@@ -111,15 +111,14 @@ class ReceptionistsController extends Controller
     public function edit(User $user)
     {
         //
-        if(auth()->user()->id == $user->manager_id && auth()->user()->hasRole('admin')){
+        if(auth()->user()->id == $user->manager_id || auth()->user()->hasRole('admin')){
             return Inertia::render('Admin/Users/Receptionists/Edit', [
             'receptionist' => $user,
             'menuLinks' => $this->getAdminMenuLinks()
             ]);
         }else{
-            // dd(auth()->user()->id);
-            dd($user);
-            // abort(403, 'Unauthorized action.');
+            
+            abort(403, 'Unauthorized action.');
         }
         
          

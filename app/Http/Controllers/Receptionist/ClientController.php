@@ -19,6 +19,18 @@ use Illuminate\Notifications\Notification;
 
 class ClientController extends Controller
 {
+    public function showMyReservation(){
+
+        $client = auth()->user();
+        // $client = User::user()->where('id',$currentUserId);
+        $reservations = $client->reservations()->with('room')->get();
+
+
+        return Inertia::render('Receptionist/Client/MyReservation', [
+           
+            'reservations' => $reservations,
+        ]);
+    }
     /**
      * Fields to select from users table
      */
@@ -230,6 +242,8 @@ class ClientController extends Controller
             'userName' => Auth::user()->name,
         ];
 
+        
+        
         return Inertia::render('Receptionist/Client/MyApprovedClients', [
             'myApprovedClients' => $myApprovedClients,
             'clientStats' => [

@@ -86,21 +86,11 @@
                     Reject
                   </Button>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <a
-                        href="/receptionist/clients/my-approved"
-                        class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
-                    >
-                        My Approved Clients
-                    </a>
-                    <a
-                        href="/receptionist/clients/reservations"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
-                    >
-                        Clients Reservations
-                    </a>
-                </div>
-            </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
       <div v-if="pendingClients.data.length > 0" class="mt-4 flex justify-between items-center">
@@ -144,10 +134,11 @@
 </template>
 
 <script setup>
-import AppLayout from '@/layouts/AppLayout.vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
+import { route } from 'ziggy-js';
+import { useToast } from '@/composables/useToast';
 import AppLayout from '@/layouts/AppLayout.vue';
 defineOptions({ layout: AppLayout });
 import {
@@ -161,6 +152,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+// Initialize toast
+const toast = useToast();
+
+// Props
+const props = defineProps({
+  pendingClients: {
+    type: Object,
+    required: true
+  }
+});
+
 // Navigation method using Inertia
 const navigateTo = (url) => {
   router.get(url, {}, {
@@ -170,5 +172,54 @@ const navigateTo = (url) => {
   });
 };
 
-// Existing script logic remains the same as in the original file...
+// Pagination
+const goToPage = (url) => {
+  if (url) {
+    router.get(url, {}, {
+      preserveScroll: true,
+      preserveState: true,
+    });
+  }
+};
+
+// Client approval and rejection
+const showConfirmDialog = ref(false);
+const confirmDialogTitle = ref('');
+const confirmDialogMessage = ref('');
+const confirmAction = ref('');
+const selectedClientId = ref(null);
+
+// Direct approval without confirmation dialog
+const approveClient = (clientId) => {
+  // Find the client name for the toast message
+  const client = props.pendingClients.data.find(c => c.id === clientId);
+  const clientName = client ? client.name : 'Client';
+
+  router.post(route('receptionist.clients.approve', clientId), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast.success(`${clientName} has been approved successfully!`);
+    },
+    onError: (errors) => {
+      toast.error(`Failed to approve client: ${Object.values(errors).flat().join(', ')}`);
+    }
+  });
+};
+
+// Direct rejection without confirmation dialog
+const rejectClient = (clientId) => {
+  // Find the client name for the toast message
+  const client = props.pendingClients.data.find(c => c.id === clientId);
+  const clientName = client ? client.name : 'Client';
+
+  router.post(route('receptionist.clients.reject', clientId), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast.success(`${clientName} has been rejected.`);
+    },
+    onError: (errors) => {
+      toast.error(`Failed to reject client: ${Object.values(errors).flat().join(', ')}`);
+    }
+  });
+};
 </script>

@@ -293,8 +293,15 @@ const approveReservation = async (reservation) => {
                     // If client is not approved, redirect to clients page
                     navigateTo('/receptionist/clients');
                 } else {
-                    // Otherwise, refresh the current page with updated data
-                    window.location.reload(); // Full page reload to ensure data is refreshed
+                    // Otherwise, refresh the current page with updated data using Inertia
+                    router.visit(window.location.pathname, {
+                        preserveScroll: true,
+                        preserveState: false,
+                        replace: true,
+                        onSuccess: () => {
+                            console.log('Page reloaded after reservation approval');
+                        }
+                    });
                 }
             } else {
                 alert('Could not approve reservation. Please try again.');
@@ -332,10 +339,16 @@ const handlePageChange = (pageIndex) => {
 
 // Navigation method using Inertia
 const navigateTo = (url) => {
-  router.get(url, {}, {
-    preserveScroll: false,
-    preserveState: false,
-    replace: false
+  router.visit(url, {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onSuccess: () => {
+      console.log('Navigation successful to:', url);
+    },
+    onError: (errors) => {
+      console.error('Navigation error:', errors);
+    }
   });
 };
 </script>

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Nnjeim\World\World;
 
 class ProfileController extends Controller
 {
@@ -18,7 +19,24 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        $isClient = Auth::user()->hasRole('client');
+        $user = Auth::user();
+
+        $isClient = $user->hasRole('client');
+
+        if ($isClient) {
+            
+            $action =  World::countries();
+
+            if ($action->success) {
+              $countries = $action->data;
+            }
+
+            return Inertia::render('Client/edit/Profile', [
+                'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+                'status' => $request->session()->get('status'),
+                'countries' => $countries
+            ]);
+        } 
 
         return Inertia::render('settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
@@ -32,16 +50,26 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user = Auth::user();
+        $user->fill($request->except('avatar_img')); // Exclude image
+    
+        // Handle avatar image update
+        if ($request->hasFile('avatar_img')) {
+            if ($user->avatar_img) {
+                Storage::disk('public')->delete($user->avatar_img); // Delete old image
+            }
+            $user->avatar_img = $request->file('avatar_img')->store('avatars', 'public');
         }
-
-        $request->user()->save();
-
+    
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+    
+        $user->save();
+    
         return to_route('profile.edit');
     }
+    
 
     /**
      * Delete the user's profile.

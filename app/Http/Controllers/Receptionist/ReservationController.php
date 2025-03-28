@@ -44,6 +44,19 @@ class ReservationController extends Controller
         $confirmedCount = Reservation::where('status', 'confirmed')->count();
         $checkedInCount = Reservation::whereIn('status', ['checked_in', 'checked-in'])->count();
 
+        // if( Auth::user()->hasRole('client')){
+        //     return Inertia::render('Receptionist/Reservation/Show', [
+        //     'reservations' => $pendingReservations,
+        //     'reservationStats' => [
+        //         'totalPending' => $pendingCount,
+        //         'confirmedReservations' => $confirmedCount,
+        //         'checkedInGuests' => $checkedInCount,
+        //     ],
+            
+        // ]);
+        // }
+        
+
         return Inertia::render('Receptionist/Reservation/PendingReservations', [
             'reservations' => $pendingReservations,
             'reservationStats' => [
@@ -53,6 +66,8 @@ class ReservationController extends Controller
             ],
             'isAdmin' => $isAdmin
         ]);
+
+        
     }
 
     /**

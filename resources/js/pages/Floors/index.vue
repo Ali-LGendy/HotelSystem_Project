@@ -48,7 +48,21 @@
             </div>
 
             <!-- Pagination Controls -->
-            <Pagination :currentPage="currentPage" :totalPages="totalPages" @pageChange="handlePageChange" class="mt-6" />
+            <div class="mt-6 flex items-center justify-center gap-2">
+                <Link
+                    v-for="page in floors.last_page"
+                    :key="page"
+                    :href="`?page=${page}`"
+                    class="rounded-lg px-4 py-2 transition-colors"
+                    :class="{
+                        'bg-primary text-primary-foreground': page === floors.current_page,
+                        'bg-secondary text-secondary-foreground hover:bg-secondary/80': page !== floors.current_page,
+                    }"
+                >
+                    {{ page }}
+                </Link>
+            </div>
+            <!-- <Pagination :currentPage="currentPage" :totalPages="totalPages" @pageChange="handlePageChange" class="mt-6" /> -->
         </div>
     </div>
 
@@ -65,12 +79,10 @@
 </template>
 
 <script setup>
-import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
-import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 defineOptions({ layout: AppLayout });

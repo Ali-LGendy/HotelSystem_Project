@@ -50,12 +50,12 @@
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <a
-                                        :href="`/receptionist/clients/${client.id}/reservations`"
+                                    <button
+                                        @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
                                         class="rounded-md bg-indigo-700 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-600"
                                     >
                                         View Reservations
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -107,12 +107,12 @@
                                     >
                                         Approve
                                     </button>
-                                    <a
-                                        :href="`/receptionist/reservations/${reservation.id}`"
+                                    <button
+                                        @click="navigateTo(`/receptionist/reservations/${reservation.id}`)"
                                         class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
                                     >
                                         View
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -170,9 +170,15 @@ const formatDate = (dateString) => {
 // Navigation method using Inertia
 const navigateTo = (url) => {
   router.visit(url, {
-    preserveScroll: false,
-    preserveState: false,
-    replace: false
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onSuccess: () => {
+      console.log('Navigation successful to:', url);
+    },
+    onError: (errors) => {
+      console.error('Navigation error:', errors);
+    }
   });
 };
 

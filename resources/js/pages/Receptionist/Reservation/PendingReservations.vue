@@ -9,16 +9,16 @@
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <button
-                        @click="navigateTo('/receptionist/all-reservations')"
-                        class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                    >
-                        All Reservations
-                    </button>
-                    <button
                         @click="navigateTo('/receptionist/clients/my-approved')"
                         class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     >
                         My Approved Clients
+                    </button>
+                    <button
+                        @click="navigateTo('/receptionist/clients/reservations')"
+                        class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        Clients Reservations
                     </button>
                     <button
                         @click="navigateTo('/receptionist/clients')"
@@ -189,8 +189,8 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { Badge } from '@/components/ui/badge';
 import axios from 'axios';
 import { router, Link } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
-defineOptions({ layout: AppLayout });
+import ReceptionistLayout from '@/layouts/ReceptionistLayout.vue';
+defineOptions({ layout: ReceptionistLayout });
 
 // Props
 const props = defineProps({
@@ -407,8 +407,12 @@ const approveReservation = async (row) => {
         // If client is not approved, redirect to clients page
         navigateTo('/receptionist/clients');
       } else {
-        // Otherwise, refresh the current page with updated data
-        window.location.reload(); // Full page reload to ensure data is refreshed
+        // Otherwise, refresh the current page with updated data using Inertia
+        router.visit(window.location.pathname, {
+          preserveScroll: false,
+          preserveState: false,
+          replace: true
+        });
       }
     } else {
       alert('Could not approve reservation. Please try again.');

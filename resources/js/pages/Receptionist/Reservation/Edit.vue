@@ -110,11 +110,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
-import AppLayout from '@/layouts/AppLayout.vue';
+import ReceptionistLayout from '@/layouts/ReceptionistLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { defineProps, ref } from 'vue';
-defineOptions({ layout: AppLayout });
+defineOptions({ layout: ReceptionistLayout });
 const props = defineProps({
     reservation: {
         type: Object,

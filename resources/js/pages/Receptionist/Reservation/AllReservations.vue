@@ -8,19 +8,19 @@
           <p class="mt-2 text-gray-400">Showing all reservations in the system</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <Link
+          <button
             v-if="isAdmin"
-            href="/receptionist/reservations"
+            @click="navigateTo('/receptionist/reservations')"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             Pending Reservations
-          </Link>
-          <Link
-            href="/receptionist/clients/my-approved"
+          </button>
+          <button
+            @click="navigateTo('/receptionist/clients/my-approved')"
             class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
             My Approved Clients
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -385,8 +385,12 @@ const confirmApproveReservation = async () => {
           replace: false
         });
       } else {
-        // Otherwise, refresh the current page with updated data
-        window.location.reload(); // Full page reload to ensure data is refreshed
+        // Otherwise, refresh the current page with updated data using Inertia
+        router.visit(window.location.pathname, {
+          preserveScroll: false,
+          preserveState: false,
+          replace: true
+        });
       }
     } else {
       alert('Could not approve reservation. Please try again.');

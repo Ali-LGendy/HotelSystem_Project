@@ -424,6 +424,102 @@ class ClientController extends Controller
     }
 
     /**
+     * Show the form for creating a new client.
+     * Admin only.
+     */
+    public function create(): Response
+    {
+        // Hardcoded list of common countries as fallback
+        $countries = [
+            ['name' => 'United States', 'code' => 'US'],
+            ['name' => 'United Kingdom', 'code' => 'GB'],
+            ['name' => 'Canada', 'code' => 'CA'],
+            ['name' => 'Australia', 'code' => 'AU'],
+            ['name' => 'Germany', 'code' => 'DE'],
+            ['name' => 'France', 'code' => 'FR'],
+            ['name' => 'Italy', 'code' => 'IT'],
+            ['name' => 'Spain', 'code' => 'ES'],
+            ['name' => 'Japan', 'code' => 'JP'],
+            ['name' => 'China', 'code' => 'CN'],
+            ['name' => 'India', 'code' => 'IN'],
+            ['name' => 'Brazil', 'code' => 'BR'],
+            ['name' => 'Mexico', 'code' => 'MX'],
+            ['name' => 'Russia', 'code' => 'RU'],
+            ['name' => 'South Africa', 'code' => 'ZA'],
+            ['name' => 'Egypt', 'code' => 'EG'],
+            ['name' => 'Nigeria', 'code' => 'NG'],
+            ['name' => 'Kenya', 'code' => 'KE'],
+            ['name' => 'Saudi Arabia', 'code' => 'SA'],
+            ['name' => 'United Arab Emirates', 'code' => 'AE'],
+        ];
+
+        return Inertia::render('Admin/Users/Clients/Create', [
+            'countries' => $countries,
+            'menuLinks' => $this->getAdminMenuLinks()
+        ]);
+    }
+
+    /**
+     * Store a newly created client in storage.
+     * Admin only.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|min:3',
+            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'password' => 'required|min:6',
+            'gender' => 'required|in:male,female',
+            'mobile' => 'required|string',
+            'country' => 'required|string',
+            'avatar_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        try {
+            // Create the user
+            $user = new User();
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+            $user->password = bcrypt($validated['password']);
+            $user->gender = $validated['gender'];
+            $user->mobile = $validated['mobile'];
+            $user->country = $validated['country'];
+            $user->is_approved = true; // Auto-approve when created by admin
+            $user->manager_id = Auth::id(); // Set the admin as the manager
+
+            // Handle avatar image if provided
+            if ($request->hasFile('avatar_image')) {
+                $user->avatar_img = $request->file('avatar_image')->store('avatars', 'public');
+            } else {
+                $user->avatar_img = 'defaults/user.png';
+            }
+
+            $user->save();
+
+            // Assign client role
+            $user->assignRole('client');
+
+            Log::info('Client created by admin', [
+                'client_id' => $user->id,
+                'client_name' => $user->name,
+                'admin_id' => Auth::id(),
+                'admin_name' => Auth::user()->name
+            ]);
+
+            return redirect()->route('receptionist.clients.index')
+                ->with('success', 'Client created successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error creating client', [
+                'error' => $e->getMessage(),
+                'data' => $validated
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'An error occurred while creating the client: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * API endpoint to approve a client and send welcome notification.
      * Also update any pending reservations to confirmed status.
      * Returns JSON response instead of redirecting.

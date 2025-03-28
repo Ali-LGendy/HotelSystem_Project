@@ -48,6 +48,7 @@ class ClientController extends Controller
                 }
             }
         }
+        
 
         // Apply sorting
         $query->orderBy($sortBy, $sortDir);
@@ -147,7 +148,20 @@ class ClientController extends Controller
      */
     public function myApprovedClients(Request $request): Response
     {
-        // Get the current user ID
+        $user = Auth::user();
+        $isAdmin = $user->hasRole('admin');
+        $isManager = $user->hasRole('manager');
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }elseif($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
+
+
+
         $currentUserId = Auth::id();
 
         // Get all clients (for debugging)
@@ -194,23 +208,6 @@ class ClientController extends Controller
             ->limit(5)
             ->get();
 
-        // Add debug information
-        // $debug = [
-        //     'currentUserId' => $currentUserId,
-        //     'totalClientsInSystem' => $allClients,
-        //     'myManagedClientsCount' => $totalApprovedCount,
-        //     'approvedClientsQuery' => User::role('client')
-        //         ->where('manager_id', $currentUserId)
-        //         ->where('is_approved', 1)
-        //         ->select(['id', 'name', 'email', 'manager_id', 'is_approved'])
-        //         ->get(),
-        //     'allApprovedClients' => User::role('client')
-        //         ->where('is_approved', 1)
-        //         ->select(['id', 'name', 'email', 'manager_id', 'is_approved'])
-        //         ->get(),
-        // ];
-
-        // Get current user role
         $userRole = Auth::user()->getRoleNames()->first();
         $isAdmin = Auth::user()->hasRole('admin');
 
@@ -236,16 +233,17 @@ class ClientController extends Controller
         return Inertia::render('Receptionist/Client/MyApprovedClients', [
             'myApprovedClients' => $myApprovedClients,
             'clientStats' => [
-            'isAdmin' => $isAdmin, // Pass the boolean directly
                 'totalApproved' => $totalApprovedCount,
                 'activeReservations' => $activeReservationsCount,
                 'pendingReservations' => $recentReservations->where('status', 'pending')->count(),
             ],
             'recentReservations' => $recentReservations,
             'userRole' => $userRole,
-            'isAdmin' => $isAdmin, // Pass the boolean directly
+            'isAdmin' => $isAdmin, 
             'debug' => $debug,
+            'menuLinks' => $menuLinks, // Fixed invisible character issue
         ]);
+        
     }
 
     /**
@@ -272,10 +270,23 @@ class ClientController extends Controller
 
     public function clientReservations(Request $request, int $id = null): Response
     {
-        // Check if ID is passed in the request (for the /clients/reservations/{id?} route)
+        $user = Auth::user();
+        $isAdmin = $user->hasRole('admin');
+        $isManager = $user->hasRole('manager');
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }elseif($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
+
+
         if (!$id && $request->has('id')) {
             $id = $request->input('id');
         }
+        
 
         // Get request parameters for sorting and pagination
         $perPage = $request->input('per_page', 10);
@@ -322,7 +333,9 @@ class ClientController extends Controller
         return Inertia::render('Receptionist/Client/ClientsReservations', [
             'clientsReservations' => $reservations,
             'clientId' => $id,
-            'clientName' => $clientName
+            'clientName' => $clientName,
+            'menuLinks' => $menuLinks
+            
         ]);
     }
 
@@ -472,7 +485,7 @@ class ClientController extends Controller
             'gender' => 'required|in:male,female',
             'mobile' => 'required|string',
             'country' => 'required|string',
-            'avatar_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'avatar_img' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         try {
@@ -488,8 +501,8 @@ class ClientController extends Controller
             $user->manager_id = Auth::id(); // Set the admin as the manager
 
             // Handle avatar image if provided
-            if ($request->hasFile('avatar_image')) {
-                $user->avatar_img = $request->file('avatar_image')->store('avatars', 'public');
+            if ($request->hasFile('avatar_img')) {
+                $user->avatar_img = $request->file('avatar_img')->store('avatars', 'public');
             } else {
                 $user->avatar_img = 'defaults/user.png';
             }
@@ -595,6 +608,18 @@ class ClientController extends Controller
      */
     public function allClients(Request $request): Response
     {
+        $user = Auth::user();
+        $isAdmin = $user->hasRole('admin');
+        $isManager = $user->hasRole('manager');
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }elseif($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
+
         // Check if user has admin role
         if (!Auth::user()->hasRole('admin')) {
             abort(403, 'Unauthorized action.');
@@ -638,6 +663,7 @@ class ClientController extends Controller
             'recentReservations' => $recentReservations,
             'userRole' => Auth::user()->getRoleNames()->first(),
             'currentUserId' => Auth::id(),
+            'menuLinks' => $menuLinks
         ]);
     }
 
@@ -647,6 +673,17 @@ class ClientController extends Controller
      */
     public function edit(string $id): Response
     {
+        $user = Auth::user();
+        $isAdmin = $user->hasRole('admin');
+        $isManager = $user->hasRole('manager');
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }elseif($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
         // Check if user is admin
         if (!Auth::user()->hasRole('admin')) {
             abort(403, 'Unauthorized action.');
@@ -664,6 +701,7 @@ class ClientController extends Controller
             'client' => $client,
             'isAdmin' => Auth::user()->hasRole('admin'),
             'currentUserId' => Auth::id(),
+            'menuLinks' => $menuLinks
         ]);
     }
 

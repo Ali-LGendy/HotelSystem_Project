@@ -1,18 +1,47 @@
 import { inject } from 'vue';
 
+// Create a simple alert-based fallback toast implementation
+const createFallbackToast = () => {
+  return {
+    show: (message, options) => {
+      const description = options?.description ? `\n${options.description}` : '';
+      alert(`${message}${description}`);
+    },
+    success: (message, options) => {
+      const description = options?.description ? `\n${options.description}` : '';
+      alert(`Success: ${message}${description}`);
+    },
+    error: (message, options) => {
+      const description = options?.description ? `\n${options.description}` : '';
+      alert(`Error: ${message}${description}`);
+    },
+    warning: (message, options) => {
+      const description = options?.description ? `\n${options.description}` : '';
+      alert(`Warning: ${message}${description}`);
+    },
+    info: (message, options) => {
+      const description = options?.description ? `\n${options.description}` : '';
+      alert(`Info: ${message}${description}`);
+    },
+  };
+};
+
+// Singleton instance of the fallback toast
+let fallbackToast = null;
+
 export function useToast() {
-  const toast = inject('toast');
-  
+  // Try to inject the toast service
+  const toast = inject('toast', null);
+
+  // If toast service is not available, use the fallback
   if (!toast) {
-    // Fallback if toast is not provided
-    return {
-      show: (message, options) => console.log('Toast not available:', message, options),
-      success: (message, options) => console.log('Success toast not available:', message, options),
-      error: (message, options) => console.log('Error toast not available:', message, options),
-      warning: (message, options) => console.log('Warning toast not available:', message, options),
-      info: (message, options) => console.log('Info toast not available:', message, options),
-    };
+    // Create the fallback toast if it doesn't exist yet
+    if (!fallbackToast) {
+      fallbackToast = createFallbackToast();
+    }
+    return fallbackToast;
   }
-  
+
+  // Return the injected toast service
   return toast;
 }

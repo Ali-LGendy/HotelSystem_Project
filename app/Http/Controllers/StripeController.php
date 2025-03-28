@@ -89,7 +89,7 @@ class StripeController extends Controller
             Log::info('this is, ', ['sessionId' => $session_id]);
 
             if (! $session_id) {
-                return redirect()->route('dashboard')->with('error', 'Invalid session.');
+                return redirect()->route('hotel.landing')->with('error', 'Invalid session.');
             }
 
             // Set Stripe API key
@@ -99,7 +99,7 @@ class StripeController extends Controller
             $session = Session::retrieve($session_id);
 
             if ($session->payment_status !== 'paid') {
-                return redirect()->route('dashboard')->with('error', 'Payment not completed.');
+                return redirect()->route('hotel.landing')->with('error', 'Payment not completed.');
             }
             $payment = Payment::where('stripe_payment_id', $session_id)->firstOrFail();
 
@@ -111,7 +111,7 @@ class StripeController extends Controller
                     'payment_id' => $payment->id,
                 ]);
 
-                return redirect()->route('dashboard')->with('error', 'Payment verification failed.');
+                return redirect()->route('hotel.landing')->with('error', 'Payment verification failed.');
             }
 
             DB::beginTransaction();
@@ -138,13 +138,13 @@ class StripeController extends Controller
                 'stripe_session_id' => $session_id,
             ]);
 
-            return redirect()->route('dashboard')->with('success', 'Your reservation has been confirmed successfully!');
+            return redirect()->route('hotel.landing')->with('success', 'Your reservation has been confirmed successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Payment success handling error: '.$e->getMessage());
 
-            return redirect()->route('dashboard')->with('error', 'There was an issue processing your payment confirmation.');
+            return redirect()->route('hotel.landing')->with('error', 'There was an issue processing your payment confirmation.');
         }
     }
 
@@ -168,11 +168,11 @@ class StripeController extends Controller
                 }
             }
 
-            return redirect()->route('dashboard')->with('info', 'Payment was cancelled.');
+            return redirect()->route('hotel.landing')->with('info', 'Payment was cancelled.');
         } catch (\Exception $e) {
             Log::error('Cancel payment error: '.$e->getMessage());
 
-            return redirect()->route('dashboard')->with('error', 'An error occurred while cancelling the payment.');
+            return redirect()->route('hotel.landing')->with('error', 'An error occurred while cancelling the payment.');
         }
     }
 

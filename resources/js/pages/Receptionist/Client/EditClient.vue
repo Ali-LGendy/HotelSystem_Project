@@ -1,96 +1,96 @@
 <template>
-    <div class="mx-auto max-w-7xl px-4 py-8">
-        <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
+    <div class="min-h-screen bg-background text-foreground p-8">
+        <div class="mx-auto max-w-7xl">
             <!-- Header with Navigation -->
             <div class="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                    <h2 class="text-3xl font-bold">Edit Client</h2>
-                    <p class="mt-2 text-gray-400">Update client information</p>
+                    <h1 class="text-3xl font-bold">Edit Client</h1>
+                    <p class="mt-2 text-muted-foreground">Update client information</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <a
+                    <Link
                         href="/receptionist/clients/all"
-                        class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+                        class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
                         Back to All Clients
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="/receptionist/clients"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+                        class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
                         Pending Clients
-                    </a>
+                    </Link>
                 </div>
             </div>
 
             <!-- Edit Client Form -->
-            <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+            <div class="rounded-lg border border-border bg-card p-6 shadow-sm">
                 <form @submit.prevent="updateClient">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Name -->
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-300">Name</label>
+                            <label for="name" class="block text-sm font-medium">Name</label>
                             <input
                                 id="name"
                                 v-model="form.name"
                                 type="text"
-                                class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 required
                             />
-                            <div v-if="form.errors.name" class="mt-1 text-sm text-red-500">{{ form.errors.name }}</div>
+                            <div v-if="form.errors.name" class="mt-1 text-sm text-destructive">{{ form.errors.name }}</div>
                         </div>
 
                         <!-- Email -->
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                            <label for="email" class="block text-sm font-medium">Email</label>
                             <input
                                 id="email"
                                 v-model="form.email"
                                 type="email"
-                                class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 required
                             />
-                            <div v-if="form.errors.email" class="mt-1 text-sm text-red-500">{{ form.errors.email }}</div>
+                            <div v-if="form.errors.email" class="mt-1 text-sm text-destructive">{{ form.errors.email }}</div>
                         </div>
 
                         <!-- Mobile -->
                         <div>
-                            <label for="mobile" class="block text-sm font-medium text-gray-300">Mobile</label>
+                            <label for="mobile" class="block text-sm font-medium">Mobile</label>
                             <input
                                 id="mobile"
                                 v-model="form.mobile"
                                 type="text"
-                                class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             />
-                            <div v-if="form.errors.mobile" class="mt-1 text-sm text-red-500">{{ form.errors.mobile }}</div>
+                            <div v-if="form.errors.mobile" class="mt-1 text-sm text-destructive">{{ form.errors.mobile }}</div>
                         </div>
 
                         <!-- Country -->
                         <div>
-                            <label for="country" class="block text-sm font-medium text-gray-300">Country</label>
+                            <label for="country" class="block text-sm font-medium">Country</label>
                             <input
                                 id="country"
                                 v-model="form.country"
                                 type="text"
-                                class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             />
-                            <div v-if="form.errors.country" class="mt-1 text-sm text-red-500">{{ form.errors.country }}</div>
+                            <div v-if="form.errors.country" class="mt-1 text-sm text-destructive">{{ form.errors.country }}</div>
                         </div>
 
                         <!-- Gender -->
                         <div>
-                            <label for="gender" class="block text-sm font-medium text-gray-300">Gender</label>
+                            <label for="gender" class="block text-sm font-medium">Gender</label>
                             <select
                                 id="gender"
                                 v-model="form.gender"
-                                class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                                 <option value="other">Other</option>
                             </select>
-                            <div v-if="form.errors.gender" class="mt-1 text-sm text-red-500">{{ form.errors.gender }}</div>
+                            <div v-if="form.errors.gender" class="mt-1 text-sm text-destructive">{{ form.errors.gender }}</div>
                         </div>
 
                         <!-- Status Options -->
@@ -101,18 +101,19 @@
                                         id="is_approved"
                                         v-model="form.is_approved"
                                         type="checkbox"
-                                        class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500"
+                                        class="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
                                     />
-                                    <label for="is_approved" class="ml-2 block text-sm text-gray-300">Approved</label>
+                                    <label for="is_approved" class="ml-2 block text-sm">Approved</label>
                                 </div>
+                                <!-- Commented out banned checkbox preserved -->
                                 <!-- <div class="flex items-center">
                   <input
                     id="is_banned"
                     v-model="form.is_banned"
                     type="checkbox"
-                    class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500"
+                    class="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
                   />
-                  <label for="is_banned" class="ml-2 block text-sm text-gray-300">Banned</label>
+                  <label for="is_banned" class="ml-2 block text-sm">Banned</label>
                 </div> -->
                             </div>
                         </div>
@@ -120,49 +121,43 @@
 
                     <!-- Submit Button -->
                     <div class="mt-6 flex justify-end">
-                        <button
+                        <Button
                             type="submit"
-                            class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             :disabled="form.processing"
+                            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                         >
                             {{ form.processing ? 'Updating...' : 'Update Client' }}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>
 
             <!-- Client Reservations Section -->
             <div v-if="client.reservations && client.reservations.length > 0" class="mt-8">
-                <h3 class="mb-4 text-xl font-semibold text-gray-100">Client Reservations</h3>
-                <div class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead class="bg-gray-800">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Room</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Check-in</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Check-out</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700 bg-gray-800">
-                            <tr v-for="reservation in client.reservations" :key="reservation.id" class="hover:bg-gray-700">
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-200">{{ reservation.room ? reservation.room.room_number : 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ formatDate(reservation.check_in_date) }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ formatDate(reservation.check_out_date) }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <span :class="getReservationStatusClass(reservation.status)" class="rounded-full px-2 py-1 text-xs font-medium">
+                <h3 class="mb-4 text-xl font-semibold">Client Reservations</h3>
+                <div class="overflow-hidden rounded-lg border border-border">
+                    <Table class="w-full">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Room</TableHead>
+                                <TableHead>Check-in</TableHead>
+                                <TableHead>Check-out</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="reservation in client.reservations" :key="reservation.id" class="hover:bg-accent/10">
+                                <TableCell class="font-medium">{{ reservation.room ? reservation.room.room_number : 'N/A' }}</TableCell>
+                                <TableCell>{{ formatDate(reservation.check_in_date) }}</TableCell>
+                                <TableCell>{{ formatDate(reservation.check_out_date) }}</TableCell>
+                                <TableCell>
+                                    <Badge :variant="getReservationStatusVariant(reservation.status)">
                                         {{ reservation.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    </Badge>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
         </div>
@@ -171,8 +166,13 @@
 
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+
 defineOptions({ layout: AppLayout });
+
 // Props
 const props = defineProps({
     client: {
@@ -215,16 +215,17 @@ const formatDate = (dateString) => {
     }
 };
 
-const getReservationStatusClass = (status) => {
-    const classes = {
-        confirmed: 'bg-green-900 text-green-200',
-        checked_in: 'bg-blue-900 text-blue-200',
-        'checked-in': 'bg-blue-900 text-blue-200',
-        checked_out: 'bg-gray-700 text-gray-200',
-        'checked-out': 'bg-gray-700 text-gray-200',
-        pending: 'bg-yellow-900 text-yellow-200',
-        cancelled: 'bg-red-900 text-red-200',
+// Updated to return variant names for Badge component
+const getReservationStatusVariant = (status) => {
+    const variants = {
+        confirmed: 'success',
+        checked_in: 'info',
+        'checked-in': 'info',
+        checked_out: 'secondary',
+        'checked-out': 'secondary',
+        pending: 'warning',
+        cancelled: 'destructive',
     };
-    return classes[status] || 'bg-gray-700 text-gray-200';
+    return variants[status] || 'secondary';
 };
 </script>

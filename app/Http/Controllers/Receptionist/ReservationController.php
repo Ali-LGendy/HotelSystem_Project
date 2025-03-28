@@ -22,10 +22,10 @@ class ReservationController extends Controller
         $isAdmin = Auth::user()->hasRole('admin');
 
         // Only allow admins to access this page
-        if (!$isAdmin) {
-            return redirect()->route('receptionist.dashboard')
-                ->with('error', 'You do not have permission to access this page.');
-        }
+        // if (!$isAdmin) {
+        //     return redirect()->route('receptionist.dashboard')
+        //         ->with('error', 'You do not have permission to access this page.');
+        // }
 
         // Get request parameters for sorting and pagination
         $perPage = $request->input('per_page', 10);
@@ -230,4 +230,33 @@ class ReservationController extends Controller
         return redirect()->route('receptionist.reservations.index')
             ->with('success', 'Reservation deleted successfully.');
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'guests' => 'required|integer|min:1',
+            'special_requests' => 'nullable|string',
+            'total_price' => 'required|numeric|min:0'
+        ]);
+
+        // Create the reservation
+        $reservation = Reservation::create([
+            'client_id' => Auth::id(),
+            'room_id' => $validated['room_id'],
+            'check_in_date' => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
+            'accompany_number' => $validated['guests'],
+            'price_paid' => $validated['total_price'] * 100,
+            'status' => 'pending',
+            'receptionist_id' => null,
+        ]);
+
+        // Redirect to checkout with reservation_id
+        return redirect()->route('stripe.checkout', ['reservation_id' => $reservation->id]);
+    }
+
+
 }

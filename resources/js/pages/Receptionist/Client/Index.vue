@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="min-h-screen bg-background text-foreground">
     <ApprovedClients
       :pendingClients="pendingClients"
       :approvedClientsCount="approvedClientsCount"
@@ -55,5 +55,4 @@ const props = defineProps({
 });
 
 defineOptions({ layout: AppLayout });
-
 </script>

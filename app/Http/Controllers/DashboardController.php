@@ -74,6 +74,11 @@ class DashboardController extends Controller
             ]);
         }
         if ($user->hasRole('client')) {
+            // return Inertia::render('Client/landing',[
+            //     'is_logedIn'=> true,
+            //     'my_reservations' => Reservation::where('client_id', $user->id)->get(),
+            //     'avialable_rooms' => Room::where('status', 'available')->get(),
+            // ]);
             return Inertia::render('Admin/Dashboard',[
                 'my_reservations' => Reservation::where('client_id', $user->id)->get(),
                 'avialable_rooms' => Room::where('status', 'available')->get(),

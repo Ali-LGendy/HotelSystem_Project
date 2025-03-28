@@ -19,10 +19,15 @@ class FloorController extends Controller
         $perPage = $request->input('per_page', 10);
         $floors = Floor::with('manager')->withCount('room')->paginate($perPage);
     
+        $isManager = $user->hasRole('manager');
+
         if($isAdmin){
             $menuLinks = $this->getAdminMenuLinks();
-        }else {
+        }elseif($isManager){
             $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
         }
         $floors->getCollection()->transform(function ($floor) use ($isAdmin, $user) {
             return [
@@ -59,7 +64,16 @@ class FloorController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
+       $isManager = $user->hasRole('manager');
 
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }elseif($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
         $managers = $isAdmin ? User::role('manager')->get(['id', 'name']) : collect([$user])->map(function($user) {
             return [
                 'id' => $user->id,
@@ -68,7 +82,8 @@ class FloorController extends Controller
         });
 
         return Inertia::render('Floors/Create', [
-            'managers' => $managers
+            'managers' => $managers,
+            'menuLinks'=> $menuLinks
         ]);
     }
 
@@ -100,6 +115,16 @@ class FloorController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin');
+        $isManager = $user->hasRole('manager');
+
+        if($isAdmin){
+            $menuLinks = $this->getAdminMenuLinks();
+        }elseif($isManager){
+            $menuLinks = $this->getManagerMenuLinks();
+        }
+        else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        }
 
         if (!$isAdmin && $floor->manager_id !== $user->id) {
             return redirect()->route('floors.index')
@@ -109,13 +134,15 @@ class FloorController extends Controller
         $managers = $isAdmin ? User::role('manager')->get(['id', 'name']) : collect([$user])->map(function($user) {
             return [
                 'id' => $user->id,
-                'name' => $user->name
+                'name' => $user->name,
             ];
         });
 
         return Inertia::render('Floors/Edit', [
             'floor' => $floor,
-            'managers' => $managers
+            'managers' => $managers,
+                'menuLinks'=> $menuLinks
+
         ]);
     }
 

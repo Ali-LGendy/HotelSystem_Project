@@ -108,7 +108,7 @@ Route::middleware(['auth', 'permission:manage reservations'])
         });
     });
 
-
+    //Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 
 // Client Routes have been removed
 

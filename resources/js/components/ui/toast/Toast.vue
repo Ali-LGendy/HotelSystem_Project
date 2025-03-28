@@ -6,6 +6,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  description: {
+    type: String,
+    default: ''
+  },
   type: {
     type: String,
     default: 'success', // success, error, warning, info
@@ -89,16 +93,19 @@ onUnmounted(() => {
 <template>
   <div 
     :class="[
-      'fixed z-50 min-w-[300px] max-w-md p-4 rounded-md shadow-lg transform transition-all duration-300',
+      'fixed z-50 min-w-[350px] max-w-md p-4 rounded-md shadow-lg transform transition-all duration-300',
       getPositionClasses(),
       getTypeClasses(),
       isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
     ]"
   >
-    <div class="flex justify-between items-center">
-      <div class="flex-1">{{ message }}</div>
-      <button 
-        @click="close" 
+    <div class="flex justify-between items-start">
+      <div class="flex-1">
+        <div class="font-medium">{{ message }}</div>
+        <div v-if="description" class="mt-1 text-sm opacity-90">{{ description }}</div>
+      </div>
+      <button
+        @click="close"
         class="ml-4 text-white hover:text-gray-200 focus:outline-none"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

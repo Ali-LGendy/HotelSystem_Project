@@ -157,10 +157,10 @@ const getInitials = (name) => {
             </TableBody>
         </Table>
         <div class="mt-6 flex items-center justify-center gap-2">
-            <Link
+            <button
                 v-for="page in managers.last_page"
                 :key="page"
-                :href="`?page=${page}`"
+                @click="router.visit(`?page=${page}`, { preserveScroll: true, preserveState: true, replace: true })"
                 class="rounded-lg px-4 py-2"
                 :class="{
                     'bg-blue-600 text-white': page === managers.current_page,
@@ -168,7 +168,7 @@ const getInitials = (name) => {
                 }"
             >
                 {{ page }}
-            </Link>
+            </button>
         </div>
     </div>
 </template>

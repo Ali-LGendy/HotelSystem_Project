@@ -8,26 +8,26 @@
           <p class="mt-2 text-gray-400">{{ showAll ? 'Showing all reservations in the system' : 'Showing reservations that need your approval' }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <Link
+          <button
             v-if="!showAll"
-            :href="route('receptionist.all-reservations')"
+            @click="router.visit(route('receptionist.all-reservations'), { preserveScroll: false, preserveState: false })"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             All Reservations
-          </Link>
-          <Link
+          </button>
+          <button
             v-else
-            :href="route('receptionist.reservations')"
+            @click="router.visit(route('receptionist.reservations'), { preserveScroll: false, preserveState: false })"
             class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
             Pending Reservations
-          </Link>
-          <Link
-            :href="route('receptionist.clients.approved')"
+          </button>
+          <button
+            @click="router.visit(route('receptionist.clients.approved'), { preserveScroll: false, preserveState: false })"
             class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
           >
             My Approved Clients
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -117,8 +117,8 @@
 import { ref, computed } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import axios from 'axios'
-import AppLayout from '@/layouts/AppLayout.vue';
-defineOptions({ layout: AppLayout });
+import ReceptionistLayout from '@/layouts/ReceptionistLayout.vue';
+defineOptions({ layout: ReceptionistLayout });
 // Shadcn UI Components
 import { Link } from '@/Components/ui/link'
 import { Button } from '@/Components/ui/button'

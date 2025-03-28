@@ -1,50 +1,59 @@
 <template>
-    <Card class="mx-auto max-w-3xl rounded-lg bg-white shadow-lg dark:bg-gray-900">
-        <CardHeader>
-            <CardTitle class="text-gray-900 dark:text-gray-100">User Details</CardTitle>
-        </CardHeader>
+    <div class="flex min-h-screen items-center justify-center bg-background p-8 text-foreground">
+        <div class="w-full max-w-3xl">
+            <Card class="w-full p-6">
+                <CardHeader>
+                    <CardTitle class="text-3xl font-bold">User Details</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-6">
+                    <!-- Avatar -->
+                    <div class="mb-6 flex items-center space-x-6">
+                        <img
+                            :src="getImageUrl(user.data.avatar_img)"
+                            alt="User Avatar"
+                            class="h-32 w-32 rounded-full border-4 border-gray-300 object-cover"
+                        />
+                        <div>
+                            <h2 class="mb-2 text-3xl font-bold">{{ user.data.name }}</h2>
+                            <p class="text-xl text-muted-foreground">{{ user.data.email }}</p>
+                        </div>
+                    </div>
 
-        <CardContent class="space-y-6">
-            <!-- Avatar -->
-            <div class="flex items-center space-x-4">
-                <img :src="getImageUrl(user.data.avatar_img)" alt="User Avatar" class="h-24 w-24 rounded-full border border-gray-600" />
-                <div>
-                    <h2 class="text-2xl font-semibold">{{ user.data.name }}</h2>
-                    <p class="text-gray-500 dark:text-gray-400">{{ user.data.email }}</p>
-                </div>
-            </div>
+                    <!-- User Information -->
+                    <div class="grid grid-cols-2 gap-6 rounded-lg bg-secondary/10 p-6">
+                        <div>
+                            <p class="mb-2 text-sm font-semibold text-muted-foreground">National ID:</p>
+                            <p class="text-lg font-medium">{{ user.data.national_id }}</p>
+                        </div>
+                        <div>
+                            <p class="mb-2 text-sm font-semibold text-muted-foreground">Status:</p>
+                            <p
+                                class="inline-block rounded-full px-4 py-1 text-sm font-semibold"
+                                :class="user.data.is_banned ? 'bg-destructive text-destructive-foreground' : 'bg-green-500 text-white'"
+                            >
+                                {{ user.data.is_banned ? 'Banned' : 'Active' }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="mb-2 text-sm font-semibold text-muted-foreground">Created At:</p>
+                            <p class="text-lg font-medium">{{ new Date(user.created_at).toLocaleString() }}</p>
+                        </div>
+                    </div>
 
-            <!-- User Information -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                    <p class="text-sm font-semibold text-gray-400">National ID:</p>
-                    <p class="text-lg">{{ user.data.national_id }}</p>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold text-gray-400">Status:</p>
-                    <p
-                        class="inline-block rounded-full px-3 py-1 text-sm"
-                        :class="user.data.is_banned ? 'bg-red-500 text-white' : 'bg-green-500 text-white'"
-                    >
-                        {{ user.data.is_banned ? 'Banned' : 'Active' }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold text-gray-400">Created At:</p>
-                    <p class="text-lg">{{ new Date(user.created_at).toLocaleString() }}</p>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="mt-8 flex justify-end space-x-4">
-                <Button @click="router.visit(route('admin.users.managers.index'))" variant="outline"> Back to List </Button>
-                <Button @click="router.visit(route('admin.users.managers.edit', user.data.id))" variant="primary"> Edit User </Button>
-                <Button @click="deleteUser" variant="destructive"> Delete User </Button>
-            </div>
-        </CardContent>
-    </Card>
+                    <!-- Actions -->
+                    <div class="mt-6 flex space-x-4">
+                        <Button @click="router.visit(route('admin.users.managers.index'))" variant="outline" class="h-12 flex-1 text-lg">
+                            Back to List
+                        </Button>
+                        <Button @click="router.visit(route('admin.users.managers.edit', user.data.id))" class="h-12 flex-1 text-lg">
+                            Edit User
+                        </Button>
+                        <Button @click="deleteUser" variant="destructive" class="h-12 flex-1 text-lg"> Delete User </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -74,12 +83,10 @@ onMounted(() => {
 const getImageUrl = (path) => {
     // If path is null or undefined
     if (!path) return '/defaults/user.png';
-
     // For full URLs
     if (typeof path === 'string' && path.startsWith('http')) {
         return path;
     }
-
     // For local storage files
     return `/storage/${path}`;
 };

@@ -1,218 +1,171 @@
 <template>
-  <div class="p-6 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header Section with Title and Create Button -->
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Manage Rooms</h1>
+    <div class="min-h-screen bg-background p-8 text-foreground">
+        <div class="mx-auto max-w-7xl">
+            <!-- Header Section with Title and Create Button -->
+            <div class="mb-8 flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-foreground">Manage Rooms</h1>
+                <Button v-if="isAdmin || permissions?.includes('manage rooms')" @click="navigateToCreate"> + Add Room </Button>
+            </div>
 
-        <button
-          v-if="isAdmin || permissions?.includes('manage rooms')"
-          @click="navigateToCreate"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md flex items-center"
-        >
-          <span class="mr-1">+</span> Add Room
-        </button>
-      </div>
+            <!-- Alert for messages -->
+            <div v-if="successMessage" class="mb-6 rounded-lg border-l-4 border-green-500 bg-green-100 p-4 text-green-700">
+                <p>{{ successMessage }}</p>
+            </div>
 
-      <!-- Alert for messages -->
-      <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
-        <p>{{ successMessage }}</p>
-      </div>
+            <!-- ShadCN Table -->
+            <Table v-if="rooms?.data?.length > 0" class="w-full rounded-lg border border-border">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Room Number</TableHead>
+                        <TableHead>Capacity</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Floor</TableHead>
+                        <TableHead v-if="isAdmin">Manager</TableHead>
+                        <TableHead class="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-for="room in paginatedRooms" :key="room.id" class="transition-colors hover:bg-accent/10">
+                        <TableCell class="font-medium">{{ room.room_number }}</TableCell>
+                        <TableCell>{{ room.room_capacity }}</TableCell>
+                        <TableCell>$ {{ (room.price / 100).toFixed(2) }}</TableCell>
+                        <TableCell>
+                            <Badge :variant="getStatusVariant(room.status)">
+                                {{ room.status }}
+                            </Badge>
+                        </TableCell>
+                        <TableCell>{{ room.floor_name }} ({{ room.floor_number }})</TableCell>
+                        <TableCell v-if="isAdmin">{{ room.manager_name || 'Not Assigned' }}</TableCell>
+                        <TableCell class="text-right">
+                            <div class="flex justify-end space-x-2">
+                                <Button
+                                    v-if="room.status !== 'occupied' && (isAdmin || room.can_edit)"
+                                    @click="openDeleteDialog(room)"
+                                    variant="destructive"
+                                >
+                                    Delete
+                                </Button>
+                                <Button
+                                    v-if="(isAdmin && room.status !== 'occupied') || room.can_edit"
+                                    @click="navigateToEdit(room.id)"
+                                    variant="outline"
+                                >
+                                    Edit
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
 
-      <!-- Table Card -->
-      <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div v-if="rooms.data.length === 0" class="text-center p-8 text-gray-500">
-          No rooms found. Create your first room by clicking the "Add Room" button above.
+            <div v-else class="rounded-lg bg-accent/50 p-8 text-center text-muted-foreground">
+                No rooms found. Create your first room by clicking the "Add Room" button above.
+            </div>
+
+            <!-- Pagination Controls -->
+            <Pagination :currentPage="currentPage" :totalPages="totalPages" @pageChange="handlePageChange" class="mt-6" />
         </div>
-
-        <table v-else class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room Number</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Floor</th>
-              <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="room in rooms.data" :key="room.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ room.room_number }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ room.room_capacity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$ {{ (room.price / 100).toFixed(2) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <span :class="getStatusClass(room.status)" class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ room.status }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ room.floor_name }} ({{ room.floor_number }})
-              </td>
-              <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ room.manager_name || 'Not Assigned' }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <!-- Delete Button: Show if NOT occupied -->
-                <button
-                  v-if="room.status !== 'occupied' && ((isAdmin) || (room.can_edit))"
-                  @click="openDeleteDialog(room)"
-                  class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md mr-2"
-                >
-                  Delete
-                </button>
-                <!-- Edit Button: Show for admin (if not occupied) OR if manager owns the room -->
-                <button
-                  v-if="(isAdmin && room.status !== 'occupied') || (room.can_edit)"
-                  @click="navigateToEdit(room.id)"
-                  class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md"
-                >
-                  Edit
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Pagination Controls -->
-        <Pagination :pagination="rooms" />
-      </div>
     </div>
-  </div>
 
-  <!-- Confirmation Dialog -->
-  <ConfirmationDialog
-    :show="showDeleteDialog"
-    title="Delete Room"
-    :message="deleteMessage"
-    confirmText="Delete"
-    cancelText="Cancel"
-    @confirm="executeDelete"
-    @cancel="cancelDelete"
-  />
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+        :show="showDeleteDialog"
+        title="Delete Room"
+        :message="deleteMessage"
+        confirmText="Delete"
+        cancelText="Cancel"
+        @confirm="executeDelete"
+        @cancel="cancelDelete"
+    />
 </template>
 
 <script setup>
-import { defineProps,ref, onMounted } from 'vue';
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
+import Pagination from '@/components/Pagination.vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
-import Pagination from '@/Components/Pagination.vue';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-
-// Define props
+import { computed, onMounted, ref } from 'vue';
+defineOptions({ layout: AppLayout });
 const props = defineProps({
-  rooms: Object,
-  isAdmin: Boolean,
-  isManager: Boolean,
-  permissions: Array,
-  success: String
+    rooms: Object,
+    isAdmin: Boolean,
+    permissions: Array,
+    success: String,
+    default: () => ({ data: [] }),
 });
 
-// Setup reactive state
 const successMessage = ref(props.success || '');
 const selectedRoom = ref(null);
 const showDeleteDialog = ref(false);
 const deleteMessage = ref('');
 const isLoading = ref(false);
+const currentPage = ref(1);
+const itemsPerPage = 10;
 
-// Log props for debugging
-onMounted(() => {
-  console.log('Rooms:', props.rooms);
-  console.log('Is Admin:', props.isAdmin);
-  console.log('Is Manager:', props.isManager);
-  console.log('Permissions:', props.permissions);
+const totalPages = computed(() => Math.ceil(props.rooms.total / itemsPerPage));
 
-  // Display success message from flash if it exists
-  if (props.success) {
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
-  }
+const paginatedRooms = computed(() => {
+    if (!props.rooms?.data) return [];
+    const start = (currentPage.value - 1) * itemsPerPage;
+    return props.rooms.data.slice(start, start + itemsPerPage);
 });
 
-defineOptions({ layout: AppLayout });
-
-
-// Function to get status class based on status
-const getStatusClass = (status) => {
-  switch (status) {
-    case 'available':
-      return 'bg-green-100 text-green-800';
-    case 'occupied':
-      return 'bg-blue-100 text-blue-800';
-    case 'maintenance':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
+const handlePageChange = (page) => {
+    currentPage.value = page;
 };
 
-// Function to navigate to create page
-const navigateToCreate = () => {
-  router.get(route('rooms.create'));
+const getStatusVariant = (status) => {
+    switch (status) {
+        case 'available':
+            return 'green';
+        case 'occupied':
+            return 'secondary';
+        case 'maintenance':
+            return 'warning';
+        default:
+            return 'outline';
+    }
 };
 
-// Function to navigate to edit page
-const navigateToEdit = (roomId) => {
-  router.get(route('rooms.edit', roomId));
-};
+onMounted(() => {
+    if (props.success) {
+        setTimeout(() => (successMessage.value = ''), 3000);
+    }
+});
 
-// Function to open delete confirmation dialog
+const navigateToCreate = () => router.get(route('rooms.create'));
+const navigateToEdit = (roomId) => router.get(route('rooms.edit', roomId));
+
 const openDeleteDialog = (room) => {
-  selectedRoom.value = room;
-  deleteMessage.value = `Are you sure you want to delete room ${room.room_number}? This action cannot be undone.`;
-  showDeleteDialog.value = true;
+    selectedRoom.value = room;
+    deleteMessage.value = `Are you sure you want to delete room ${room.room_number}? This action cannot be undone.`;
+    showDeleteDialog.value = true;
 };
 
-// Function to cancel deletion
 const cancelDelete = () => {
-  showDeleteDialog.value = false;
-  selectedRoom.value = null;
-};
-
-// Function to execute deletion via AJAX
-const executeDelete = async () => {
-  if (!selectedRoom.value) return;
-
-  isLoading.value = true;
-
-  try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const formData = new FormData();
-    formData.append('_method', 'DELETE');
-
-    const response = await axios.post(route('rooms.destroy', selectedRoom.value.id), formData, {
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-        'Accept': 'application/json'
-      }
-    });
-
-    // Success handling
-    successMessage.value = response.data.success || 'Room deleted successfully';
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
-
-    // Refresh the data
-    router.reload({ only: ['rooms'] });
-
-  } catch (error) {
-    // Improved error handling
-    const errorMessage = error.response?.data?.error || error.response?.data?.message || 'An error occurred while deleting the room';
-    
-    // Use a more user-friendly error display
-    alert(errorMessage);
-    
-    // Optional: log detailed error for debugging
-    console.error('Delete error:', error.response);
-  } finally {
-    // Reset state
-    isLoading.value = false;
     showDeleteDialog.value = false;
     selectedRoom.value = null;
-  }
+};
+
+const executeDelete = async () => {
+    if (!selectedRoom.value) return;
+    isLoading.value = true;
+    try {
+        await axios.post(route('rooms.destroy', selectedRoom.value.id), { _method: 'DELETE' });
+        successMessage.value = 'Room deleted successfully';
+        setTimeout(() => (successMessage.value = ''), 3000);
+        router.reload({ only: ['rooms'] });
+    } catch (error) {
+        alert(error.response?.data?.error || 'An error occurred while deleting the room');
+    } finally {
+        isLoading.value = false;
+        showDeleteDialog.value = false;
+        selectedRoom.value = null;
+    }
 };
 </script>

@@ -274,6 +274,8 @@
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { router, Link } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+defineOptions({ layout: AppLayout });
 
 // Props
 const props = defineProps({
@@ -325,10 +327,16 @@ const goToPage = (url) => {
 
 // Navigation method using Inertia
 const navigateTo = (url) => {
-  router.get(url, {}, {
-    preserveScroll: false,
-    preserveState: false,
-    replace: false
+  router.visit(url, {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onSuccess: () => {
+      console.log('Navigation successful to:', url);
+    },
+    onError: (errors) => {
+      console.error('Navigation error:', errors);
+    }
   });
 };
 

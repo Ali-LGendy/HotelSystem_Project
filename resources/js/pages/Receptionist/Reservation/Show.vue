@@ -84,11 +84,11 @@
 <script setup>
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/AppLayout.vue';
+import ReceptionistLayout from '@/layouts/ReceptionistLayout.vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { defineProps } from 'vue';
-defineOptions({ layout: AppLayout });
+defineOptions({ layout: ReceptionistLayout });
 const props = defineProps({
     reservation: {
         type: Object,

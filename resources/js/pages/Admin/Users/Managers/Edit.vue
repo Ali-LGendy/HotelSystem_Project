@@ -171,8 +171,8 @@ const getInitials = (name) => {
 
                         <!-- Submit and Cancel Buttons -->
                         <div class="mt-6 flex space-x-4">
-                            <Button type="submit" class="h-12 flex-1 text-lg">Update Manager</Button>
                             <Button type="button" variant="outline" @click="cancelForm" class="h-12 flex-1 text-lg"> Cancel </Button>
+                            <Button type="submit" class="h-12 flex-1 text-lg">Update Manager</Button>
                         </div>
                     </form>
                 </CardContent>

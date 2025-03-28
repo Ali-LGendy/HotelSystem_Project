@@ -28,6 +28,13 @@
           >
             All Clients
           </button>
+          <button
+            v-if="isAdmin"
+            @click="navigateTo('/receptionist/clients/create')"
+            class="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Add Client
+          </button>
         </div>
       </div>
     </div>
@@ -297,7 +304,12 @@ import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, ref } from 'vue';
 import ApprovalDataTable from './ApprovalDataTable.vue';
+import { useToast } from '@/composables/useToast';
+import { route } from 'ziggy-js';
 defineOptions({ layout: AppLayout });
+
+// Initialize toast
+const toast = useToast();
 // Props
 const props = defineProps({
     pendingClients: {
@@ -368,10 +380,16 @@ const goToPage = (url) => {
 
 // Navigation method using Inertia
 const navigateTo = (url) => {
-  router.get(url, {}, {
-    preserveScroll: false,
-    preserveState: false,
-    replace: false
+  router.visit(url, {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onSuccess: () => {
+      console.log('Navigation successful to:', url);
+    },
+    onError: (errors) => {
+      console.error('Navigation error:', errors);
+    }
   });
 };
 
@@ -398,18 +416,24 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
 };
 
 const approveClient = (clientId) => {
+    // Find the client in the pending clients list
+    const client = props.pendingClients.data.find(c => c.id === clientId);
+
     selectedClientId.value = clientId;
     confirmAction.value = 'approve';
     confirmDialogTitle.value = 'Confirm Client Approval';
-    confirmDialogMessage.value = 'Are you sure you want to approve this client? They will be added to your approved clients list.';
+    confirmDialogMessage.value = `Are you sure you want to approve ${client ? client.name : 'this client'}? They will be added to your approved clients list.`;
     showConfirmDialog.value = true;
 };
 
 const rejectClient = (clientId) => {
+    // Find the client in the pending clients list
+    const client = props.pendingClients.data.find(c => c.id === clientId);
+
     selectedClientId.value = clientId;
     confirmAction.value = 'reject';
     confirmDialogTitle.value = 'Confirm Client Rejection';
-    confirmDialogMessage.value = 'Are you sure you want to reject this client? This action cannot be undone.';
+    confirmDialogMessage.value = `Are you sure you want to reject ${client ? client.name : 'this client'}? This action cannot be undone.`;
     showConfirmDialog.value = true;
 };
 
@@ -418,81 +442,52 @@ const cancelConfirmation = () => {
     selectedClientId.value = null;
 };
 
-const confirmApprove = async () => {
+const confirmApprove = () => {
     if (!selectedClientId.value) return;
 
-    try {
-        // Show loading state
-        showConfirmDialog.value = false;
+    // Find the client in the pending clients list for the toast message
+    const client = props.pendingClients.data.find(c => c.id === selectedClientId.value);
+    const clientName = client ? client.name : 'Client';
 
-        // Use axios to make the request
-        const response = await axios.post(`/receptionist/clients/${selectedClientId.value}/approve`);
-        console.log('Client approval response:', response.data);
+    // Hide the confirmation dialog
+    showConfirmDialog.value = false;
 
-        // If the client was approved successfully, update the data tables
-        if (response.data.success) {
-            // Add the newly approved client to the recentApprovals
-            if (response.data.client) {
-                props.recentlyApprovedClients.unshift(response.data.client);
-                // Keep only the first 5 items
-                if (props.recentlyApprovedClients.length > 5) {
-                    props.recentlyApprovedClients.pop();
-                }
-            }
-
-            // Add the updated reservations to pendingReservations
-            if (response.data.updatedReservations) {
-                props.pendingReservationsForApprovedClients.unshift(...response.data.updatedReservations);
-                // Keep only the first 5 items
-                if (props.pendingReservationsForApprovedClients.length > 5) {
-                    props.pendingReservationsForApprovedClients.splice(5);
-                }
-            }
-
-            // Update the stats
-            props.approvedClientsCount++;
+    // Use Inertia router.post directly
+    router.post(route('receptionist.clients.approve', selectedClientId.value), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Show success toast notification with client name
+            toast.success(`${clientName} has been approved successfully!`);
+        },
+        onError: (errors) => {
+            // Show error toast notification
+            toast.error(`Failed to approve client: ${Object.values(errors).flat().join(', ')}`);
         }
-
-        // Use Inertia router to reload the page with fresh data
-        router.visit(window.location.pathname, {
-            method: 'get',
-            preserveScroll: false,
-            preserveState: false,
-            replace: true,
-            onSuccess: () => {
-                console.log('Client approved successfully');
-            },
-        });
-    } catch (error) {
-        console.error('Error approving client:', error);
-        alert('Could not approve client due to a technical issue. Please try refreshing the page.');
-    }
+    });
 };
 
-const confirmReject = async () => {
+const confirmReject = () => {
     if (!selectedClientId.value) return;
 
-    try {
-        // Show loading state
-        showConfirmDialog.value = false;
+    // Find the client in the pending clients list for the toast message
+    const client = props.pendingClients.data.find(c => c.id === selectedClientId.value);
+    const clientName = client ? client.name : 'Client';
 
-        // Use axios to make the request
-        await axios.post(`/receptionist/clients/${selectedClientId.value}/reject`);
+    // Hide the confirmation dialog
+    showConfirmDialog.value = false;
 
-        // Use Inertia router to reload the page with fresh data
-        router.visit(window.location.pathname, {
-            method: 'get',
-            preserveScroll: false,
-            preserveState: false,
-            replace: true,
-            onSuccess: () => {
-                console.log('Client rejected successfully');
-            },
-        });
-    } catch (error) {
-        console.error('Error rejecting client:', error);
-        alert('Could not reject client due to a technical issue. Please try refreshing the page.');
-    }
+    // Use Inertia router.post directly
+    router.post(route('receptionist.clients.reject', selectedClientId.value), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Show success toast notification with client name
+            toast.success(`${clientName} has been rejected.`);
+        },
+        onError: (errors) => {
+            // Show error toast notification
+            toast.error(`Failed to reject client: ${Object.values(errors).flat().join(', ')}`);
+        }
+    });
 };
 </script>
 

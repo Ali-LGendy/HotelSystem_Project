@@ -93,8 +93,8 @@ const bookRoom = (room) => {
 };
 
 const closeBookingModal = () => {
-  showBookingModal.value = false;
-  selectedRoom.value = null;
+    showBookingModal.value = false;
+    selectedRoom.value = null;
 };
 
 const calculateNights = () => {

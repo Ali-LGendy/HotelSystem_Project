@@ -1,3 +1,5 @@
+I'll adapt the style to match the Create.vue file exactly, maintaining the structure and adding support for light and dark modes:
+
 <script setup>
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,54 +27,59 @@ const submitForm = () => {
         onSuccess: () => router.visit(route('admin.users.receptionists.index')),
     });
 };
+
+const cancelForm = () => {
+    router.visit(route('admin.users.receptionists.index'));
+};
 </script>
 
 <template>
-    <Card class="mx-auto max-w-2xl rounded-lg bg-white shadow-lg dark:bg-gray-900">
-        <CardHeader>
-            <CardTitle class="text-gray-900 dark:text-gray-100">Create New Receptionist</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
-                <!-- Name -->
-                <div>
-                    <Label for="name" class="dark:text-gray-300">Name</Label>
-                    <Input v-model="form.name" id="name" placeholder="Enter manager's name" required />
-                </div>
+    <div class="min-h-screen bg-background p-8 text-foreground">
+        <div class="mx-auto max-w-2xl">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Create New Receptionist</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
+                        <!-- Name -->
+                        <div>
+                            <Label for="name">Name</Label>
+                            <Input v-model="form.name" id="name" placeholder="Enter receptionist's name" required />
+                        </div>
 
-                <!-- Email -->
-                <div>
-                    <Label for="email" class="dark:text-gray-300">Email</Label>
-                    <Input v-model="form.email" id="email" type="email" placeholder="Enter manager's email" required />
-                </div>
+                        <!-- Email -->
+                        <div>
+                            <Label for="email">Email</Label>
+                            <Input v-model="form.email" id="email" type="email" placeholder="Enter receptionist's email" required />
+                        </div>
 
-                <!-- Password -->
-                <div>
-                    <Label for="password" class="dark:text-gray-300">Password</Label>
-                    <Input v-model="form.password" id="password" type="password" placeholder="Set a password" required />
-                </div>
+                        <!-- Password -->
+                        <div>
+                            <Label for="password">Password</Label>
+                            <Input v-model="form.password" id="password" type="password" placeholder="Set a password" required />
+                        </div>
 
-                <!-- National ID -->
-                <div>
-                    <Label for="national_id" class="dark:text-gray-300">National ID</Label>
-                    <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" required />
-                </div>
+                        <!-- National ID -->
+                        <div>
+                            <Label for="national_id">National ID</Label>
+                            <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" required />
+                        </div>
 
-                <!-- Avatar Image -->
-                <div>
-                    <Label for="avatar_img" class="dark:text-gray-300">Avatar Image</Label>
-                    <Input id="avatar_img" type="file" @change="handleFileUpload" accept="image/*" />
-                </div>
+                        <!-- Avatar Image -->
+                        <div>
+                            <Label for="avatar_img">Avatar Image</Label>
+                            <Input id="avatar_img" type="file" @change="handleFileUpload" accept="image/*" />
+                        </div>
 
-                <!-- Submit Button -->
-                <Button type="submit" class="w-full">Create Receptionist</Button>
-            </form>
-        </CardContent>
-    </Card>
+                        <!-- Submit and Cancel Buttons -->
+                        <div class="flex space-x-4">
+                            <Button type="button" variant="outline" @click="cancelForm" class="flex-1"> Cancel </Button>
+                            <Button type="submit" class="flex-1">Create Receptionist</Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
 </template>
-
-<style scoped>
-label {
-    color: #4a4a4a;
-}
-</style>

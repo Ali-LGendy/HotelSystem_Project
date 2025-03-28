@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import { useToast } from '@/composables/useToast';
 
 const props = defineProps({
     unapprovedClients: {
@@ -51,13 +52,18 @@ const showActionsColumn = computed(() => {
 
 defineOptions({ layout: AppLayout });
 
+// Initialize toast
+const toast = useToast();
+
 // Function to approve a client
 const approveClient = (client) => {
     router.patch(route('admin.users.clients.approve', client.id), {}, {
         preserveScroll: true,
         onSuccess: () => {
-            // Optionally, you can add a toast or notification here
-            console.log('Client approved successfully');
+            toast.success(`Client ${client.name} approved successfully!`);
+        },
+        onError: (errors) => {
+            toast.error(`Failed to approve client: ${Object.values(errors).flat().join(', ')}`);
         }
     });
 };

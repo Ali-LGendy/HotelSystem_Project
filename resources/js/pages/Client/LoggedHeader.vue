@@ -45,13 +45,19 @@
 
                     <div class="flex items-center gap-4">
                         <div class="sm:flex sm:gap-4">
-                            <Link class="rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm" :href="route('login')">
-                                Login
+                            <Link
+                                class="rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm"
+                                :href="route('clients.myreservation')"
+                            >
+                                My Reservations
                             </Link>
 
                             <div class="hidden sm:flex">
-                                <a class="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-teal-600" href="#"> Register </a>
+                                <a class="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-teal-600" href="#"> Profile </a>
                             </div>
+                            <Link class="rounded-md bg-red-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm" :href="route('login')">
+                                Logout
+                            </Link>
                         </div>
 
                         <div class="block md:hidden">

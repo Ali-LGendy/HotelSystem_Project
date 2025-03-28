@@ -19,6 +19,7 @@ use App\Http\Controllers\ReceptionistsController;
 // more can be found @ https://spatie.be/docs/laravel-permission/v6/best-practices/roles-vs-permissions
 
 Route::get('/', function () {
+    // return Inertia::render('Client/landing');
     return Inertia::render('Welcome');
 })->name('home');
 
@@ -30,6 +31,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 
     
 Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/clientReservation', [ClientController::class, 'index'])->name('clientReservation');
 
 
 
@@ -45,9 +47,9 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/us
 });
 
 
-// Route::middleware(['auth','permission:manage receptionists'])->patch('/admin/users/managers/{user}/ban', [ManagersController::class, 'ban'])
-//     ->name('admin.users.managers.ban');
-
+Route::middleware(['auth'])
+    ->get('clients/myreservation', [ClientController::class, 'showMyReservation'])
+    ->name('clients.myreservation');
 
 Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
     Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         
@@ -98,6 +100,8 @@ Route::middleware(['auth', 'permission:manage reservations'])
 
         // Admin-only client management routes
         Route::middleware('role:admin')->group(function () {
+            Route::get('clients/create', [ClientController::class, 'create'])->name('clients.create');
+            Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
             Route::get('clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
             Route::put('clients/{id}', [ClientController::class, 'update'])->name('clients.update');
             Route::delete('clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');

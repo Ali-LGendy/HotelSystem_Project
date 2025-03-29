@@ -22,10 +22,10 @@ class ReservationController extends Controller
         $isAdmin = Auth::user()->hasRole('admin');
 
         // Only allow admins to access this page
-        if (!$isAdmin) {
-            return redirect()->route('receptionist.dashboard')
-                ->with('error', 'You do not have permission to access this page.');
-        }
+        // if (!$isAdmin) {
+        //     return redirect()->route('receptionist.dashboard')
+        //         ->with('error', 'You do not have permission to access this page.');
+        // }
 
         // Get request parameters for sorting and pagination
         $perPage = $request->input('per_page', 10);

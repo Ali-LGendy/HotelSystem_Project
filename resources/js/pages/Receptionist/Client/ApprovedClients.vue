@@ -1,315 +1,20 @@
-<template>
-  <div class="mx-auto max-w-7xl px-4 py-8">
-    <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-      <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex flex-wrap gap-3">
-          <button
-            @click="navigateTo('/receptionist/clients/my-approved')"
-            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            My Approved Clients
-          </button>
-          <button
-            @click="navigateTo('/receptionist/clients/reservations')"
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            All My Clients Reservations
-          </button>
-          <button
-            @click="navigateTo('/receptionist/reservations')"
-            class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            Pending Reservations
-          </button>
-          <button
-            v-if="isAdmin"
-            @click="navigateTo('/receptionist/clients/all')"
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            All Clients
-          </button>
-          <button
-            v-if="isAdmin"
-            @click="navigateTo('/receptionist/clients/create')"
-            class="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          >
-            Add Client
-          </button>
-        </div>
-      </div>
-    </div>
- 
-     
-            <!-- Pending Clients Section -->
-            <div class="mb-8">
-                <h3 class="mb-4 text-2xl font-bold text-gray-100">Pending Client Registrations</h3>
-
-                <div v-if="pendingClients.data.length === 0" class="py-8 text-center">
-                    <p class="text-lg text-gray-300">No pending client registrations found.</p>
-                </div>
-
-                <div v-else class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead class="bg-gray-800">
-                            <tr>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            perPage,
-                                            'name',
-                                            currentSort.field === 'name' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Client Name
-                                    <span v-if="currentSort.field === 'name'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            perPage,
-                                            'email',
-                                            currentSort.field === 'email' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Email
-                                    <span v-if="currentSort.field === 'email'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            perPage,
-                                            'mobile',
-                                            currentSort.field === 'mobile' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Mobile
-                                    <span v-if="currentSort.field === 'mobile'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            perPage,
-                                            'country',
-                                            currentSort.field === 'country' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Country
-                                    <span v-if="currentSort.field === 'country'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th
-                                    @click="
-                                        sortAndPaginate(
-                                            1,
-                                            perPage,
-                                            'gender',
-                                            currentSort.field === 'gender' && currentSort.direction === 'asc' ? 'desc' : 'asc',
-                                        )
-                                    "
-                                    scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300 hover:bg-gray-700"
-                                >
-                                    Gender
-                                    <span v-if="currentSort.field === 'gender'" class="ml-1">
-                                        {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
-                                    </span>
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700 bg-gray-800">
-                            <tr v-for="client in pendingClients.data" :key="client.id" class="hover:bg-gray-700">
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.email }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.mobile || 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.country || 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm text-gray-300">{{ client.gender || 'N/A' }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                    <div class="flex space-x-2">
-                                        <button
-                                            @click="approveClient(client.id)"
-                                            class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                                        >
-                                            Approve
-                                        </button>
-                                        <button
-                                            @click="rejectClient(client.id)"
-                                            class="rounded-md bg-red-800 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Enhanced Pagination for Pending Clients -->
-                <div v-if="pendingClients.data.length > 0" class="mt-4 flex items-center justify-between">
-                    <div class="text-sm text-gray-400">
-                        Showing {{ pendingClients.from }} to {{ pendingClients.to }} of {{ pendingClients.total }} pending clients
-                    </div>
-
-                    <!-- Page Size Selector -->
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center">
-                            <span class="mr-2 text-sm text-gray-400">Per page:</span>
-                            <select
-                                v-model="perPage"
-                                @change="sortAndPaginate(1, perPage, currentSort.field, currentSort.direction)"
-                                class="rounded-md bg-gray-700 px-2 py-1 text-sm text-gray-200"
-                            >
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                            </select>
-                        </div>
-
-                        <!-- Page Navigation -->
-                        <div class="flex space-x-2">
-                            <button
-                                v-for="page in pendingClients.links"
-                                :key="page.label"
-                                @click="
-                                    page.url &&
-                                    sortAndPaginate(
-                                        page.label === '&laquo; Previous'
-                                            ? pendingClients.current_page - 1
-                                            : page.label === 'Next &raquo;'
-                                              ? pendingClients.current_page + 1
-                                              : parseInt(page.label),
-                                        perPage,
-                                        currentSort.field,
-                                        currentSort.direction,
-                                    )
-                                "
-                                :disabled="!page.url"
-                                :class="[
-                                    'rounded-md px-3 py-1 text-sm',
-                                    page.active
-                                        ? 'bg-blue-600 text-white'
-                                        : page.url
-                                          ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                                          : 'cursor-not-allowed bg-gray-800 text-gray-500',
-                                ]"
-                                v-html="page.label"
-                            ></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Confirmation Dialog -->
-            <div v-if="showConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-                    <h3 class="text-xl font-semibold text-gray-100">{{ confirmDialogTitle }}</h3>
-                    <p class="mt-2 text-gray-400">{{ confirmDialogMessage }}</p>
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button
-                            class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                            @click="cancelConfirmation"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            :class="[
-                                'rounded-md px-4 py-2 text-sm font-medium text-white',
-                                confirmAction === 'approve' ? 'bg-green-700 hover:bg-green-600' : 'bg-red-700 hover:bg-red-600',
-                            ]"
-                            @click="confirmAction === 'approve' ? confirmApprove() : confirmReject()"
-                        >
-                            {{ confirmAction === 'approve' ? 'Approve' : 'Reject' }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Approval Data Tables -->
-            <ApprovalDataTable :stats="approvalStats" :recent-approvals="recentApprovals" :pending-reservations="pendingReservations" />
-            
-        </div>
-    
-
-
-
-      <!-- Confirmation Dialog -->
-      <div v-if="showConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-lg bg-gray-800 p-6 text-gray-200 shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-100">{{ confirmDialogTitle }}</h3>
-          <p class="mt-2 text-gray-400">{{ confirmDialogMessage }}</p>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              class="rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600"
-              @click="cancelConfirmation"
-            >
-              Cancel
-            </button>
-            <button
-              :class="[
-                'rounded-md px-4 py-2 text-sm font-medium text-white',
-                confirmAction === 'approve' 
-                  ? 'bg-green-700 hover:bg-green-600' 
-                  : 'bg-red-700 hover:bg-red-600'
-              ]"
-              @click="confirmAction === 'approve' ? confirmApprove() : confirmReject()"
-            >
-              {{ confirmAction === 'approve' ? 'Approve' : 'Reject' }}
-            </button>
-          </div>
-        </div>
-      </div>
-   
-
-     
-</template>
-
 <script setup>
-import AppLayout from '@/layouts/AppLayout.vue';
-import { router } from '@inertiajs/vue3';
-import axios from 'axios';
 import { computed, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
+import axios from 'axios';
+import AppLayout from '@/layouts/AppLayout.vue';
 import ApprovalDataTable from './ApprovalDataTable.vue';
 import { useToast } from '@/composables/useToast';
-import { route } from 'ziggy-js';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 defineOptions({ layout: AppLayout });
 
 // Initialize toast
 const toast = useToast();
+
 // Props
 const props = defineProps({
     pendingClients: {
@@ -370,27 +75,27 @@ const pendingReservations = computed(() => props.pendingReservationsForApprovedC
 
 // Methods
 const goToPage = (url) => {
-  if (!url) return;
-  router.get(url, {}, {
-    preserveScroll: true,
-    preserveState: true,
-    only: ['pendingClients', 'approvedClientsCount', 'myApprovedClientsCount', 'recentlyApprovedClients', 'pendingReservationsForApprovedClients']
-  });
+    if (!url) return;
+    router.get(url, {}, {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['pendingClients', 'approvedClientsCount', 'myApprovedClientsCount', 'recentlyApprovedClients', 'pendingReservationsForApprovedClients']
+    });
 };
 
 // Navigation method using Inertia
 const navigateTo = (url) => {
-  router.visit(url, {
-    preserveScroll: true,
-    preserveState: true,
-    replace: true,
-    onSuccess: () => {
-      console.log('Navigation successful to:', url);
-    },
-    onError: (errors) => {
-      console.error('Navigation error:', errors);
-    }
-  });
+    router.visit(url, {
+        preserveScroll: true,
+        preserveState: true,
+        replace: true,
+        onSuccess: () => {
+            console.log('Navigation successful to:', url);
+        },
+        onError: (errors) => {
+            console.error('Navigation error:', errors);
+        }
+    });
 };
 
 // Enhanced pagination with sorting
@@ -401,18 +106,18 @@ const sortAndPaginate = (page = 1, perPage = 10, sortBy = 'created_at', sortDir 
         direction: sortDir,
     };
 
-  // Navigate with new parameters using Inertia's get method
-  router.get(window.location.pathname, {
-    page,
-    per_page: perPage,
-    sort_by: sortBy,
-    sort_dir: sortDir
-  }, {
-    preserveScroll: true,
-    preserveState: true, // Keep component state between requests
-    only: ['pendingClients', 'approvedClientsCount', 'myApprovedClientsCount', 'recentlyApprovedClients', 'pendingReservationsForApprovedClients'], // Only refresh these data props
-    replace: true // Replace current history entry instead of adding a new one
-  });
+    // Navigate with new parameters using Inertia's get method
+    router.get(window.location.pathname, {
+        page,
+        per_page: perPage,
+        sort_by: sortBy,
+        sort_dir: sortDir
+    }, {
+        preserveScroll: true,
+        preserveState: true, // Keep component state between requests
+        only: ['pendingClients', 'approvedClientsCount', 'myApprovedClientsCount', 'recentlyApprovedClients', 'pendingReservationsForApprovedClients'], // Only refresh these data props
+        replace: true // Replace current history entry instead of adding a new one
+    });
 };
 
 const approveClient = (clientId) => {
@@ -491,20 +196,226 @@ const confirmReject = () => {
 };
 </script>
 
-<style scoped>
-.pagination-link {
-    @apply rounded-md px-3 py-1 text-sm;
-}
+<template>
+    <div class="min-h-screen bg-background text-foreground p-8">
+        <!-- Navigation Header -->
+        <div class="rounded-lg border border-border bg-card p-8 shadow-sm mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Client Management</h1>
+                    <p class="text-muted-foreground">Manage client approvals and reservations</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <Button
+                        @click="navigateTo('/receptionist/clients/my-approved')"
+                        variant="outline"
+                    >
+                        My Approved Clients
+                    </Button>
+                    <Button
+                        @click="navigateTo('/receptionist/clients/reservations')"
+                        variant="default"
+                    >
+                        All My Clients Reservations
+                    </Button>
+                    <Button
+                        @click="navigateTo('/receptionist/reservations')"
+                        variant="outline"
+                    >
+                        Pending Reservations
+                    </Button>
+                    <Button
+                        v-if="isAdmin"
+                        @click="navigateTo('/receptionist/clients/all')"
+                        variant="default"
+                    >
+                        All Clients
+                    </Button>
+                    <Button
+                        v-if="isAdmin"
+                        @click="navigateTo('/receptionist/clients/create')"
+                        variant="default"
+                        class="bg-green-600 hover:bg-green-700"
+                    >
+                        Add Client
+                    </Button>
+                </div>
+            </div>
+        </div>
 
-.pagination-link-active {
-    @apply bg-blue-600 text-white;
-}
+        <!-- Pending Clients Section -->
+        <div class="mb-8">
+            <h2 class="mb-4 text-2xl font-bold">Pending Client Registrations</h2>
 
-.pagination-link-inactive {
-    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
-}
+            <div v-if="pendingClients.data.length === 0" class="text-center text-muted-foreground py-8 border rounded-lg">
+                <p class="text-lg">No pending client registrations found.</p>
+            </div>
 
-.pagination-link-disabled {
-    @apply cursor-not-allowed bg-gray-800 text-gray-500;
-}
-</style>
+            <div v-else>
+                <Table class="w-full overflow-hidden rounded-lg border border-border">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead
+                                @click="sortAndPaginate(1, perPage, 'name', currentSort.field === 'name' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                                class="cursor-pointer hover:bg-accent/10"
+                            >
+                                Client Name
+                                <span v-if="currentSort.field === 'name'" class="ml-1">
+                                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                                </span>
+                            </TableHead>
+                            <TableHead
+                                @click="sortAndPaginate(1, perPage, 'email', currentSort.field === 'email' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                                class="cursor-pointer hover:bg-accent/10"
+                            >
+                                Email
+                                <span v-if="currentSort.field === 'email'" class="ml-1">
+                                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                                </span>
+                            </TableHead>
+                            <TableHead
+                                @click="sortAndPaginate(1, perPage, 'mobile', currentSort.field === 'mobile' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                                class="cursor-pointer hover:bg-accent/10"
+                            >
+                                Mobile
+                                <span v-if="currentSort.field === 'mobile'" class="ml-1">
+                                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                                </span>
+                            </TableHead>
+                            <TableHead
+                                @click="sortAndPaginate(1, perPage, 'country', currentSort.field === 'country' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                                class="cursor-pointer hover:bg-accent/10"
+                            >
+                                Country
+                                <span v-if="currentSort.field === 'country'" class="ml-1">
+                                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                                </span>
+                            </TableHead>
+                            <TableHead
+                                @click="sortAndPaginate(1, perPage, 'gender', currentSort.field === 'gender' && currentSort.direction === 'asc' ? 'desc' : 'asc')"
+                                class="cursor-pointer hover:bg-accent/10"
+                            >
+                                Gender
+                                <span v-if="currentSort.field === 'gender'" class="ml-1">
+                                    {{ currentSort.direction === 'asc' ? '↑' : '↓' }}
+                                </span>
+                            </TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow
+                            v-for="client in pendingClients.data"
+                            :key="client.id"
+                            class="transition hover:bg-accent/10"
+                        >
+                            <TableCell>{{ client.name }}</TableCell>
+                            <TableCell>{{ client.email }}</TableCell>
+                            <TableCell>{{ client.mobile || 'N/A' }}</TableCell>
+                            <TableCell>{{ client.country || 'N/A' }}</TableCell>
+                            <TableCell>{{ client.gender || 'N/A' }}</TableCell>
+                            <TableCell>
+                                <div class="flex gap-2">
+                                    <Button
+                                        @click="approveClient(client.id)"
+                                        variant="default"
+                                        size="sm"
+                                        class="bg-green-600 hover:bg-green-700"
+                                    >
+                                        Approve
+                                    </Button>
+                                    <Button
+                                        @click="rejectClient(client.id)"
+                                        variant="destructive"
+                                        size="sm"
+                                    >
+                                        Reject
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+
+                <!-- Enhanced Pagination for Pending Clients -->
+                <div v-if="pendingClients.data.length > 0" class="mt-4 flex items-center justify-between">
+                    <div class="text-sm text-muted-foreground">
+                        Showing {{ pendingClients.from }} to {{ pendingClients.to }} of {{ pendingClients.total }} pending clients
+                    </div>
+
+                    <!-- Page Size Selector and Navigation -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-sm text-muted-foreground">Per page:</span>
+                            <select
+                                v-model="perPage"
+                                @change="sortAndPaginate(1, perPage, currentSort.field, currentSort.direction)"
+                                class="rounded-md bg-card border border-border px-2 py-1 text-sm"
+                            >
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+
+                        <!-- Page Navigation -->
+                        <div class="flex gap-2">
+                            <Button
+                                v-for="page in pendingClients.links"
+                                :key="page.label"
+                                @click="
+                                    page.url &&
+                                    sortAndPaginate(
+                                        page.label === '&laquo; Previous'
+                                            ? pendingClients.current_page - 1
+                                            : page.label === 'Next &raquo;'
+                                              ? pendingClients.current_page + 1
+                                              : parseInt(page.label),
+                                        perPage,
+                                        currentSort.field,
+                                        currentSort.direction,
+                                    )
+                                "
+                                :disabled="!page.url"
+                                :variant="page.active ? 'default' : 'outline'"
+                                size="sm"
+                                v-html="page.label"
+                            ></Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Data Tables -->
+        <ApprovalDataTable
+            :stats="approvalStats"
+            :recent-approvals="recentApprovals"
+            :pending-reservations="pendingReservations"
+        />
+
+        <!-- Confirmation Dialog -->
+        <Dialog :open="showConfirmDialog" @update:open="showConfirmDialog = $event">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{{ confirmDialogTitle }}</DialogTitle>
+                    <DialogDescription>
+                        {{ confirmDialogMessage }}
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="cancelConfirmation">
+                        Cancel
+                    </Button>
+                    <Button
+                        :variant="confirmAction === 'approve' ? 'default' : 'destructive'"
+                        @click="confirmAction === 'approve' ? confirmApprove() : confirmReject()"
+                    >
+                        {{ confirmAction === 'approve' ? 'Approve' : 'Reject' }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    </div>
+</template>

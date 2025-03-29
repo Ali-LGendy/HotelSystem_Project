@@ -10,11 +10,12 @@ const addToast = (message, options = {}) => {
   const toast = {
     id,
     message,
+    description: options.description || '',
     type: options.type || 'success',
     duration: options.duration || 3000,
     position: options.position || 'top-right'
   };
-  
+
   toasts.value.push(toast);
   return id;
 };
@@ -59,6 +60,7 @@ defineExpose({
       v-for="toast in toasts"
       :key="toast.id"
       :message="toast.message"
+      :description="toast.description"
       :type="toast.type"
       :duration="toast.duration"
       :position="toast.position"

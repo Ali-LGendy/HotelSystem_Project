@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import ToastProvider from '@/components/ui/ToastProvider.vue';
 import type { BreadcrumbItemType } from '@/types';
 
 interface Props {
@@ -20,6 +21,7 @@ const menuLinks = [
 </script>
 
 <template>
+    <ToastProvider />
     <AppLayout :breadcrumbs="breadcrumbs" :menuLinks="menuLinks">
         <slot />
     </AppLayout>

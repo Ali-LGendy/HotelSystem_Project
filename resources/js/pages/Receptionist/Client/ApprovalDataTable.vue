@@ -1,134 +1,15 @@
-<template>
-    <div class="mt-8 rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
-        <h3 class="mb-4 text-2xl font-bold text-gray-100">Approval Data</h3>
-
-        <!-- Approval Status -->
-        <div class="mb-6 rounded-lg bg-gray-800 p-4">
-            <h4 class="mb-2 text-xl font-semibold text-gray-100">Approval Status</h4>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div class="rounded-lg bg-gray-700 p-4">
-                    <div class="text-sm text-gray-400">Total Clients</div>
-                    <div class="text-2xl font-bold text-gray-100">{{ stats.totalClients }}</div>
-                </div>
-                <div class="rounded-lg bg-green-900 p-4">
-                    <div class="text-sm text-gray-300">Approved Clients</div>
-                    <div class="text-2xl font-bold text-gray-100">{{ stats.approvedClients }}</div>
-                </div>
-                <div class="rounded-lg bg-yellow-900 p-4">
-                    <div class="text-sm text-gray-300">Pending Clients</div>
-                    <div class="text-2xl font-bold text-gray-100">{{ stats.pendingClients }}</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Approvals -->
-        <div class="mb-6">
-            <h4 class="mb-4 text-xl font-semibold text-gray-100">Recent Approvals</h4>
-            <div v-if="recentApprovals.length === 0" class="rounded-lg bg-gray-800 py-4 text-center">
-                <p class="text-gray-400">No recent approvals found.</p>
-            </div>
-            <div v-else class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-800">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Client Name</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Email</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Approved On</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700 bg-gray-800">
-                        <tr v-for="client in recentApprovals" :key="client.id" class="hover:bg-gray-700">
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm font-medium text-gray-200">{{ client.name }}</div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm text-gray-300">{{ client.email }}</div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm text-gray-300">{{ formatDate(client.approved_at) }}</div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <button
-                                        @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
-                                        class="rounded-md bg-indigo-700 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-600"
-                                    >
-                                        View Reservations
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pending Reservations for Approved Clients -->
-        <div>
-            <h4 class="mb-4 text-xl font-semibold text-gray-100">Pending Reservations for Approved Clients</h4>
-            <div v-if="pendingReservations.length === 0" class="rounded-lg bg-gray-800 py-4 text-center">
-                <p class="text-gray-400">No pending reservations found for your approved clients.</p>
-            </div>
-            <div v-else class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-800">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Client Name</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Room Number</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Check-in Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Check-out Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700 bg-gray-800">
-                        <tr v-for="reservation in pendingReservations" :key="reservation.id" class="hover:bg-gray-700">
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm font-medium text-gray-200">
-                                    {{ reservation.client ? reservation.client.name : 'N/A' }}
-                                </div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm text-gray-300">
-                                    {{ reservation.room ? reservation.room.room_number : 'N/A' }}
-                                </div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm text-gray-300">{{ formatDate(reservation.check_in_date) }}</div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm text-gray-300">{{ formatDate(reservation.check_out_date) }}</div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <button
-                                        @click="approveReservation(reservation)"
-                                        class="rounded-md bg-green-700 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
-                                    >
-                                        Approve
-                                    </button>
-                                    <button
-                                        @click="navigateTo(`/receptionist/reservations/${reservation.id}`)"
-                                        class="rounded-md border border-gray-600 bg-gray-700 px-3 py-1 text-sm font-medium text-gray-200 hover:bg-gray-600"
-                                    >
-                                        View
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
+import { ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
-
+import { route } from 'ziggy-js';
+import { useToast } from '@/composables/useToast';
 import axios from 'axios';
+
 defineOptions({ layout: AppLayout });
+
 // Props
 const props = defineProps({
     stats: {
@@ -148,6 +29,9 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+// Initialize toast
+const toast = useToast();
 
 // For debugging
 console.log('ApprovalDataTable props:', {
@@ -169,39 +53,39 @@ const formatDate = (dateString) => {
 
 // Navigation method using Inertia
 const navigateTo = (url) => {
-  router.visit(url, {
-    preserveScroll: true,
-    preserveState: true,
-    replace: true,
-    onSuccess: () => {
-      console.log('Navigation successful to:', url);
-    },
-    onError: (errors) => {
-      console.error('Navigation error:', errors);
-    }
-  });
+    router.visit(url, {
+        preserveScroll: true,
+        preserveState: true,
+        replace: true,
+        onSuccess: () => {
+            console.log('Navigation successful to:', url);
+        },
+        onError: (errors) => {
+            console.error('Navigation error:', errors);
+        }
+    });
 };
 
 const approveReservation = async (reservation) => {
-  if (confirm('Are you sure you want to approve this reservation?')) {
-    try {
-      // Prepare the data to send
-      const data = {
-        status: 'confirmed',
-        room_id: reservation.room_id,
-        client_id: reservation.client_id,
-        accompany_number: reservation.accompany_number,
-        price_paid: reservation.price_paid,
-        check_in_date: reservation.check_in_date,
-        check_out_date: reservation.check_out_date
-      };
+    if (confirm('Are you sure you want to approve this reservation?')) {
+        try {
+            // Prepare the data to send
+            const data = {
+                status: 'confirmed',
+                room_id: reservation.room_id,
+                client_id: reservation.client_id,
+                accompany_number: reservation.accompany_number,
+                price_paid: reservation.price_paid,
+                check_in_date: reservation.check_in_date,
+                check_out_date: reservation.check_out_date
+            };
 
-      // Use axios to make the request with proper method
-      const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data);
-      console.log('Reservation approval response:', response.data);
+            // Use axios to make the request with proper method
+            const response = await axios.put(`/receptionist/reservations/${reservation.id}`, data);
+            console.log('Reservation approval response:', response.data);
 
-            // Show success message
-            alert('Reservation approved successfully!');
+            // Show success message using toast instead of alert
+            toast.success('Reservation approved successfully!');
 
             // Reload the current page
             router.visit(window.location.pathname, {
@@ -213,11 +97,129 @@ const approveReservation = async (reservation) => {
                     console.log('Page reloaded after reservation approval');
                 },
             });
-        }  catch (error) {
-      console.error('Error approving reservation:', error.response?.data || error);
-      alert('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+        } catch (error) {
+            console.error('Error approving reservation:', error.response?.data || error);
+            toast.error('Could not approve reservation due to a technical issue. Please try refreshing the page.');
+        }
     }
-      };
-    
 };
 </script>
+
+<template>
+    <div class="min-h-screen bg-background text-foreground p-8">
+        <h1 class="mb-8 text-3xl font-bold">Approval Data</h1>
+
+        <!-- Approval Status -->
+        <div class="mb-6 rounded-lg border border-border bg-accent/10 p-6">
+            <h2 class="mb-4 text-xl font-semibold">Approval Status</h2>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    <div class="text-sm text-muted-foreground">Total Clients</div>
+                    <div class="text-2xl font-bold">{{ stats.totalClients }}</div>
+                </div>
+                <div class="rounded-lg border border-green-600/20 bg-green-950/10 p-4 shadow-sm">
+                    <div class="text-sm text-muted-foreground">Approved Clients</div>
+                    <div class="text-2xl font-bold">{{ stats.approvedClients }}</div>
+                </div>
+                <div class="rounded-lg border border-yellow-600/20 bg-yellow-950/10 p-4 shadow-sm">
+                    <div class="text-sm text-muted-foreground">Pending Clients</div>
+                    <div class="text-2xl font-bold">{{ stats.pendingClients }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Approvals -->
+        <div class="mb-6">
+            <h2 class="mb-4 text-xl font-semibold">Recent Approvals</h2>
+            <div v-if="recentApprovals.length === 0" class="text-center text-muted-foreground py-8 border rounded-lg">
+                <p>No recent approvals found.</p>
+            </div>
+            <div v-else>
+                <Table class="w-full overflow-hidden rounded-lg border border-border">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Client Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Approved On</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow
+                            v-for="client in recentApprovals"
+                            :key="client.id"
+                            class="transition hover:bg-accent/10"
+                        >
+                            <TableCell>{{ client.name }}</TableCell>
+                            <TableCell>{{ client.email }}</TableCell>
+                            <TableCell>{{ formatDate(client.approved_at) }}</TableCell>
+                            <TableCell>
+                                <div class="flex gap-2">
+                                    <Button
+                                        @click="navigateTo(`/receptionist/clients/${client.id}/reservations`)"
+                                        variant="default"
+                                    >
+                                        View Reservations
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+
+        <!-- Pending Reservations for Approved Clients -->
+        <div>
+            <h2 class="mb-4 text-xl font-semibold">Pending Reservations for Approved Clients</h2>
+            <div v-if="pendingReservations.length === 0" class="text-center text-muted-foreground py-8 border rounded-lg">
+                <p>No pending reservations found for your approved clients.</p>
+            </div>
+            <div v-else>
+                <Table class="w-full overflow-hidden rounded-lg border border-border">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Client Name</TableHead>
+                            <TableHead>Room Number</TableHead>
+                            <TableHead>Check-in Date</TableHead>
+                            <TableHead>Check-out Date</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow
+                            v-for="reservation in pendingReservations"
+                            :key="reservation.id"
+                            class="transition hover:bg-accent/10"
+                        >
+                            <TableCell>
+                                {{ reservation.client ? reservation.client.name : 'N/A' }}
+                            </TableCell>
+                            <TableCell>
+                                {{ reservation.room ? reservation.room.room_number : 'N/A' }}
+                            </TableCell>
+                            <TableCell>{{ formatDate(reservation.check_in_date) }}</TableCell>
+                            <TableCell>{{ formatDate(reservation.check_out_date) }}</TableCell>
+                            <TableCell>
+                                <div class="flex gap-2">
+                                    <Button
+                                        @click="approveReservation(reservation)"
+                                        variant="default"
+                                    >
+                                        Approve
+                                    </Button>
+                                    <Button
+                                        @click="navigateTo(`/receptionist/reservations/${reservation.id}`)"
+                                        variant="outline"
+                                    >
+                                        View
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    </div>
+</template>

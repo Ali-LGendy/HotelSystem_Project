@@ -143,7 +143,7 @@ class StripeController extends Controller
                 'stripe_session_id' => $session_id,
             ]);
 
-            return redirect()->route('hotel.landing')->with('success', 'Your reservation has been confirmed successfully!');
+            return redirect()->route('clients.myreservation')->with('success', 'Your reservation has been confirmed successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -24,6 +24,9 @@
                                 <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
                                     Status
                                 </th>
+                                <th  class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                                    actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -49,6 +52,9 @@
                                         {{ reservation.status }}
                                     </span>
                                 </td>
+                                <td v-if="reservation.status == 'pending'" class="whitespace-nowrap px-6 py-4 text-right">
+                                    <Button @click="goToStripe(reservation.id)">Proceed to Payment</Button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -68,6 +74,7 @@
 
 <script setup>
 import Pagination from '@/Components/Pagination.vue';
+import { Button } from '@/components/ui/button';
 
 // Props from controller
 const props = defineProps({
@@ -80,6 +87,18 @@ const props = defineProps({
         default: null,
     },
 });
+
+console.log('Reservations:', props.reservations);
+
+const goToStripe = function(reservationId) {
+        // Replace '69' with the actual reservation ID or a variable.
+  
+        // Construct the URL with the reservation ID.
+        const stripeCheckoutUrl = `/reservations/checkout/${reservationId}`;
+  
+        // Redirect the user to the Stripe checkout URL.
+        window.location.href = stripeCheckoutUrl;
+      }
 
 // Method to get status badge class
 const getStatusBadgeClass = (status) => {

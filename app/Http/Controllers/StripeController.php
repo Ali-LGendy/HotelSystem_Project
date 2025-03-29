@@ -7,6 +7,7 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Redirect;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
@@ -69,8 +70,12 @@ class StripeController extends Controller
             Log::info('this is session,', ['sessionid' => $session]);
 
             // Redirect to Stripe Checkout
-            return redirect($session->url);
+            return redirect()->away($session->url);
 
+            // return Redirect::back()->with([
+            //     'stripe_url' => $session->url, 
+            //     'reservation_id' => $reservation->id
+            // ]);
         } catch (ApiErrorException $e) {
             Log::error('Stripe API Error: '.$e->getMessage());
 

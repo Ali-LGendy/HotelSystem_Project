@@ -254,8 +254,7 @@ class ReservationController extends Controller
             'receptionist_id' => null,
         ]);
 
-        // Redirect to checkout with reservation_id
-        return redirect()->route('stripe.checkout', ['reservation_id' => $reservation->id]);
+        return redirect()->route('clients.myreservation');
     }
 
 

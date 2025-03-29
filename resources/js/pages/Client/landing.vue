@@ -62,7 +62,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import Header from './header.vue';
 import Footer from './footer.vue';
 import RoomCard from './room.vue';
@@ -79,7 +79,10 @@ const form = useForm({
   guests: 1,
   special_requests: '',
   room_id: null,
+  total_price: 0,
 });
+
+const reservationId = ref(null);
 
 const bookRoom = (room) => {
   if (room.status !== 'available') return;
@@ -93,8 +96,8 @@ const bookRoom = (room) => {
 };
 
 const closeBookingModal = () => {
-    showBookingModal.value = false;
-    selectedRoom.value = null;
+  showBookingModal.value = false;
+  selectedRoom.value = null;
 };
 
 const calculateNights = () => {
@@ -104,19 +107,15 @@ const calculateNights = () => {
 };
 
 const calculateTotal = () => {
-  return (calculateNights() * (selectedRoom.value?.price || 0)).toFixed(2);
+  const total = calculateNights() * (selectedRoom.value?.price / 100 || 0);
+  form.total_price = total;
+  return total.toFixed(2);
 };
 
 const submitBooking = () => {
-  form.post(route('hotel.reservations.store'), {
-    onSuccess: ({ props }) => {
-      // const reservationId = props?.reservation_id;
-      // if (reservationId) {
-      //   router.visit(route('hotel.reservations.edit', { reservation_id: reservationId }));
-      // }
-      console.log(form);
-    },
-  });
+  calculateTotal();
+
+  form.post(route('hotel.reservations.store'));
 };
 </script>
 
@@ -138,6 +137,7 @@ const submitBooking = () => {
   padding: 10px 20px;
   border-radius: 5px;
   transition: background 0.3s;
+  cursor: pointer;
 }
 .btn-primary:hover {
   background-color: #0056b3;
@@ -146,5 +146,6 @@ const submitBooking = () => {
   background-color: #ccc;
   padding: 10px 20px;
   border-radius: 5px;
+  cursor: pointer;
 }
 </style>

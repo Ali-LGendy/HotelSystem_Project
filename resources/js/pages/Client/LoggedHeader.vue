@@ -93,7 +93,7 @@ const navigationItems = [
             <Link :href="route('clients.myreservation')">My Reservations</Link>
           </Button>
           <Button asChild variant="outline" class="text-gray-900 dark:text-white">
-            <Link href="/profile">Profile</Link>
+            <Link :href="route('profile.edit')">Profile</Link>
           </Button>
           <Button asChild variant="destructive">
             <Link :href="route('logout')" method="post" as="button">Logout</Link>

@@ -71,11 +71,7 @@ class StripeController extends Controller
 
             // Redirect to Stripe Checkout
             return redirect()->away($session->url);
-
-            // return Redirect::back()->with([
-            //     'stripe_url' => $session->url, 
-            //     'reservation_id' => $reservation->id
-            // ]);
+;
         } catch (ApiErrorException $e) {
             Log::error('Stripe API Error: '.$e->getMessage());
 

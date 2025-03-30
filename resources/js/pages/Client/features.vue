@@ -1,49 +1,63 @@
-<template>
-    <section class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-          <h2 class="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
+<script setup>
+import { Card, CardContent } from "@/components/ui/card";
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center p-6">
-              <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold mb-2">Premium Comfort</h3>
-              <p class="text-gray-600">Experience luxury with our premium amenities and comfortable rooms.</p>
-            </div>
-
-            <div class="text-center p-6">
-              <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold mb-2">24/7 Service</h3>
-              <p class="text-gray-600">Our staff is available around the clock to assist with your needs.</p>
-            </div>
-
-            <div class="text-center p-6">
-              <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold mb-2">Best Rates</h3>
-              <p class="text-gray-600">Competitive pricing with no hidden fees or surprise charges.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-</template>
-
-<script>
-export default {
-
-}
+const features = [
+  {
+    title: "Luxurious Accommodations",
+    description: "Experience unparalleled comfort in our meticulously designed rooms and suites.",
+    icon: "🏨"
+  },
+  {
+    title: "Fine Dining",
+    description: "Savor exquisite cuisine at our world-class restaurants and bars.",
+    icon: "🍽️"
+  },
+  {
+    title: "Spa & Wellness",
+    description: "Rejuvenate your body and mind in our premium spa facilities.",
+    icon: "💆"
+  },
+  {
+    title: "24/7 Service",
+    description: "Our dedicated staff is available around the clock to ensure your comfort.",
+    icon: "⏰"
+  },
+  {
+    title: "Event Spaces",
+    description: "Perfect venues for your special occasions and business meetings.",
+    icon: "🎉"
+  },
+  {
+    title: "Prime Location",
+    description: "Conveniently located with easy access to major attractions.",
+    icon: "📍"
+  }
+];
 </script>
 
-<style>
+<template>
+  <section class="py-16 bg-white dark:bg-black">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Why Choose Us</h2>
+        <p class="text-gray-600 dark:text-gray-300">
+          Experience unparalleled luxury and comfort
+        </p>
+      </div>
 
-</style>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <Card 
+          v-for="feature in features" 
+          :key="feature.title" 
+          class="border-none shadow-none bg-white/50 dark:bg-black/50 backdrop-blur"
+        >
+          <CardContent class="pt-6">
+            <div class="text-4xl mb-4">{{ feature.icon }}</div>
+            <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{{ feature.title }}</h3>
+            <p class="text-gray-600 dark:text-gray-300">{{ feature.description }}</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </section>
+</template>

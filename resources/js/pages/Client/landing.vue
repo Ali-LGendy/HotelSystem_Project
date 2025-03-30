@@ -1,78 +1,37 @@
-<template>
-  <div class="min-h-screen flex flex-col">
-    <Header />
-    <CTAs />
-    <main class="flex-grow">
-      <section id="rooms" class="py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-          <h2 class="text-3xl font-bold text-center mb-12">Our Rooms</h2>
-          <div v-if="rooms.length === 0" class="text-center py-8">
-            <p class="text-gray-500">No rooms available at the moment.</p>
-          </div>
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <RoomCard v-for="room in rooms" :key="room.id" :room="room" @book-room="bookRoom" />
-          </div>
-        </div>
-      </section>
-      <Features />
-      <div v-if="showBookingModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8 max-h-[95vh] overflow-y-auto">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold">Book Room {{ selectedRoom?.room_number }}</h3>
-            <button @click="closeBookingModal" class="text-gray-500 hover:text-gray-700">&times;</button>
-          </div>
-          <form @submit.prevent="submitBooking" class="space-y-4">
-            <div>
-              <label class="block text-gray-700 text-sm font-bold mb-2">Check-in Date</label>
-              <input type="date" v-model="form.check_in_date" class="input-field" required :min="today">
-            </div>
-            <div>
-              <label class="block text-gray-700 text-sm font-bold mb-2">Check-out Date</label>
-              <input type="date" v-model="form.check_out_date" class="input-field" required :min="form.check_in_date || today">
-            </div>
-            <div>
-              <label class="block text-gray-700 text-sm font-bold mb-2">Number of Guests</label>
-              <input type="number" v-model="form.guests" min="1" :max="selectedRoom?.room_capacity || 1" class="input-field" required>
-            </div>
-            <div>
-              <input type="hidden" v-model="form.room_id" value="selectedRoom.room_id" class="input-field" required>
-            </div>
-            <div>
-              <label class="block text-gray-700 text-sm font-bold mb-2">Special Requests (Optional)</label>
-              <textarea v-model="form.special_requests" class="input-field" rows="3"></textarea>
-            </div>
-            <div class="bg-gray-100 p-4 rounded-md">
-              <div class="flex justify-between mb-2"><span>Room Rate:</span><span>${{ selectedRoom?.price || 0 }} per night</span></div>
-              <div class="flex justify-between mb-2"><span>Nights:</span><span>{{ calculateNights() }}</span></div>
-              <div class="flex justify-between font-bold"><span>Total:</span><span>${{ calculateTotal() }}</span></div>
-            </div>
-            <div class="flex justify-end space-x-3">
-              <button type="button" @click="closeBookingModal" class="btn-secondary">Cancel</button>
-              <button type="submit" class="btn-primary" :disabled="form.processing">
-                {{ form.processing ? 'Processing...' : 'Proceed to Payment' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </main>
-    <Footer />
-  </div>
-</template>
-
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+
+// Custom Components
 import Header from './header.vue';
+import LoggedHeader from './Loggedheader.vue';
 import Footer from './footer.vue';
 import RoomCard from './room.vue';
 import CTAs from './ctas.vue';
 import Features from './features.vue';
 
-const props = defineProps({ rooms: Array, pagination: Object });
+function useCurrentUser() {
+    const page = usePage();
+    return page.props.auth.user;
+}
+
+const user = useCurrentUser();
+console.log(user);
+const props = defineProps({ 
+  rooms: Array, 
+  pagination: Object 
+});
+
 const showBookingModal = ref(false);
 const selectedRoom = ref(null);
 const today = computed(() => new Date().toISOString().split('T')[0]);
+
 const form = useForm({
   check_in_date: '',
   check_out_date: '',
@@ -81,8 +40,6 @@ const form = useForm({
   room_id: null,
   total_price: 0,
 });
-
-const reservationId = ref(null);
 
 const bookRoom = (room) => {
   if (room.status !== 'available') return;
@@ -114,38 +71,119 @@ const calculateTotal = () => {
 
 const submitBooking = () => {
   calculateTotal();
-
   form.post(route('hotel.reservations.store'));
 };
 </script>
 
-<style scoped>
-.input-field {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  outline: none;
-  transition: border 0.3s;
-}
-.input-field:focus {
-  border-color: #007bff;
-}
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  transition: background 0.3s;
-  cursor: pointer;
-}
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-.btn-secondary {
-  background-color: #ccc;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-</style>
+<template>
+  <div class="min-h-screen bg-white dark:bg-black">
+    <LoggedHeader v-if="user" />
+    <Header v-else />
+
+    <CTAs />
+    <main>
+      <div class="relative bg-white dark:bg-black">
+        <div class="container mx-auto px-4">
+          <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Our Rooms</h2>
+          <div v-if="rooms.length === 0" class="text-center py-8">
+            <p class="text-gray-500 dark:text-gray-300">No rooms available at the moment.</p>
+          </div>
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <RoomCard v-for="room in rooms" :key="room.id" :room="room" @book-room="bookRoom" />
+          </div>
+        </div>
+      </div>
+
+      <Features />
+
+      <!-- Booking Modal -->
+      <Dialog :open="showBookingModal" @update:open="closeBookingModal">
+        <DialogContent class="sm:max-w-2xl bg-white dark:bg-black">
+          <DialogHeader>
+            <DialogTitle class="text-gray-900 dark:text-white">Book Room {{ selectedRoom?.room_number }}</DialogTitle>
+          </DialogHeader>
+
+          <form @submit.prevent="submitBooking" class="space-y-4">
+            <div class="space-y-2">
+              <Label for="check_in_date">Check-in Date</Label>
+              <Input
+                id="check_in_date"
+                v-model="form.check_in_date"
+                type="date"
+                required
+                :min="today"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="check_out_date">Check-out Date</Label>
+              <Input
+                id="check_out_date"
+                v-model="form.check_out_date"
+                type="date"
+                required
+                :min="form.check_in_date || today"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="guests">Number of Guests</Label>
+              <Input
+                id="guests"
+                v-model="form.guests"
+                type="number"
+                min="1"
+                :max="selectedRoom?.room_capacity || 1"
+                required
+              />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="special_requests">Special Requests (Optional)</Label>
+              <Textarea
+                id="special_requests"
+                v-model="form.special_requests"
+                rows="3"
+              />
+            </div>
+
+            <Card class="bg-white dark:bg-black">
+              <CardContent class="pt-6 space-y-2">
+                <div class="flex justify-between text-gray-900 dark:text-white">
+                  <span class="text-gray-500 dark:text-gray-400">Room Rate:</span>
+                  <span>${{ selectedRoom?.price/100 || 0 }} per night</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Nights:</span>
+                  <span>{{ calculateNights() }}</span>
+                </div>
+                <div class="flex justify-between font-bold">
+                  <span>Total:</span>
+                  <span>${{ calculateTotal() }}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                @click="closeBookingModal"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                :disabled="form.processing"
+              >
+                {{ form.processing ? 'Processing...' : 'Proceed to Payment' }}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </main>
+
+    <Footer />
+  </div>
+</template>

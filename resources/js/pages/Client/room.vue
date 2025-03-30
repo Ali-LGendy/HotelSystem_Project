@@ -1,40 +1,15 @@
-<template>
-  <div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <!-- Room Image (placeholder) -->
-    <div class="h-48 bg-gray-300 relative">
-      <div class="absolute top-0 right-0 bg-teal-500 text-white px-3 py-1 m-2 rounded-md">
-        ${{ room.price }}/night
-      </div>
-    </div>
-    <div class="p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">Room {{ room.room_number }}</h3>
-        <span :class="getStatusBadgeClass(room.status)" class="px-2 py-1 rounded-full text-xs font-medium">
-          {{ room.status }}
-        </span>
-      </div>
-      <div class="mb-4">
-        <p class="text-gray-600">
-          <span class="font-medium">Capacity:</span> {{ room.room_capacity }} person(s)
-        </p>
-        <p class="text-gray-600">
-          <span class="font-medium">Floor:</span> {{ room.floor_name }}
-        </p>
-      </div>
-      <button
-        @click="$emit('book-room', room)"
-        class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
-        :disabled="room.status !== 'available'"
-        :class="{'opacity-50 cursor-not-allowed': room.status !== 'available'}"
-      >
-        {{ room.status === 'available' ? 'Book Now' : 'Not Available' }}
-      </button>
-    </div>
-  </div>
-</template>
-
 <script setup>
-// Props
+import { computed } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+function useCurrentUser() {
+    const page = usePage();
+    return page.props.auth.user;
+}
+
+const user = useCurrentUser();
 const props = defineProps({
   room: {
     type: Object,
@@ -42,20 +17,74 @@ const props = defineProps({
   }
 });
 
-// Emits
-defineEmits(['book-room']);
+const emit = defineEmits(['book-room']);
 
-// Methods
-const getStatusBadgeClass = (status) => {
-  switch (status) {
-    case 'available':
-      return 'bg-green-100 text-green-800';
-    case 'occupied':
-      return 'bg-blue-100 text-blue-800';
-    case 'maintenance':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
+const statusColor = computed(() => {
+  const colors = {
+    available: 'success',
+    occupied: 'destructive',
+    maintenance: 'warning'
+  };
+  return colors[props.room.status] || 'secondary';
+});
+
+const handleBooking = () => {
+  if(user){
+  emit('book-room', props.room);
+}else{
+  router.visit('/login');
+}
 };
 </script>
+
+<template>
+  <Card class="overflow-hidden bg-white dark:bg-black">
+    <div class="relative aspect-video">
+      <img :src="room.image" :alt="room.name" class="object-cover w-full h-full" />
+      <div class="absolute top-2 right-2">
+        <Badge :variant="room.status === 'available' ? 'default' : 'destructive'" class="text-white dark:text-black-200">
+          {{ room.status }}
+        </Badge>
+      </div>
+    </div>
+
+    <CardHeader>
+      <CardTitle class="flex justify-between items-center">
+        <span>{{ room.name }}</span>
+        <span class="text-lg">${{ room.price/100 }}/night</span>
+      </CardTitle>
+      <p class="text-sm text-muted-foreground">Room {{ room.room_number }}</p>
+    </CardHeader>
+
+    <CardContent>
+      <div class="space-y-4">
+        <div class="flex items-center gap-2">
+          <!-- <Badge variant="outline">{{ room.type }}</Badge> -->
+          <Badge variant="outline">{{ room.room_capacity }} Guests</Badge>
+        </div>
+        
+        <p class="text-sm text-muted-foreground">{{ room.description }}</p>
+
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div v-for="(feature, index) in room.features" :key="index" class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+            <span>{{ feature }}</span>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+
+    <CardFooter>
+      <Button 
+        class="w-full" 
+        :variant="room.status === 'available' ? 'default' : 'secondary'"
+        :disabled="room.status !== 'available'"
+        @click="handleBooking"
+      >
+        {{ room.status === 'available' ? 'Book Now' : 'Unavailable' }}
+      </Button>
+    </CardFooter>
+  </Card>
+</template>

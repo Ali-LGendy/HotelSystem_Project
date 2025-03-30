@@ -1,72 +1,102 @@
-<template>
-  <section
-    class="relative overflow-hidden bg-[url(https://thumbs.dreamstime.com/b/luxury-hotel-room-master-bedroom-creative-ai-design-background-instagram-facebook-wall-painting-backgrounds-photo-art-325040735.jpg)] bg-cover bg-center bg-no-repeat min-h-screen flex items-center justify-center"
-  >
-    <!-- Gradient Overlay for Better Text Contrast -->
-    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30"></div>
+<script setup>
+import { Link } from '@inertiajs/vue3';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
-    <!-- Content -->
+const ctaCards = [
+  {
+    title: "Special Offers",
+    description: "Discover our exclusive packages and seasonal promotions for an unforgettable stay.",
+    image: "/images/special-offers.jpg",
+    link: "/offers"
+  },
+  {
+    title: "Events & Meetings",
+    description: "Perfect venues for your corporate events, weddings, and special occasions.",
+    image: "/images/events.jpg",
+    link: "/events"
+  },
+  {
+    title: "Dining Experience",
+    description: "Explore our world-class restaurants and unique culinary experiences.",
+    image: "/images/dining.jpg",
+    link: "/dining"
+  }
+];
+
+const scrollToRooms = (event) => {
+  event.preventDefault();
+  const targetSection = document.getElementById('rooms');
+  if (targetSection) {
+    targetSection.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+    window.history.pushState(null, null, '#rooms');
+  }
+};
+</script>
+
+<template>
+  <section class="relative overflow-hidden bg-white dark:bg-black">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30 dark:from-black/80 dark:via-black/60 dark:to-black/40"></div>
+
     <div class="relative z-10 p-8 md:p-12 lg:p-16 max-w-4xl mx-auto text-center">
-      <!-- Animated Heading -->
-      <h2
-        class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 animate-fade-in-down"
-      >
+      <h2 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-white dark:text-white leading-tight mb-6 animate-fade-in-down">
         Welcome to Our Luxury Hotel
       </h2>
 
-      <!-- Animated Subheading -->
-      <p
-        class="text-lg sm:text-xl md:text-2xl text-white/90 mb-10 animate-fade-in-up delay-200"
-      >
+      <p class="text-lg sm:text-xl md:text-2xl text-white/90 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
         Experience comfort and elegance in every stay
       </p>
 
-      <!-- Animated CTA Button with Smooth Scroll -->
       <div class="mt-6 sm:mt-10">
-        <a
-          href="#rooms"
-          @click.prevent="scrollToRooms"
-          class="inline-block rounded-full bg-indigo-600 px-8 py-4 text-base sm:text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:bg-indigo-700 hover:shadow-xl focus:ring-4 focus:ring-indigo-300 focus:outline-none animate-bounce-in delay-400"
+        <Button 
+          size="lg"
+          variant="secondary"
+          class="animate-in fade-in zoom-in duration-1000 delay-300"
+          @click="scrollToRooms"
         >
           Book Your Stay Today
-        </a>
+        </Button>
+      </div>
+    </div>
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Experience Luxury</h2>
+        <p class="text-gray-600 dark:text-gray-300">
+          Indulge in exceptional experiences tailored just for you
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <Card 
+          v-for="cta in ctaCards" 
+          :key="cta.title"
+          class="overflow-hidden group hover:shadow-lg transition-shadow duration-300 bg-white dark:bg-black"
+        >
+          <div class="relative aspect-video">
+            <img 
+              :src="cta.image" 
+              :alt="cta.title"
+              class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+          <CardContent class="p-6">
+            <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{{ cta.title }}</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">{{ cta.description }}</p>
+            <Button asChild variant="outline" class="w-full">
+              <Link :href="cta.link">Learn More</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  name: 'HeroSection',
-  methods: {
-    scrollToRooms(event) {
-      // Prevent the default anchor behavior
-      event.preventDefault();
-
-      // Find the target section by its ID
-      const targetSection = document.getElementById('rooms');
-      if (targetSection) {
-        // Smoothly scroll to the target section
-        targetSection.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start', // Align the top of the section with the top of the viewport
-        });
-
-        // Update the URL hash without jumping
-        window.history.pushState(null, null, '#rooms');
-      }
-    },
-  },
-};
-</script>
-
 <style scoped>
-/* Enable smooth scrolling for the entire page */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Custom Animations */
 @keyframes fade-in-down {
   0% {
     opacity: 0;
@@ -123,8 +153,7 @@ html {
   animation-delay: 0.4s;
 }
 
-/* Optional: Add scroll margin to account for fixed headers */
 #rooms {
-  scroll-margin-top: 80px; /* Adjust based on your header height */
+  scroll-margin-top: 80px;
 }
 </style>

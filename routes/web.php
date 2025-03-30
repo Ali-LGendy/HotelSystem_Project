@@ -30,7 +30,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 });
 
     
-// Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/clientReservation', [ClientController::class, 'index'])->name('clientReservation');
 
 

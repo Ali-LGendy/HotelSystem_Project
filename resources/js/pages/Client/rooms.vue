@@ -1,12 +1,12 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h2 class="text-3xl font-bold text-center mb-8">Available Rooms</h2>
+    <h2 class="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">Available Rooms</h2>
 
     <div v-if="rooms.length === 0" class="text-center py-8">
-      <p class="text-gray-500">No rooms available at the moment.</p>
+      <p class="text-gray-500 dark:text-gray-300">No rooms available at the moment.</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <RoomCard
         v-for="room in rooms"
         :key="room.id"
@@ -15,108 +15,93 @@
       />
     </div>
 
-    <!-- Booking Modal -->
-    <div v-if="showBookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold">Book Room {{ selectedRoom?.room_number }}</h3>
-          <button @click="closeBookingModal" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <Dialog :open="showBookingModal" @update:open="closeBookingModal">
+      <DialogContent class="sm:max-w-md bg-white dark:bg-black">
+        <DialogHeader>
+          <DialogTitle class="text-gray-900 dark:text-white">Book Room {{ selectedRoom?.room_number }}</DialogTitle>
+        </DialogHeader>
 
-        <form @submit.prevent="submitBooking">
-          <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="check_in_date">
-              Check-in Date
-            </label>
-            <input
+        <form @submit.prevent="submitBooking" class="space-y-4">
+          <div class="space-y-2">
+            <Label for="check_in_date">Check-in Date</Label>
+            <Input
               id="check_in_date"
               v-model="bookingForm.check_in_date"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               :min="today"
-            >
+            />
           </div>
 
-          <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="check_out_date">
-              Check-out Date
-            </label>
-            <input
+          <div class="space-y-2">
+            <Label for="check_out_date">Check-out Date</Label>
+            <Input
               id="check_out_date"
               v-model="bookingForm.check_out_date"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               :min="bookingForm.check_in_date || today"
-            >
+            />
           </div>
 
-          <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="guests">
-              Number of Guests
-            </label>
-            <input
+          <div class="space-y-2">
+            <Label for="guests">Number of Guests</Label>
+            <Input
               id="guests"
               v-model="bookingForm.guests"
               type="number"
               min="1"
               :max="selectedRoom?.room_capacity || 1"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            >
+            />
           </div>
 
-          <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="special_requests">
-              Special Requests (Optional)
-            </label>
-            <textarea
+          <div class="space-y-2">
+            <Label for="special_requests">Special Requests (Optional)</Label>
+            <Textarea
               id="special_requests"
               v-model="bookingForm.special_requests"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows="3"
-            ></textarea>
+            />
           </div>
 
-          <div class="bg-gray-50 p-4 rounded-md mb-6">
-            <div class="flex justify-between mb-2">
-              <span>Room Rate:</span>
-              <span>${{ selectedRoom?.price || 0 }} per night</span>
-            </div>
-            <div class="flex justify-between mb-2">
-              <span>Nights:</span>
-              <span>{{ calculateNights() }}</span>
-            </div>
-            <div class="flex justify-between font-bold">
-              <span>Total:</span>
-              <span>${{ calculateTotal() }}</span>
-            </div>
-          </div>
+          <Card class="mt-6">
+            <CardContent class="pt-6">
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Room Rate:</span>
+                  <span>${{ selectedRoom?.price || 0 }} per night</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Nights:</span>
+                  <span>{{ calculateNights() }}</span>
+                </div>
+                <div class="flex justify-between font-bold">
+                  <span>Total:</span>
+                  <span>${{ calculateTotal() }}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div class="flex justify-end space-x-3">
-            <button
+          <DialogFooter class="flex justify-end space-x-2">
+            <Button
               type="button"
+              variant="outline"
               @click="closeBookingModal"
-              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               :disabled="isSubmitting"
             >
               {{ isSubmitting ? 'Processing...' : 'Proceed to Payment' }}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
@@ -124,6 +109,18 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import RoomCard from './room.vue';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Props
 const props = defineProps({
@@ -192,7 +189,6 @@ const submitBooking = () => {
 
   isSubmitting.value = true;
 
-  // Prepare the form data
   const formData = {
     room_id: selectedRoom.value.id,
     check_in_date: bookingForm.value.check_in_date,
@@ -202,15 +198,12 @@ const submitBooking = () => {
     total_price: calculateTotal()
   };
 
-  // Submit the booking
   router.post(route('hotel.reservations.store'), formData, {
     onSuccess: () => {
       closeBookingModal();
-      // You might want to show a success message or redirect
     },
     onError: (errors) => {
       console.error('Booking errors:', errors);
-      // Handle errors
     },
     onFinish: () => {
       isSubmitting.value = false;

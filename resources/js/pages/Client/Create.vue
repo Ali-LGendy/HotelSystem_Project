@@ -5,30 +5,40 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ref } from 'vue';
+
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
+
 defineOptions({ layout: AppLayout });
 
 const form = useForm({
     name: '',
     email: '',
     password: '',
-    national_id: '',
+    mobile: '',
     avatar_img: null,
+    gender: '',
 });
 
 const handleFileUpload = (event) => {
     form.avatar_img = event.target.files[0];
 };
+const showGenderDropdown = ref(false);
+const genderOptions = ['Male', 'Female'];
 
+const selectGender = (option) => {
+    form.gender = option;
+    showGenderDropdown.value = false;
+};
 const submitForm = () => {
-    form.post(route('admin.users.receptionists.store'), {
-        onSuccess: () => router.visit(route('admin.users.receptionists.index')),
+    form.post(route('client.store'), {
+        onSuccess: () => router.visit(route('client.index')),
     });
 };
 
 const cancelForm = () => {
-    router.visit(route('admin.users.receptionists.index'));
+    router.visit(route('client.index'));
 };
 </script>
 
@@ -37,20 +47,20 @@ const cancelForm = () => {
         <div class="mx-auto max-w-2xl">
             <Card>
                 <CardHeader>
-                    <CardTitle>Create New Receptionist</CardTitle>
+                    <CardTitle>Create New Client</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
                         <!-- Name -->
                         <div>
                             <Label for="name">Name</Label>
-                            <Input v-model="form.name" id="name" placeholder="Enter receptionist's name" required />
+                            <Input v-model="form.name" id="name" placeholder="Enter client's name" required />
                         </div>
 
                         <!-- Email -->
                         <div>
                             <Label for="email">Email</Label>
-                            <Input v-model="form.email" id="email" type="email" placeholder="Enter receptionist's email" required />
+                            <Input v-model="form.email" id="email" type="email" placeholder="Enter client's email" required />
                         </div>
 
                         <!-- Password -->
@@ -61,8 +71,8 @@ const cancelForm = () => {
 
                         <!-- National ID -->
                         <div>
-                            <Label for="national_id">National ID</Label>
-                            <Input v-model="form.national_id" id="national_id" placeholder="Enter national ID" required />
+                            <Label for="national_id">Mobile Number</Label>
+                            <Input v-model="form.mobile" id="mobile" placeholder="Enter Mobile number" required />
                         </div>
 
                         <!-- Avatar Image -->
@@ -70,6 +80,7 @@ const cancelForm = () => {
                             <Label for="avatar_img">Avatar Image</Label>
                             <Input id="avatar_img" type="file" @change="handleFileUpload" accept="image/*" />
                         </div>
+                        <!-- Gender -->
                         <div>
                             <Label for="gender">Gender</Label>
                             <div class="relative">
@@ -110,10 +121,11 @@ const cancelForm = () => {
                                 </div>
                             </div>
                         </div>
+
                         <!-- Submit and Cancel Buttons -->
                         <div class="flex space-x-4">
                             <Button type="button" variant="outline" @click="cancelForm" class="flex-1"> Cancel </Button>
-                            <Button type="submit" class="flex-1">Create Receptionist</Button>
+                            <Button type="submit" class="flex-1">Create Client</Button>
                         </div>
                     </form>
                 </CardContent>

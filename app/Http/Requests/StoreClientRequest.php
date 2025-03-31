@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreClientRequest extends FormRequest
 {
@@ -22,12 +23,23 @@ class StoreClientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|min:3',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'avatar_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-            'country' => 'required|string',
-            'gender' => 'required|in:Male,Female',
+            'name' => ['sometimes', 'string', 'max:255'],
+        'email' => [
+            'sometimes', 
+            'email', 
+            'max:255', 
+            Rule::unique('users', 'email')
+        ],
+        'password' => ['nullable', 'min:6'],
+        'mobile' => [
+            'sometimes', 
+            'string', 
+            Rule::unique('users', 'mobile')
+        ],
+        'avatar_img' => ['nullable', 'image', 'max:5120'],
+        'gender' => 'required|in:Male,Female',
+ // 5MB max
+            // 'mobile' => 'required|string|max:1',
         ];
     }
 }

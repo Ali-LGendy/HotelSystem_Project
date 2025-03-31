@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
-
 defineOptions({ layout: AppLayout });
 
 const form = useForm({
@@ -69,7 +68,46 @@ const cancelForm = () => {
                             <Label for="avatar_img">Avatar Image</Label>
                             <Input id="avatar_img" type="file" @change="handleFileUpload" accept="image/*" />
                         </div>
+                        <div>
+                            <Label for="gender">Gender</Label>
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    @click="showGenderDropdown = !showGenderDropdown"
+                                    class="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-left"
+                                >
+                                    {{ form.gender || 'Select Gender' }}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="h-4 w-4 opacity-50"
+                                    >
+                                        <path d="m6 9 6 6 6-6" />
+                                    </svg>
+                                </button>
 
+                                <div
+                                    v-if="showGenderDropdown"
+                                    class="absolute z-10 mt-1 w-full rounded-md border border-input bg-background shadow-md"
+                                >
+                                    <div
+                                        v-for="option in genderOptions"
+                                        :key="option"
+                                        @click="selectGender(option)"
+                                        class="cursor-pointer px-3 py-2 hover:bg-muted"
+                                    >
+                                        {{ option }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <!-- Submit and Cancel Buttons -->
                         <div class="flex space-x-4">
                             <Button type="submit" class="flex-1">Create Manager</Button>

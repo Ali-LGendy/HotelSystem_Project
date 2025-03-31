@@ -11,7 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
-
+import ThemeToggle from '@/components/ThemeToggle.vue';
 // Remove this import
 // import ModeToggle  from "@/components/modeToggle";
 
@@ -49,6 +49,7 @@ const navigationItems = [
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
+      <ThemeToggle/>
 
       <!-- Mobile Navigation Button -->
       <Button

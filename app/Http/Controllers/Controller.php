@@ -23,10 +23,10 @@ abstract class Controller
         return [
             ['title' => 'Client Interface', 'href' => route('hotel.landing')],
             ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.index')],
+            ['title' => 'Manage Clients', 'href' => route('client.index')],
             ['title' => 'Manage Floors', 'href' => route('floors.index')],
             ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
             // ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
-            ['title' => 'Manage Clients', 'href' => route('client.index')],
 
         ];
     }
@@ -38,9 +38,7 @@ abstract class Controller
             ['title' => 'My Approved Clients', 'href' => route('client.myApproved')],
             // ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
             // ['title' => 'Approved Clients', 'href' => route('receptionist.clients.my-approved')],
-            ['title' => 'Clients Reservations', 'href' => route('client.clientsReservations')],
-            ['title' => 'Manage Floors', 'href' => route('floors.index')],
-            ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
+            ['title' => 'Clients Reservations', 'href' => route('client.clientsReservations')]
         ];
     }
 }

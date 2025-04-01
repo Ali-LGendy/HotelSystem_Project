@@ -38,7 +38,7 @@ abstract class Controller
             ['title' => 'My Approved Clients', 'href' => route('client.myApproved')],
             // ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
             // ['title' => 'Approved Clients', 'href' => route('receptionist.clients.my-approved')],
-            // ['title' => 'Clients Reservations', 'href' => route('receptionist.clients.all')],
+            ['title' => 'Clients Reservations', 'href' => route('client.clientsReservations')],
             ['title' => 'Manage Floors', 'href' => route('floors.index')],
             ['title' => 'Manage Rooms', 'href' => route('rooms.index')],
         ];

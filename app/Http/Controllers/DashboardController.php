@@ -41,9 +41,11 @@ class DashboardController extends Controller
         if ($user->hasRole('manager')) {
             return Inertia::render('Admin/Dashboard',[
                 'total_clients' => User::role('client')->get()->count(),
-                'my_receptionists' => User::where('manager_id', $user->id)->count(),
+                'total_receptionists' => User::role('receptionist')->count(),
+                'total_reservations' => Reservation::count(),
+                'approved_clients'=> User::where('is_approved', true)->count(),
+                // 'my_receptionists' => User::where('manager_id', $user->id)->count(),
                 // 'total_reservations' => Reservation::where('manager_id', $user->id)->count(),
-                'total_revenue' => Reservation::where('status','<>', 'pending')->sum('price_paid'),
                 'my_floors' => Floor::where('manager_id', $user->id)->count(),
                 'my_rooms' => Room::where('manager_id', $user->id)->count(),
                 'menuLinks' => $this->getManagerMenuLinks(),
@@ -51,8 +53,10 @@ class DashboardController extends Controller
         }
         if ($user->hasRole('receptionist')) {
             return Inertia::render('Admin/Dashboard',[
-                'clients_to_approve' => User::role('client')->where('is_approved', false)->get(),
-                'approved_clients' => User::role('client')->where('is_approved', true)->get(),
+                'pending_clients' => User::role('client')->where('is_approved', false)->get()->count(),
+                'approved_clients' => User::role('client')->where('is_approved', true)->get()->count(),
+                'total_clients' => User::role('client')->get()->count(),
+                'total_reservations' => Reservation::count(),
                 'menuLinks' => $this->getreceptionistMenuLinks()
 
             ]);

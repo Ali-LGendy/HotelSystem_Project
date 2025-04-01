@@ -48,6 +48,7 @@ class HandleInertiaRequests extends Middleware
                 'id' => $request->user()->id,
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
+                'is_approved' => $request->user()->is_approved,
                 // Make sure roles are included here
                 'roles' => $request->user()->roles->map(function ($role) {
                     return [

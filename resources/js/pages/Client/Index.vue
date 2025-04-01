@@ -51,13 +51,13 @@ const handleImageError = (event, name) => {
     `;
 };
 
-const banManager = (id) => {
-    if (confirm('Are you sure you want to change the ban status of this client?')) {
-        router.patch(route('admin.users.receptionists.ban', id), {
+const toggleApprove = (id) => {
+    if (confirm('Are you sure you want to change the approvement status of this client?')) {
+        router.patch(route('client.approve', id), {
             onSuccess: () => {
                 const clienttIndex = props.clients.data.findIndex((m) => m.id === id);
                 if (clienttIndex !== -1) {
-                    props.clients.data[receptionistIndex].is_banned = !props.clients.data[clienttIndex].is_banned;
+                    props.clients.data[clienttIndex].is_approved = !props.clients.data[clienttIndex].is_approved;
                 }
             },
         });
@@ -80,8 +80,18 @@ const getInitials = (name) => {
         .substring(0, 2);
 };
 
+const getApprovedBadgeClass = (is_approved) => {
+    switch (is_approved) {
+        case true:
+            return 'bg-blue-100 text-blue-800 dark:bg-green-900 dark:text-blue-200';
+        case false:
+            return 'bg-pink-100 text-pink-800 dark:bg-gray-900 dark:text-pink-200';
+        default:
+            return 'bg-grey-100 text-purple-800 dark:bg-grey-900 dark:text-purple-200';
+    }
+};
 const getGenderBadgeClass = (gender) => {
-    switch (gender.toLowerCase()) {
+    switch (gender) {
         case 'male':
             return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
         case 'female':
@@ -99,7 +109,7 @@ const getGenderBadgeClass = (gender) => {
                 <CardHeader>
                     <div class="dark:bg-dark-700 flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-600">
                         <CardTitle class="text-3xl font-bold">Manage Clients</CardTitle>
-                        <Link :href="route('client.create')">
+                        <Link v-if="user.roles.some((role) => role.name === 'admin')" :href="route('client.create')">
                             <Button class="h-12 text-lg">Add Client</Button>
                         </Link>
                     </div>
@@ -115,6 +125,7 @@ const getGenderBadgeClass = (gender) => {
                                 <TableHead>Country</TableHead>
                                 <TableHead>Avatar</TableHead>
                                 <TableHead>Gender</TableHead>
+                                <TableHead>Approvement</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -145,6 +156,14 @@ const getGenderBadgeClass = (gender) => {
                                         {{ client.gender }}
                                     </span>
                                 </TableCell>
+                                <TableCell class="whitespace-nowrap px-6 py-4 text-sm">
+                                    <span
+                                        :class="getApprovedBadgeClass(client.is_approved)"
+                                        class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
+                                    >
+                                        {{ client.is_approved ? 'approved' : 'not approved' }}
+                                    </span>
+                                </TableCell>
                                 <TableCell>
                                     <div class="flex gap-2">
                                         <!-- Edit Button -->
@@ -154,8 +173,14 @@ const getGenderBadgeClass = (gender) => {
                                             </Button>
                                         </Link>
 
+                                        <!-- Approve Button -->
+                                        <Button @click="toggleApprove(client.id)" :variant="client.is_approved ? 'default' : 'destructive'">
+                                            <!-- {{ client.is_approved ? 'Unapprove' : 'Aprrove' }} -->
+                                            Aprrove
+                                        </Button>
+
                                         <!-- View Button -->
-                                        <Link :href="route('admin.users.receptionists.show', client)">
+                                        <Link :href="route('client.show', client)">
                                             <Button variant="secondary" class="h-10"> View </Button>
                                         </Link>
 

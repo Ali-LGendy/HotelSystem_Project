@@ -113,7 +113,7 @@ Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefi
     //Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 
 // Client Routes
-Route::middleware(['auth','CkeckBan'])->prefix('client')->name('client.')->group(function () {
+Route::middleware(['auth','CkeckBan' ,'permission:manage clients'])->prefix('client')->name('client.')->group(function () {
     Route::get('/', [ClientController::class, 'index'])->name('index');
     Route::get('/clientsReservations', [ClientController::class, 'clientsReservations'])->name('clientsReservations');
     Route::get('/approved', [ClientController::class, 'myApproved'])->name('myApproved');

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-
+import { Head, usePage } from '@inertiajs/vue3';
 import Chart from 'chart.js/auto';
 import { defineProps, onMounted, ref } from 'vue';
 const props = defineProps({
@@ -14,6 +13,8 @@ const props = defineProps({
     baned_users: Number,
     approved_clients: Number,
     pending_clients: Number,
+    my_rooms: Number,
+    my_floors: Number,
 });
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,6 +31,8 @@ const stats = ref({
     bannedUsers: props.baned_users,
     approvedClients: props.approved_clients,
     penddingClients: props.pending_clients,
+    myRooms: props.my_rooms,
+    myFloors: props.my_floors,
 });
 
 const clientStatusChart = ref(null);
@@ -95,14 +98,20 @@ onMounted(() => {
         });
     }
 });
+function useCurrentUser() {
+    const page = usePage();
+    return page.props.auth.user;
+}
+
+const user = useCurrentUser();
 </script>
 
 <template>
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs" :menuLinks="props.menuLinks">
-        <div class="mx-auto max-w-7xl px-4 py-8">
-            <div class="rounded-lg bg-gray-900 p-8 text-gray-200 shadow-lg">
+        <div class="w-full px-4 py-8">
+            <div class="rounded-lg border border-border bg-card p-8 text-card-foreground shadow-lg">
                 <!-- Header -->
                 <div class="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                     <div>
@@ -112,44 +121,78 @@ onMounted(() => {
 
                 <!-- Main Statistics Grid -->
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6 text-center">
+                    <!-- Total Clients - Visible to all roles -->
+                    <div class="rounded-lg border border-border bg-muted p-6 text-center">
                         <h3 class="text-4xl font-bold">{{ stats.totalClients }}</h3>
-                        <p class="mt-2 text-gray-400">Total Clients</p>
+                        <p class="mt-2 text-muted-foreground">Total Clients</p>
                     </div>
 
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6 text-center">
+                    <!-- Total Managers - Visible to admin only -->
+                    <div v-if="user.roles.some((role) => role.name === 'admin')" class="rounded-lg border border-border bg-muted p-6 text-center">
                         <h3 class="text-4xl font-bold">{{ stats.totalManagers }}</h3>
-                        <p class="mt-2 text-gray-400">Total Managers</p>
+                        <p class="mt-2 text-muted-foreground">Total Managers</p>
                     </div>
 
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6 text-center">
+                    <!-- Total Rooms - Visible to manager only -->
+                    <div v-if="user.roles.some((role) => role.name === 'manager')" class="rounded-lg border border-border bg-muted p-6 text-center">
+                        <h3 class="text-4xl font-bold">{{ stats.myRooms }}</h3>
+                        <p class="mt-2 text-muted-foreground">My Rooms</p>
+                    </div>
+
+                    <!-- Total Reservations - Visible to all roles -->
+                    <div class="rounded-lg border border-border bg-muted p-6 text-center">
                         <h3 class="text-4xl font-bold">{{ stats.totalReservations }}</h3>
-                        <p class="mt-2 text-gray-400">Total Reservations</p>
+                        <p class="mt-2 text-muted-foreground">Total Reservations</p>
+                    </div>
+                    <div
+                        v-if="user.roles.some((role) => role.name === 'receptionist')"
+                        class="rounded-lg border border-border bg-muted p-6 text-center"
+                    >
+                        <h3 class="text-4xl font-bold">{{ stats.approvedClients }}</h3>
+                        <p class="mt-2 text-muted-foreground">Approved Clients</p>
+                    </div>
+                    <div
+                        v-if="user.roles.some((role) => role.name === 'receptionist')"
+                        class="rounded-lg border border-border bg-muted p-6 text-center"
+                    >
+                        <h3 class="text-4xl font-bold">{{ stats.penddingClients }}</h3>
+                        <p class="mt-2 text-muted-foreground">Pending Clients</p>
                     </div>
                 </div>
 
                 <!-- Additional Statistics -->
-                <div class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3">
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6 text-center">
+                <div
+                    v-if="user.roles.some((role) => role.name === 'admin' || role.name === 'manager')"
+                    class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3"
+                >
+                    <!-- Total Receptionists - Visible to admin and manager -->
+                    <div
+                        v-if="user.roles.some((role) => role.name === 'admin' || role.name === 'manager')"
+                        class="rounded-lg border border-border bg-muted p-6 text-center"
+                    >
                         <h3 class="text-4xl font-bold">{{ stats.receptionists }}</h3>
-                        <p class="mt-2 text-gray-400">Total Receptionists</p>
+                        <p class="mt-2 text-muted-foreground">Total Receptionists</p>
                     </div>
 
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6 text-center">
+                    <!-- Banned Users - Visible to admin only -->
+                    <div v-if="user.roles.some((role) => role.name === 'admin')" class="rounded-lg border border-border bg-muted p-6 text-center">
                         <h3 class="text-4xl font-bold">{{ stats.bannedUsers }}</h3>
-                        <p class="mt-2 text-gray-400">Banned Users</p>
+                        <p class="mt-2 text-muted-foreground">Banned Users</p>
                     </div>
 
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6 text-center">
-                        <h3 class="text-4xl font-bold">{{ stats.approvedClients }}</h3>
-                        <p class="mt-2 text-gray-400">Approved Clients</p>
+                    <!-- Total Floors - Visible to manager only -->
+                    <div v-if="user.roles.some((role) => role.name === 'manager')" class="rounded-lg border border-border bg-muted p-6 text-center">
+                        <h3 class="text-4xl font-bold">{{ stats.myFloors }}</h3>
+                        <p class="mt-2 text-muted-foreground">My Floors</p>
                     </div>
+
+                    <!-- Approved Clients - Visible to all roles -->
                 </div>
 
-                <!-- Charts Section -->
+                <!-- Charts Section - Visible to admin and manager -->
                 <div class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
                     <!-- Client Status Pie Chart -->
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+                    <div class="rounded-lg border border-border bg-muted p-6">
                         <h3 class="mb-4 text-center text-xl font-semibold">Client Status Distribution</h3>
                         <div class="flex justify-center">
                             <canvas ref="clientStatusChart"></canvas>
@@ -157,7 +200,7 @@ onMounted(() => {
                     </div>
 
                     <!-- Reservations Bar Chart -->
-                    <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+                    <div class="rounded-lg border border-border bg-muted p-6">
                         <h3 class="mb-4 text-center text-xl font-semibold">Monthly Reservations</h3>
                         <div class="flex justify-center">
                             <canvas ref="monthlyReservationsChart"></canvas>

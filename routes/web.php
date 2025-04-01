@@ -118,7 +118,10 @@ Route::middleware(['auth'])->prefix('client')->name('client.')->group(function (
     Route::get('/approved', [ClientController::class, 'myApproved'])->name('myApproved');
     Route::get('/create', [ClientController::class, 'create'])->name('create');
     Route::post('/', [ClientController::class, 'store'])->name('store');
-    Route::get('/{user}', [ClientController::class, 'show'])->name('show'); 
+    Route::get('/{user}', [ClientController::class, 'show'])->name('show');
+    Route::get('/{user}/edit', [ClientController::class, 'edit'])->name('edit'); 
+    Route::put('/{user}', [ClientController::class, 'update'])->name('update');
+    Route::delete('/{user}', [ClientController::class, 'destroy'])->name('destroy'); 
     Route::patch('/{user}/approve', [ClientController::class, 'approve'])->name('approve');
 });
 

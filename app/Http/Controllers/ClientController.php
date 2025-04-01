@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Http\Requests\StoreClientRequest;
+use App\Http\Requests\UpdateClientRequest;
 
 
 class ClientController extends Controller
@@ -17,17 +18,22 @@ class ClientController extends Controller
     {
         //
         $user = auth()->user();
-        if($user->hasRole('admin') || $user->hasRole('manager') )
+        if($user->hasRole('admin'))
         {
             $clients = User::role('client')->paginate(10);
+            $menuLinks = $this->getAdminMenuLinks();
+        }else if( $user->hasRole('manager')){
+            $clients = User::role('client')->where('is_approved',false)->paginate(10);
+            $menuLinks = $this->getManagerMenuLinks();
         }else{
             $clients = User::role('client')->where('is_approved',false)->paginate(10);
+            $menuLinks = $this->getreceptionistMenuLinks();
         }   
 
 
         return Inertia::render('Client/Index', [
             'clients' => $clients,
-            'menuLinks' => $this->getreceptionistMenuLinks(),
+            'menuLinks' => $menuLinks,
         ]);
         
     }
@@ -123,17 +129,73 @@ class ClientController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $user)
     {
         //
+        if(auth()->user()->hasRole('admin')){
+            return Inertia::render('Client/Edit', [
+            'client' => $user,
+            'menuLinks' => $this->getAdminMenuLinks()
+            ]);
+        }else{
+            
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateClientRequest $request, User $user)
     {
         //
+         if(!auth()->user()->hasRole('admin')){
+            abort(403, 'Unauthorized action.');
+        }
+        //\Log::info('Received request data:', $request->all());
+
+        // Validate the request
+        $validated = $request->validated();
+
+        // Handle file upload
+        if ($request->hasFile('avatar_img')) {
+            $path = $request->file('avatar_img')->store('managers', 'public');
+            $validated['avatar_img'] = $path;
+        } else {
+            // Keep existing avatar if no new file is uploaded
+            $validated['avatar_img'] = $user->avatar_img;
+        }
+
+        // Handle password update
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            // Remove password from update if it's empty
+            unset($validated['password']);
+        }
+
+        // Prepare update data
+        $updateData = array_filter([
+            'name' => $validated['name'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'password' => $validated['password'] ?? null,
+            'mobile' => $validated['mobile'] ?? null,
+            'avatar_img' => $validated['avatar_img'] ?? null,
+        ]);
+
+        // Remove null values
+        $updateData = array_filter($updateData, function ($value) {
+            return $value !== null;
+        });
+
+        // Perform the update
+        $user->update($updateData);
+
+        // Redirect with success message
+        return redirect()->route('client.index')->with([
+            'success' => 'User updated successfully.',
+            'user' => $user,
+        ]);
     }
 
     /**
@@ -142,5 +204,16 @@ class ClientController extends Controller
     public function destroy(string $id)
     {
         //
+        if (!auth()->user()->hasRole('admin')) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // Delete the receptionist
+    $user->delete();
+
+    return redirect()->route('client.index')
+        ->with('success', 'Client deleted successfully.');
+        
+   
     }
 }

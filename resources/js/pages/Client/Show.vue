@@ -37,8 +37,6 @@
                     <!-- Actions -->
                     <div class="mt-8 flex space-x-4">
                         <Button @click="router.visit(route('client.index'))" variant="outline"> Back to List </Button>
-                        <Button @click="router.visit(route('admin.users.recetionists.edit', user.data.id))" variant="primary"> Edit User </Button>
-                        <Button @click="deleteUser" variant="destructive"> Delete Client </Button>
                     </div>
                 </CardContent>
             </Card>

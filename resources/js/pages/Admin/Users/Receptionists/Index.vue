@@ -66,7 +66,7 @@ const banManager = (id) => {
 
 const confirmDelete = (id) => {
     if (confirm('Are you sure you want to delete this receptionist?')) {
-        router.delete(route('admin.users.receptionists.destroy', id));
+        router.delete(route('client.destroy', id));
     }
 };
 
@@ -86,15 +86,16 @@ const getInitials = (name) => {
         <div class="w-full max-w-6xl">
             <Card class="w-full p-6">
                 <CardHeader>
-                    <CardTitle class="text-3xl font-bold">Manage Receptionists</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <!-- Add Receptionist Button -->
-                    <div class="mb-6">
+                    <div class="dark:bg-dark-700 flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-600">
+                        <CardTitle class="text-3xl font-bold">Manage Receptionists</CardTitle>
+
                         <Link :href="route('admin.users.receptionists.create')">
                             <Button class="h-12 text-lg">Add Receptionist</Button>
                         </Link>
                     </div>
+                </CardHeader>
+                <CardContent>
+                    <!-- Add Receptionist Button -->
 
                     <!-- Receptionists Table -->
                     <Table v-if="receptionists && receptionists.data.length > 0" class="w-full">

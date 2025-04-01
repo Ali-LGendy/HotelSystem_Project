@@ -167,21 +167,20 @@ const getGenderBadgeClass = (gender) => {
                                 <TableCell>
                                     <div class="flex gap-2">
                                         <!-- Edit Button -->
-                                        <Link :href="route('admin.users.receptionists.edit', client)">
+                                        <Link :href="route('client.edit', client)">
                                             <Button variant="outline" v-show="user.roles.some((role) => role.name === 'admin')" class="h-10">
                                                 Edit
                                             </Button>
                                         </Link>
 
                                         <!-- Approve Button -->
-                                        <Button @click="toggleApprove(client.id)" :variant="client.is_approved ? 'default' : 'destructive'">
-                                            <!-- {{ client.is_approved ? 'Unapprove' : 'Aprrove' }} -->
-                                            Aprrove
+                                        <Button @click="toggleApprove(client.id)" :variant="client.is_approved ? 'secondary' : 'default'">
+                                            {{ client.is_approved ? 'Unapprove' : 'Aprrove' }}
                                         </Button>
 
                                         <!-- View Button -->
                                         <Link :href="route('client.show', client)">
-                                            <Button variant="secondary" class="h-10"> View </Button>
+                                            <Button variant="outline" class="h-10"> View </Button>
                                         </Link>
 
                                         <!-- Delete Button -->

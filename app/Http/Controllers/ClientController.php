@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Reservation;
 use Inertia\Inertia;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
@@ -48,7 +49,30 @@ class ClientController extends Controller
         ]);
         
     }
-    
+    public function clientsReservations(User $user)
+    {
+        //
+        $loggedInUser = auth()->user();
+        $reservations = Reservation::with([
+            'client:id,name',  // Load client's name
+            'room:id,room_number' // Load room number
+            ])->whereHas('client', function ($query) use ($loggedInUser) {
+                $query->role('client')->where('is_approved', true)->where('manager_id', $loggedInUser->id);
+                })->paginate(10);
+//         $clientIds = User::role('client')
+//     ->where('is_approved', true)
+//     ->where('manager_id', $loggedInUser->id)
+//     ->pluck('id'); // Get only client IDs
+
+// $reservations = Reservation::whereIn('client_id', $clientIds)
+//     ->paginate(10);
+
+        return Inertia::render('Client/ClientsReservations', [
+            'reservations' => $reservations,
+            'menuLinks' => $this->getreceptionistMenuLinks(),
+        ]);
+        
+    }
 
     /**
      * Show the form for creating a new resource.

@@ -8,6 +8,7 @@ use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ManagersController;
 use App\Http\Controllers\FloorController;
@@ -114,8 +115,11 @@ Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefi
 // Client Routes
 Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
     Route::get('/', [ClientController::class, 'index'])->name('index');
+    Route::get('/approved', [ClientController::class, 'myApproved'])->name('myApproved');
     Route::get('/create', [ClientController::class, 'create'])->name('create');
     Route::post('/', [ClientController::class, 'store'])->name('store');
+    Route::get('/{user}', [ClientController::class, 'show'])->name('show'); 
+    Route::patch('/{user}/approve', [ClientController::class, 'approve'])->name('approve');
 });
 
 // Route::middleware(['auth'])

@@ -87,7 +87,7 @@ const getApprovedBadgeClass = (is_approved) => {
         case false:
             return 'bg-pink-100 text-pink-800 dark:bg-gray-900 dark:text-pink-200';
         default:
-            return 'bg-grey-100 text-purple-800 dark:bg-grey-900 dark:text-purple-200';
+            return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
     }
 };
 const getGenderBadgeClass = (gender) => {
@@ -100,6 +100,10 @@ const getGenderBadgeClass = (gender) => {
             return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
     }
 };
+
+const banClient = () => {
+    user.is_approved = !user.is_approved;
+};
 </script>
 
 <template>
@@ -108,10 +112,7 @@ const getGenderBadgeClass = (gender) => {
             <Card class="w-full p-6">
                 <CardHeader>
                     <div class="dark:bg-dark-700 flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-600">
-                        <CardTitle class="text-3xl font-bold">Manage Clients</CardTitle>
-                        <Link v-if="user.roles.some((role) => role.name === 'admin')" :href="route('client.create')">
-                            <Button class="h-12 text-lg">Add Client</Button>
-                        </Link>
+                        <CardTitle class="text-3xl font-bold">My Approved Clients</CardTitle>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -166,43 +167,14 @@ const getGenderBadgeClass = (gender) => {
                                 </TableCell>
                                 <TableCell>
                                     <div class="flex gap-2">
-                                        <!-- Edit Button -->
-                                        <Link :href="route('admin.users.receptionists.edit', client)">
-                                            <Button variant="outline" v-show="user.roles.some((role) => role.name === 'admin')" class="h-10">
-                                                Edit
-                                            </Button>
-                                        </Link>
-
-                                        <!-- Approve Button -->
                                         <Button @click="toggleApprove(client.id)" :variant="client.is_approved ? 'default' : 'destructive'">
                                             <!-- {{ client.is_approved ? 'Unapprove' : 'Aprrove' }} -->
-                                            Aprrove
+                                            Unapprove
                                         </Button>
-
                                         <!-- View Button -->
-                                        <Link :href="route('client.show', client)">
+                                        <!-- <Link :href="route('admin.users.receptionists.show', client)">
                                             <Button variant="secondary" class="h-10"> View </Button>
-                                        </Link>
-
-                                        <!-- Delete Button -->
-                                        <Button
-                                            variant="destructive"
-                                            @click="confirmDelete(client.id)"
-                                            v-show="user.roles.some((role) => role.name === 'admin')"
-                                            class="h-10"
-                                        >
-                                            Delete
-                                        </Button>
-
-                                        <!-- Ban/Unban Button -->
-                                        <Button
-                                            @click="banManager(client.id)"
-                                            :variant="client.is_banned ? 'default' : 'destructive'"
-                                            v-show="user.roles.some((role) => role.name === 'admin')"
-                                            class="h-10"
-                                        >
-                                            {{ client.is_banned ? 'Unban' : 'Ban' }}
-                                        </Button>
+                                        </Link> -->
                                     </div>
                                 </TableCell>
                             </TableRow>

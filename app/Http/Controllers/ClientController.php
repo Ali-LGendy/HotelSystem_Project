@@ -16,14 +16,33 @@ class ClientController extends Controller
     public function index()
     {
         //
-        $clients = User::role('client')->paginate(10);
-        $user = auth()->user()->role;
+        $user = auth()->user();
+        if($user->hasRole('admin') || $user->hasRole('manager') )
+        {
+            $clients = User::role('client')->paginate(10);
+        }else{
+            $clients = User::role('client')->where('is_approved',false)->paginate(10);
+        }   
+
+
         return Inertia::render('Client/Index', [
             'clients' => $clients,
-            'menuLinks' => $this->getAdminMenuLinks(),
+            'menuLinks' => $this->getreceptionistMenuLinks(),
         ]);
         
     }
+    public function myApproved(User $user)
+    {
+        //
+        $loggedInUser = auth()->user();
+        $clients = User::role('client')->where('is_approved',true)->where('manager_id',$loggedInUser->id)->paginate(10);
+        return Inertia::render('Client/MyApproved', [
+            'clients' => $clients,
+            'menuLinks' => $this->getreceptionistMenuLinks(),
+        ]);
+        
+    }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -32,7 +51,7 @@ class ClientController extends Controller
     {
         //
         return Inertia::render('Client/Create', [
-            'menuLinks' => $this->getAdminMenuLinks(),
+            'menuLinks' => $this->getreceptionistMenuLinks(),
         ]);
 
     }
@@ -66,13 +85,39 @@ class ClientController extends Controller
             'user' => $user,
         ]);  
     }
+    public function approve(User $user)
+    {
+        $loggedInUser = auth()->user();
+        $user->is_approved = !$user->is_approved;
+        $user->manager_id = $loggedInUser->id;
+        $user->save();
+        // $user->ban();
+
+        // Prepare message based on new ban status
+        $message = $user->is_approved 
+            ? 'User approved successfully.' 
+            : 'User Unapproved successfully.';
+
+        return redirect()
+            ->route('client.index')
+            ->with('success', $message);
+    }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
         //
+        return Inertia::render('Client/Show', [
+        'user' => [
+            'data' => $user,
+            'created_at' => $user->created_at,
+            'id' => $user->id,
+            
+        ],
+        'menuLinks' => $this->getAdminMenuLinks()
+    ]);
     }
 
     /**

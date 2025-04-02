@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
         $this->call([
             RolesAndPermissionsSeeder::class,
-           // WorldSeeder::class,
+            WorldSeeder::class,
             //  RoomSeeder::class, // Uncommented if needed
             //  ReservationSeeder::class,
         ]);

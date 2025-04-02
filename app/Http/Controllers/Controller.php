@@ -9,7 +9,6 @@ abstract class Controller
     protected function getAdminMenuLinks()
     {
         return [
-            ['title' => 'Client Interface', 'href' => route('hotel.landing')],
             ['title' => 'Manage Managers', 'href' => route('manager.index')],
             ['title' => 'Manage Receptionists', 'href' => route('receptionist.index')],
             // ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
@@ -21,7 +20,6 @@ abstract class Controller
     protected function getManagerMenuLinks()
     {
         return [
-            ['title' => 'Client Interface', 'href' => route('hotel.landing')],
             ['title' => 'Manage Receptionists', 'href' => route('receptionist.index')],
             ['title' => 'Manage Clients', 'href' => route('client.index')],
             ['title' => 'Manage Floors', 'href' => route('floors.index')],
@@ -33,7 +31,6 @@ abstract class Controller
     protected function getreceptionistMenuLinks()
     {
         return [
-            ['title' => 'Client Interface', 'href' => route('hotel.landing')],
             ['title' => 'Manage Clients', 'href' => route('client.index')],
             ['title' => 'My Approved Clients', 'href' => route('client.myApproved')],
             // ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],

@@ -221,11 +221,28 @@ class ClientController extends Controller
             'user' => $user,
         ]);
     }
+    public function ban(User $user)
+    {
+        if(auth()->user()->id !== $user->manager_id && !auth()->user()->hasRole('admin')){
+            abort(403, 'Unauthorized action.');
+        }
+        
+        $user->is_banned = !$user->is_banned;
+        $user->save();
 
+        // Prepare message based on new ban status
+        $message = $user->is_banned 
+            ? 'User banned successfully.' 
+            : 'User unbanned successfully.';
+
+        return redirect()
+            ->route('client.index')
+            ->with('success', $message);
+    }
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
         //
         if (!auth()->user()->hasRole('admin')) {

@@ -4,7 +4,7 @@
             <!-- Header Section with Title and Create Button -->
             <div class="mb-8 flex items-center justify-between">
                 <h1 class="text-3xl font-bold text-foreground">Manage Managers</h1>
-                <Link :href="route('admin.users.managers.create')">
+                <Link :href="route('manager.create')">
                     <Button>+ Add Manager</Button>
                 </Link>
             </div>
@@ -40,10 +40,10 @@
                         </TableCell>
                         <TableCell class="text-right">
                             <div class="flex justify-end space-x-2">
-                                <Link :href="route('admin.users.managers.edit', manager)">
+                                <Link :href="route('manager.edit', manager)">
                                     <Button variant="outline">Edit</Button>
                                 </Link>
-                                <Link :href="route('admin.users.managers.show', manager)">
+                                <Link :href="route('manager.show', manager)">
                                     <Button variant="secondary">View</Button>
                                 </Link>
                                 <Button @click="banManager(manager.id)" :variant="manager.is_banned ? 'default' : 'destructive'">
@@ -134,7 +134,7 @@ const handleImageError = (event) => {
 
 const banManager = (id) => {
     if (confirm('Are you sure you want to change the ban status of this manager?')) {
-        router.patch(route('admin.users.managers.ban', id), {
+        router.patch(route('manager.ban', id), {
             onSuccess: () => {
                 const managerIndex = props.managers.data.findIndex((m) => m.id === id);
                 if (managerIndex !== -1) {
@@ -147,7 +147,7 @@ const banManager = (id) => {
 
 const confirmDelete = (id) => {
     if (confirm('Are you sure you want to delete this user?')) {
-        router.delete(route('admin.users.managers.destroy', id));
+        router.delete(route('manager.destroy', id));
     }
 };
 

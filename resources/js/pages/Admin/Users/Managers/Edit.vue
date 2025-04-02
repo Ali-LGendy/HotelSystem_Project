@@ -49,11 +49,11 @@ const submitForm = () => {
     }
 
     // Use axios directly for more control
-    router.post(route('admin.users.managers.update', props.manager.id), formData, {
+    router.post(route('manager.update', props.manager.id), formData, {
         forceFormData: true, // Important for file uploads
         onSuccess: () => {
             console.log('Update successful');
-            router.visit(route('admin.users.managers.index'));
+            router.visit(route('manager.index'));
         },
         onError: (errors) => {
             console.error('Update errors:', errors);
@@ -64,7 +64,7 @@ const submitForm = () => {
 };
 
 const cancelForm = () => {
-    router.visit(route('admin.users.managers.index'));
+    router.visit(route('manager.index'));
 };
 
 const getImageUrl = (path) => {

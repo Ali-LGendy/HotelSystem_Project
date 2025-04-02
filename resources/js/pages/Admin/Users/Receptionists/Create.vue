@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 defineOptions({ layout: AppLayout });
 
 const form = useForm({
@@ -22,13 +23,19 @@ const handleFileUpload = (event) => {
 };
 
 const submitForm = () => {
-    form.post(route('admin.users.receptionists.store'), {
-        onSuccess: () => router.visit(route('admin.users.receptionists.index')),
+    form.post(route('receptionist.store'), {
+        onSuccess: () => router.visit(route('receptionist.index')),
     });
 };
+const showGenderDropdown = ref(false);
+const genderOptions = ['Male', 'Female'];
 
+const selectGender = (option) => {
+    form.gender = option;
+    showGenderDropdown.value = false;
+};
 const cancelForm = () => {
-    router.visit(route('admin.users.receptionists.index'));
+    router.visit(route('receptionist.index'));
 };
 </script>
 

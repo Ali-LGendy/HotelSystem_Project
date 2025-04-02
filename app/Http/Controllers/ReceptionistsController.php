@@ -82,7 +82,7 @@ class ReceptionistsController extends Controller
             'is_approved' => true,
         ]);
         $user->assignRole('receptionist');
-        return redirect()->route('admin.users.receptionists.index')->with([
+        return redirect()->route('receptionist.index')->with([
             'success' => 'User created successfully.',
             'user' => $user,
         ]);  
@@ -197,7 +197,7 @@ class ReceptionistsController extends Controller
             : 'User unbanned successfully.';
 
         return redirect()
-            ->route('admin.users.receptionists.index')
+            ->route('receptionist.index')
             ->with('success', $message);
     }
     public function destroy(User $user)
@@ -209,7 +209,7 @@ class ReceptionistsController extends Controller
     // Delete the receptionist
     $user->delete();
 
-    return redirect()->route('admin.users.receptionists.index')
+    return redirect()->route('receptionist.index')
         ->with('success', 'Receptionist deleted successfully.');
         
     }

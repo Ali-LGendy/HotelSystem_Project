@@ -49,11 +49,11 @@ const submitForm = () => {
     }
 
     // Use axios directly for more control
-    router.post(route('admin.users.receptionists.update', props.receptionist.id), formData, {
+    router.post(route('receptionist.update', props.receptionist.id), formData, {
         forceFormData: true, // Important for file uploads
         onSuccess: () => {
             console.log('Update successful');
-            router.visit(route('admin.users.receptionists.index'));
+            router.visit(route('receptionist.index'));
         },
         onError: (errors) => {
             console.error('Update errors:', errors);
@@ -64,7 +64,7 @@ const submitForm = () => {
 };
 
 const cancelForm = () => {
-    router.visit(route('admin.users.receptionists.index'));
+    router.visit(route('receptionist.index'));
 };
 
 const getImageUrl = (path) => {

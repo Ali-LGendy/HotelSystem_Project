@@ -80,8 +80,8 @@ const getImageUrl = (path) => {
 // Delete user (with confirmation)
 const deleteUser = () => {
     if (confirm('Are you sure you want to delete this user?')) {
-        router.delete(route('admin.users.receptionists.destroy', props.user.data.id), {
-            onSuccess: () => router.visit(route('admin.users.receptionists.index')),
+        router.delete(route('receptionist.destroy', props.user.data.id), {
+            onSuccess: () => router.visit(route('receptionist.index')),
         });
     }
 };

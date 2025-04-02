@@ -66,7 +66,7 @@ const toggleApprove = (id) => {
 
 const confirmDelete = (id) => {
     if (confirm('Are you sure you want to delete this client?')) {
-        router.delete(route('admin.users.receptionists.destroy', id));
+        router.delete(route('receptionist.destroy', id));
     }
 };
 
@@ -172,7 +172,7 @@ const banClient = () => {
                                             Unapprove
                                         </Button>
                                         <!-- View Button -->
-                                        <!-- <Link :href="route('admin.users.receptionists.show', client)">
+                                        <!-- <Link :href="route('receptionist.show', client)">
                                             <Button variant="secondary" class="h-10"> View </Button>
                                         </Link> -->
                                     </div>

@@ -20,13 +20,13 @@ const handleFileUpload = (event) => {
 };
 
 const submitForm = () => {
-    form.post(route('admin.users.managers.store'), {
-        onSuccess: () => router.visit(route('admin.users.managers.index')),
+    form.post(route('manager.store'), {
+        onSuccess: () => router.visit(route('manager.index')),
     });
 };
 
 const cancelForm = () => {
-    router.visit(route('admin.users.managers.index'));
+    router.visit(route('manager.index'));
 };
 </script>
 

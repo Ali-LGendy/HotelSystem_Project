@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
-import { defineOptions, defineProps, ref } from 'vue';
+import { defineOptions, defineProps } from 'vue';
 import { route } from 'ziggy-js';
 
 // Props from the controller (receptionist object)
@@ -20,7 +20,6 @@ const form = useForm({
     email: props.client.email || '', // Ensure non-null value
     password: '', // Keep as optional
     mobile: props.client.mobile || '', // Ensure non-null value
-    gender: props.client.gender || '', // Ensure non-null value
     avatar_img: props.client.avatar_img || null,
 });
 
@@ -38,7 +37,6 @@ const submitForm = () => {
     formData.append('name', form.name);
     formData.append('email', form.email);
     formData.append('mobile', form.mobile);
-    formData.append('gender', form.gender);
 
     // Only append password if it's not empty
     if (form.password) {
@@ -97,13 +95,7 @@ const handleImageError = (event) => {
         </div>
     `;
 };
-const showGenderDropdown = ref(false);
-const genderOptions = ['Male', 'Female'];
 
-const selectGender = (option) => {
-    form.gender = option;
-    showGenderDropdown.value = false;
-};
 // Get initials from name
 const getInitials = (name) => {
     return name
@@ -180,48 +172,6 @@ const getInitials = (name) => {
                                         class="h-20 w-20 rounded-full border border-gray-500"
                                         @error="handleImageError"
                                     />
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Gender -->
-                        <div>
-                            <Label for="gender">Gender</Label>
-                            <div class="relative">
-                                <button
-                                    type="button"
-                                    @click="showGenderDropdown = !showGenderDropdown"
-                                    class="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-left"
-                                >
-                                    {{ form.gender || 'Select Gender' }}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="h-4 w-4 opacity-50"
-                                    >
-                                        <path d="m6 9 6 6 6-6" />
-                                    </svg>
-                                </button>
-
-                                <div
-                                    v-if="showGenderDropdown"
-                                    class="absolute z-10 mt-1 w-full rounded-md border border-input bg-background shadow-md"
-                                >
-                                    <div
-                                        v-for="option in genderOptions"
-                                        :key="option"
-                                        @click="selectGender(option)"
-                                        class="cursor-pointer px-3 py-2 hover:bg-muted"
-                                    >
-                                        {{ option }}
-                                    </div>
                                 </div>
                             </div>
                         </div>

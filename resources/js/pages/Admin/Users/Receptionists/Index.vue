@@ -53,7 +53,7 @@ const handleImageError = (event, name) => {
 
 const banManager = (id) => {
     if (confirm('Are you sure you want to change the ban status of this receptionist?')) {
-        router.patch(route('admin.users.receptionists.ban', id), {
+        router.patch(route('receptionist.ban', id), {
             onSuccess: () => {
                 const receptionistIndex = props.receptionists.data.findIndex((m) => m.id === id);
                 if (receptionistIndex !== -1) {
@@ -89,7 +89,7 @@ const getInitials = (name) => {
                     <div class="dark:bg-dark-700 flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-600">
                         <CardTitle class="text-3xl font-bold">Manage Receptionists</CardTitle>
 
-                        <Link :href="route('admin.users.receptionists.create')">
+                        <Link :href="route('receptionist.create')">
                             <Button class="h-12 text-lg">Add Receptionist</Button>
                         </Link>
                     </div>
@@ -134,7 +134,7 @@ const getInitials = (name) => {
                                 <TableCell>
                                     <div class="flex gap-2">
                                         <!-- Edit Button -->
-                                        <Link :href="route('admin.users.receptionists.edit', receptionist)">
+                                        <Link :href="route('receptionist.edit', receptionist)">
                                             <Button
                                                 variant="outline"
                                                 :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
@@ -145,7 +145,7 @@ const getInitials = (name) => {
                                         </Link>
 
                                         <!-- View Button -->
-                                        <Link :href="route('admin.users.receptionists.show', receptionist)">
+                                        <Link :href="route('receptionist.show', receptionist)">
                                             <Button variant="secondary" class="h-10"> View </Button>
                                         </Link>
 

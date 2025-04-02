@@ -111,7 +111,7 @@ Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefi
 //         });
 //     });
 
-    //Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+//     Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 
 // Client Routes
 Route::middleware(['auth','CkeckBan' ,'permission:manage reservations'])->prefix('client')->name('client.')->group(function () {

@@ -10,8 +10,8 @@ abstract class Controller
     {
         return [
             ['title' => 'Client Interface', 'href' => route('hotel.landing')],
-            ['title' => 'Manage Managers', 'href' => route('admin.users.managers.index')],
-            ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.index')],
+            ['title' => 'Manage Managers', 'href' => route('manager.index')],
+            ['title' => 'Manage Receptionists', 'href' => route('receptionist.index')],
             // ['title' => 'Manage Clients', 'href' => route('receptionist.clients.index')],
             ['title' => 'Manage Clients', 'href' => route('client.index')],
             ['title' => 'Manage Floors', 'href' => route('floors.index')],
@@ -22,7 +22,7 @@ abstract class Controller
     {
         return [
             ['title' => 'Client Interface', 'href' => route('hotel.landing')],
-            ['title' => 'Manage Receptionists', 'href' => route('admin.users.receptionists.index')],
+            ['title' => 'Manage Receptionists', 'href' => route('receptionist.index')],
             ['title' => 'Manage Clients', 'href' => route('client.index')],
             ['title' => 'Manage Floors', 'href' => route('floors.index')],
             ['title' => 'Manage Rooms', 'href' => route('rooms.index')],

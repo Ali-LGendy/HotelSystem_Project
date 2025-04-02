@@ -37,7 +37,7 @@ Route::middleware(['auth','CkeckBan','CkeckApproval'])->get('/clientReservation'
 
 
 
-Route::middleware(['auth','permission:manage managers','web'])->prefix('admin/users/managers')->name('admin.users.managers.')->group(function () {
+Route::middleware(['auth','permission:manage managers','web'])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/', [ManagersController::class, 'index'])->name('index');        // List all managers
     Route::get('/create', [ManagersController::class, 'create'])->name('create'); // Show create form
     Route::post('/', [ManagersController::class, 'store'])->name('store');        // Store a new manager
@@ -53,7 +53,7 @@ Route::middleware(['auth'])
     ->get('clients/myreservation', [ClientController::class, 'showMyReservation'])
     ->name('clients.myreservation');
 
-Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('admin/users/receptionists')->name('admin.users.receptionists.')->group(function () {
+Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefix('receptionist')->name('receptionist.')->group(function () {
     Route::get('/', [ReceptionistsController::class, 'index'])->name('index');         
     Route::get('/create', [ReceptionistsController::class, 'create'])->name('create'); 
     Route::post('/', [ReceptionistsController::class, 'store'])->name('store');        
@@ -70,6 +70,7 @@ Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefi
 // Route::get('dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 
 // Receptionist Routes
@@ -113,7 +114,7 @@ Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefi
     //Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 
 // Client Routes
-Route::middleware(['auth','CkeckBan' ,'permission:manage clients'])->prefix('client')->name('client.')->group(function () {
+Route::middleware(['auth','CkeckBan' ,'permission:manage reservations'])->prefix('client')->name('client.')->group(function () {
     Route::get('/', [ClientController::class, 'index'])->name('index');
     Route::get('/clientsReservations', [ClientController::class, 'clientsReservations'])->name('clientsReservations');
     Route::get('/approved', [ClientController::class, 'myApproved'])->name('myApproved');

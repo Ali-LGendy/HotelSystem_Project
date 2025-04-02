@@ -41,8 +41,8 @@
 
                     <!-- Actions -->
                     <div class="mt-8 flex space-x-4">
-                        <Button @click="router.visit(route('admin.users.recetionists.index'))" variant="outline"> Back to List </Button>
-                        <Button @click="router.visit(route('admin.users.recetionists.edit', user.data.id))" variant="primary"> Edit User </Button>
+                        <Button @click="router.visit(route('receptionist.index'))" variant="outline"> Back to List </Button>
+                        <Button @click="router.visit(route('receptionist.edit', user.data.id))" variant="primary"> Edit User </Button>
                         <Button @click="deleteUser" variant="destructive"> Delete Receptionist </Button>
                     </div>
                 </CardContent>
@@ -91,8 +91,8 @@ const getImageUrl = (path) => {
 // Delete user (with confirmation)
 const deleteUser = () => {
     if (confirm('Are you sure you want to delete this user?')) {
-        router.delete(route('admin.users.receptionists.destroy', props.user.data.id), {
-            onSuccess: () => router.visit(route('admin.users.receptionists.index')),
+        router.delete(route('receptionist.destroy', props.user.data.id), {
+            onSuccess: () => router.visit(route('receptionist.index')),
         });
     }
 };

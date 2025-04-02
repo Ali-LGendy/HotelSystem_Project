@@ -57,7 +57,7 @@ class ManagersController extends Controller
             'is_approved' => true,
         ]);
         $user->assignRole('manager');
-        return redirect()->route('admin.users.managers.index')->with([
+        return redirect()->route('manager.index')->with([
             'success' => 'User created successfully.',
             'user' => $user,
         ]);  
@@ -136,7 +136,7 @@ class ManagersController extends Controller
     $user->update($updateData);
 
     // Redirect with success message
-    return redirect()->route('admin.users.managers.index')->with([
+    return redirect()->route('manager.index')->with([
         'success' => 'User updated successfully.',
         'user' => $user,
     ]);  
@@ -158,14 +158,14 @@ class ManagersController extends Controller
             : 'User unbanned successfully.';
 
         return redirect()
-            ->route('admin.users.managers.index')
+            ->route('manager.index')
             ->with('success', $message);
     }
     public function destroy(User $user)
     {
         //
         $user->delete();
-        return redirect()->route('admin.users.managers.index')->with('error', 'You cannot delete an admin user.');
+        return redirect()->route('manager.index')->with('error', 'You cannot delete an admin user.');
         
     }
 }

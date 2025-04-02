@@ -257,4 +257,16 @@ class ClientController extends Controller
         
    
     }
+    public function showMyReservation(){
+
+        $client = auth()->user();
+        // $client = User::user()->where('id',$currentUserId);
+        $reservations = $client->reservations()->with('room')->get();
+
+
+        return Inertia::render('Receptionist/Client/MyReservation', [
+           
+            'reservations' => $reservations,
+        ]);
+    }
 }

@@ -20,10 +20,7 @@ use App\Http\Controllers\ReceptionistsController;
 // to add/remove/edit permissions or roles modify the ./database/seeders/RolesAndPermissionsSeeder
 // more can be found @ https://spatie.be/docs/laravel-permission/v6/best-practices/roles-vs-permissions
 
-Route::get('/', function () {
-    // return Inertia::render('Client/landing');
-    return Inertia::render('Welcome');
-})->name('home');
+Route::get('/', [RoomController::class, 'clientIndex'])->name('home');
 
 // Public Client Routes (no authentication required)
 Route::prefix('hotel')->name('hotel.')->group(function () {

@@ -42,7 +42,7 @@
                                     {{ reservation.room_id }}
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-900 dark:text-gray-200">
-                                    ${{ reservation.price_paid.toFixed(3) }}
+                                    ${{ reservation.price_paid.toFixed(3) /100 }}
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right">
                                     <span

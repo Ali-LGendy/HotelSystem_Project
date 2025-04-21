@@ -34,8 +34,6 @@ class ReservationFactory extends Factory
             'room_id' => $room->id,
             'accompany_number' => $this->faker->numberBetween(1, $room->room_capacity),
             'price_paid' => $room->price * $stayDuration,
-            'receptionist_id' => User::role('receptionist')->inRandomOrder()->first()?->id
-                ?? User::factory()->receptionist()->create()->id,
             'check_in_date' => $checkInDate,
             'check_out_date' => $checkOutDate,
             'status' => 'pending',

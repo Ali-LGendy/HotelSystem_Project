@@ -14,9 +14,7 @@ use App\Http\Controllers\ReceptionistsController;
 
 
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
+Route::get('/', [RoomController::class, 'clientIndex'])->name('home');
 
 // Public Client Routes (no authentication required)
 Route::prefix('hotel')->name('hotel.')->group(function () {

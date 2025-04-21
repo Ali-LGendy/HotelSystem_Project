@@ -26,11 +26,11 @@ const navigationItems = [
 
 <template>
   <header class="sticky top-0 z-50 w-full border-b bg-white dark:bg-black backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/60">
-    <div class="container flex h-16 items-center">
-      <div class="mx-5 px-5 flex">
+    <div class="container flex h-16 items-center px-3">
+      <div class="ms-5 me-0 pe-0 flex">
         <Link href="/" class="mr-6 flex items-center space-x-2">
           <AppLogoIcon class="size-9 fill-current text-black dark:text-white" />
-          <span class="text-xl font-semibold text-black-900 dark:text-white">Four Seasons</span>
+          <span class="text-xl font-semibold text-black-900 dark:text-white">Luna Vista</span>
         </Link>
       </div>
 

@@ -7,6 +7,7 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 use Redirect;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
@@ -46,7 +47,10 @@ class StripeController extends Controller
                         'product_data' => [
                             'name' => "Room {$reservation->room->room_number} Reservation",
                             'description' => "Check-in: {$checkInDate}, Check-out: {$checkOutDate}",
-                        ],
+                            'images' => [
+                                'https://i.ibb.co/Y7ZZDhWD/5.jpg'
+                                ]
+                            ],
                         'unit_amount' => $reservation->price_paid,
                     ],
                     'quantity' => 1,
@@ -58,6 +62,7 @@ class StripeController extends Controller
                     'reservation_id' => $reservation->id,
                 ],
             ]);
+            Log::info('this is session,', ['sessionid' => asset($reservation->room->image)]);
 
             // Create payment record in pending state
             $payment = Payment::create([
@@ -138,8 +143,10 @@ class StripeController extends Controller
                 'reservation_id' => $reservation->id,
                 'stripe_session_id' => $session_id,
             ]);
-
-            return redirect()->route('clients.myreservation')->with('success', 'Your reservation has been confirmed successfully!');
+            return Inertia::render('Client/success', [
+           
+            ]);
+            // return redirect()->route('clients.myreservation')->with('success', 'Your reservation has been confirmed successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -7,9 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class GreetingApprovedClient extends Notification implements ShouldQueue
+class GreetingApprovedClient extends Notification
 {
-    use Queueable;
 
     public $user;
 

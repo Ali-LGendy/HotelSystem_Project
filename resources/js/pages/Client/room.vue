@@ -16,7 +16,7 @@ const props = defineProps({
     required: true
   }
 });
-
+console.log(props.room);
 const emit = defineEmits(['book-room']);
 
 const statusColor = computed(() => {
@@ -42,7 +42,7 @@ const handleBooking = () => {
     <div class="relative aspect-video">
       <img :src="room.image" :alt="room.name" class="object-cover w-full h-full" />
       <div class="absolute top-2 right-2">
-        <Badge :variant="room.status === 'available' ? 'default' : 'destructive'" class="text-white dark:text-black-200">
+        <Badge :variant="room.status === 'available' ? 'default' : 'destructive'" class="text-white dark:text-black">
           {{ room.status }}
         </Badge>
       </div>
@@ -51,7 +51,7 @@ const handleBooking = () => {
     <CardHeader>
       <CardTitle class="flex justify-between items-center">
         <span>{{ room.name }}</span>
-        <span class="text-lg">${{ room.price/100 }}/night</span>
+        <span class="text-lg">${{ (room.price/100).toFixed(2) }} /night</span>
       </CardTitle>
       <p class="text-sm text-muted-foreground">Room {{ room.room_number }}</p>
     </CardHeader>

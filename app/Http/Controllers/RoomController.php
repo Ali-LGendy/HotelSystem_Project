@@ -296,6 +296,7 @@ class RoomController extends Controller
                     'id' => $room->id,
                     'room_number' => $room->room_number,
                     'room_capacity' => $room->room_capacity,
+                    'image' => $room->image,
                     'price' => $room->price,
                     'status' => $room->status,
                     'floor_id' => $room->floor_id,

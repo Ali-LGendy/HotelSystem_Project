@@ -49,7 +49,6 @@ class ReservationController extends Controller
             'accompany_number' => $validated['guests'],
             'price_paid' => $validated['total_price'] * 100,
             'status' => 'pending',
-            'receptionist_id' => null,
         ]);
 
         return redirect()->route('clients.myreservation');

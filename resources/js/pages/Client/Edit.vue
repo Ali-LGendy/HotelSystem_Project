@@ -141,20 +141,10 @@ const getInitials = (name) => {
                                     {{ form.errors.email }}
                                 </p>
                             </div>
-
-                            <!-- Password -->
-                            <div>
-                                <Label for="password" class="text-lg">Password</Label>
-                                <Input v-model="form.password" id="password" type="password" placeholder="Set a new password" class="mt-2 h-12" />
-                                <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
-                                    {{ form.errors.password }}
-                                </p>
-                            </div>
-
                             <!-- National ID -->
                             <div>
-                                <Label for="national_id" class="text-lg">Mobile</Label>
-                                <Input v-model="form.mobile" id="mobile" placeholder="Enter national ID" required class="mt-2 h-12" />
+                                <Label for="mobile" class="text-lg">Mobile</Label>
+                                <Input v-model="form.mobile" id="mobile" placeholder="01*********" required class="mt-2 h-12" />
                                 <p v-if="form.errors.mobile" class="mt-1 text-sm text-red-500">
                                     {{ form.errors.mobile }}
                                 </p>

@@ -142,15 +142,6 @@ const getInitials = (name) => {
                                 </p>
                             </div>
 
-                            <!-- Password -->
-                            <div>
-                                <Label for="password" class="text-lg">Password</Label>
-                                <Input v-model="form.password" id="password" type="password" placeholder="Set a new password" class="mt-2 h-12" />
-                                <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
-                                    {{ form.errors.password }}
-                                </p>
-                            </div>
-
                             <!-- National ID -->
                             <div>
                                 <Label for="national_id" class="text-lg">National ID</Label>

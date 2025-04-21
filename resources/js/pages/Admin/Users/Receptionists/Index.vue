@@ -1,6 +1,5 @@
 <script setup>
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
@@ -19,12 +18,6 @@ const props = defineProps({
         type: Object,
         default: () => ({ data: [] }),
     },
-    is_admin: {
-        type: Boolean,
-    },
-    user_id: {
-        type: Number,
-    },
 });
 
 defineOptions({ layout: AppLayout });
@@ -32,20 +25,17 @@ defineOptions({ layout: AppLayout });
 const getImageUrl = (path) => {
     if (!path) return '/defaults/user.png';
 
-    // For full URLs
     if (path.startsWith('http')) {
         return path;
     }
 
-    // For local storage files
     return `/storage/${path}`;
 };
 
-// Fallback to initials if image fails to load
 const handleImageError = (event, name) => {
     event.target.style.display = 'none';
     event.target.parentNode.innerHTML = `
-        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+        <div class="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
             ${getInitials(name)}
         </div>
     `;
@@ -70,7 +60,6 @@ const confirmDelete = (id) => {
     }
 };
 
-// Get initials from name
 const getInitials = (name) => {
     return name
         .split(' ')
@@ -82,118 +71,106 @@ const getInitials = (name) => {
 </script>
 
 <template>
-    <div class="flex min-h-screen items-center justify-center bg-background p-8 text-foreground">
-        <div class="w-full max-w-6xl">
-            <Card class="w-full p-6">
-                <CardHeader>
-                    <div class="dark:bg-dark-700 flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-600">
-                        <CardTitle class="text-3xl font-bold">Manage Receptionists</CardTitle>
+    <div class="min-h-screen bg-background p-8 text-foreground">
+        <div class="mx-auto max-w-7xl">
+            <!-- Header Section with Title and Create Button -->
+            <div class="mb-8 flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-foreground">Manage Receptionists</h1>
+                <Link :href="route('receptionist.create')">
+                    <Button>+ Add Receptionist</Button>
+                </Link>
+            </div>
 
-                        <Link :href="route('receptionist.create')">
-                            <Button class="h-12 text-lg">Add Receptionist</Button>
-                        </Link>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <!-- Add Receptionist Button -->
+            <!-- Receptionists Table -->
+            <Table v-if="receptionists && receptionists.data.length > 0" class="w-full rounded-lg border border-border">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>National ID</TableHead>
+                        <TableHead>Avatar</TableHead>
+                        <TableHead v-if="user.roles.some((role) => role.name === 'admin')">Manager</TableHead>
+                        <TableHead class="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
 
-                    <!-- Receptionists Table -->
-                    <Table v-if="receptionists && receptionists.data.length > 0" class="w-full">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>National ID</TableHead>
-                                <TableHead>Avatar</TableHead>
-                                <TableHead v-if="user.roles.some((role) => role.name === 'admin')">Manager</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
+                <TableBody>
+                    <TableRow 
+                        v-for="receptionist in receptionists.data" 
+                        :key="receptionist.id" 
+                        class="transition-colors hover:bg-accent/10"
+                    >
+                        <TableCell class="font-medium">{{ receptionist.name }}</TableCell>
+                        <TableCell>{{ receptionist.email }}</TableCell>
+                        <TableCell>{{ receptionist.national_id }}</TableCell>
+                        <TableCell>
+                            <img
+                                v-if="receptionist.avatar_img"
+                                :src="getImageUrl(receptionist.avatar_img)"
+                                alt="Avatar"
+                                class="h-10 w-10 rounded-full border border-border"
+                                @error="(event) => handleImageError(event, receptionist.name)"
+                            />
+                            <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
+                                {{ getInitials(receptionist.name) }}
+                            </div>
+                        </TableCell>
+                        <TableCell v-if="user.roles.some((role) => role.name === 'admin')">
+                            {{ receptionist.manager ? receptionist.manager.name : 'No Manager' }}
+                        </TableCell>
+                        <TableCell class="text-right">
+                            <div class="flex justify-end space-x-2">
+                                <Link :href="route('receptionist.edit', receptionist)">
+                                    <Button 
+                                        variant="outline"
+                                        :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
+                                    >
+                                        Edit
+                                    </Button>
+                                </Link>
+                                <Link :href="route('receptionist.show', receptionist)">
+                                    <Button variant="secondary">View</Button>
+                                </Link>
+                                <Button 
+                                    @click="banManager(receptionist.id)" 
+                                    :variant="receptionist.is_banned ? 'default' : 'destructive'"
+                                    :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
+                                >
+                                    {{ receptionist.is_banned ? 'Unban' : 'Ban' }}
+                                </Button>
+                                <Button 
+                                    variant="destructive" 
+                                    @click.prevent="confirmDelete(receptionist.id)"
+                                    :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
+                                >
+                                    Delete
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
 
-                        <TableBody>
-                            <TableRow v-for="receptionist in receptionists.data" :key="receptionist.id" class="hover:bg-secondary/10">
-                                <TableCell>{{ receptionist.name }}</TableCell>
-                                <TableCell>{{ receptionist.email }}</TableCell>
-                                <TableCell>{{ receptionist.national_id }}</TableCell>
-                                <TableCell>
-                                    <img
-                                        v-if="receptionist.avatar_img"
-                                        :src="getImageUrl(receptionist.avatar_img)"
-                                        alt="Avatar"
-                                        class="h-12 w-12 rounded-full object-cover"
-                                        @error="(event) => handleImageError(event, receptionist.name)"
-                                    />
-                                    <div v-else class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-foreground">
-                                        {{ getInitials(receptionist.name) }}
-                                    </div>
-                                </TableCell>
-                                <TableCell v-if="user.roles.some((role) => role.name === 'admin')">
-                                    {{ receptionist.manager ? receptionist.manager.name : 'No Manager' }}
-                                </TableCell>
+            <!-- Empty State -->
+            <div v-else class="rounded-lg bg-accent/50 p-8 text-center text-muted-foreground">
+                No receptionists found. Create a new receptionist by clicking the "Add Receptionist" button.
+            </div>
 
-                                <TableCell>
-                                    <div class="flex gap-2">
-                                        <!-- Edit Button -->
-                                        <Link :href="route('receptionist.edit', receptionist)">
-                                            <Button
-                                                variant="outline"
-                                                :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
-                                                class="h-10"
-                                            >
-                                                Edit
-                                            </Button>
-                                        </Link>
-
-                                        <!-- View Button -->
-                                        <Link :href="route('receptionist.show', receptionist)">
-                                            <Button variant="secondary" class="h-10"> View </Button>
-                                        </Link>
-
-                                        <!-- Delete Button -->
-                                        <Button
-                                            variant="destructive"
-                                            @click="confirmDelete(receptionist.id)"
-                                            :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
-                                            class="h-10"
-                                        >
-                                            Delete
-                                        </Button>
-
-                                        <!-- Ban/Unban Button -->
-                                        <Button
-                                            @click="banManager(receptionist.id)"
-                                            :variant="receptionist.is_banned ? 'default' : 'destructive'"
-                                            :disabled="!(user.roles.some((role) => role.name === 'admin') || receptionist.manager_id == user.id)"
-                                            class="h-10"
-                                        >
-                                            {{ receptionist.is_banned ? 'Unban' : 'Ban' }}
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-
-                    <!-- Empty State -->
-                    <div v-if="!receptionists.data.length" class="py-8 text-center text-muted-foreground">No receptionists found.</div>
-
-                    <!-- Pagination -->
-                    <div class="mt-6 flex items-center justify-center gap-2">
-                        <Link
-                            v-for="page in receptionists.last_page"
-                            :key="page"
-                            :href="`?page=${page}`"
-                            class="rounded-lg px-4 py-2 transition-colors"
-                            :class="{
-                                'bg-primary text-primary-foreground': page === receptionists.current_page,
-                                'bg-secondary text-secondary-foreground hover:bg-secondary/80': page !== receptionists.current_page,
-                            }"
-                        >
-                            {{ page }}
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
+            <!-- Pagination -->
+            <div class="mt-6 flex items-center justify-center space-x-2">
+                <Link
+                    v-for="page in receptionists.last_page"
+                    :key="page"
+                    :href="`?page=${page}`"
+                    class="rounded-lg px-4 py-2"
+                    :class="{
+                        'bg-primary text-primary-foreground': page === receptionists.current_page,
+                        'bg-accent text-accent-foreground hover:bg-accent/80': page !== receptionists.current_page,
+                    }"
+                >
+                    {{ page }}
+                </Link>
+            </div>
         </div>
     </div>
 </template>

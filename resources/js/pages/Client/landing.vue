@@ -81,6 +81,7 @@ const submitBooking = () => {
     <Header v-else />
 
     <CTAs />
+    <hr class="mt-12 border-t border border-gray-400 dark:border-light-600" />
     <main>
       <div class="relative bg-white dark:bg-black pt-8">
         <div class="container mx-auto px-4">

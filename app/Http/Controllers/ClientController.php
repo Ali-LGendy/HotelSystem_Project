@@ -81,8 +81,17 @@ class ClientController extends Controller
     public function create()
     {
         //
+        $user = auth()->user();
+        if($user->hasRole('admin'))
+        {
+            $menuLinks = $this->getAdminMenuLinks();
+        }else if( $user->hasRole('manager')){
+            $menuLinks = $this->getManagerMenuLinks();
+        }else{
+            $menuLinks = $this->getreceptionistMenuLinks();
+        } 
         return Inertia::render('Client/Create', [
-            'menuLinks' => $this->getreceptionistMenuLinks(),
+            'menuLinks' => $menuLinks,
         ]);
 
     }

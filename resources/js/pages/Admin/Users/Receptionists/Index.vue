@@ -66,7 +66,7 @@ const banManager = (id) => {
 
 const confirmDelete = (id) => {
     if (confirm('Are you sure you want to delete this receptionist?')) {
-        router.delete(route('client.destroy', id));
+        router.delete(route('receptionist.destroy', id));
     }
 };
 

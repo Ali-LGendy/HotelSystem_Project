@@ -1,9 +1,5 @@
 <?php
 
-// use App\Http\Controllers\Receptionist\ClientController;
-
-// use App\Http\Controllers\Receptionist\ClientController;
-// use App\Http\Controllers\Receptionist\ReservationController;
 use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,9 +12,7 @@ use App\Http\Controllers\RoomController;
 use App\Models\Floor;
 use App\Http\Controllers\ReceptionistsController;
 
-// this is an example on how to authorize based on permissions // our practice when it comes to Authorization : permisson gets assigned to roles, roles gets assigned to users then in middleware check permission names, or sometimes role-names
-// to add/remove/edit permissions or roles modify the ./database/seeders/RolesAndPermissionsSeeder
-// more can be found @ https://spatie.be/docs/laravel-permission/v6/best-practices/roles-vs-permissions
+
 
 Route::get('/', [RoomController::class, 'clientIndex'])->name('home');
 
@@ -46,7 +40,7 @@ Route::middleware(['auth','permission:manage managers','web'])->prefix('manager'
 });
 
 
-Route::middleware(['auth'])
+Route::middleware(['auth','CkeckBan','CkeckApproval'])
     ->get('clients/myreservation', [ClientController::class, 'showMyReservation'])
     ->name('clients.myreservation');
 
@@ -64,54 +58,9 @@ Route::middleware(['auth','CkeckBan', 'permission:manage receptionists'])->prefi
 
 
 
-// Route::get('dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-
-
-// Receptionist Routes
-// Route::middleware(['auth', 'permission:manage reservations'])
-//     ->prefix('receptionist')
-//     ->name('receptionist.')
-//     ->group(function () {
-//         // Use resource routing for ReservationController (except create and store)
-//         Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
-//         // Add route for all reservations
-//         Route::get('all-reservations', [ReservationController::class, 'allReservations'])->name('reservations.all');
-//         Route::get('clients/{id}/reservations', [ClientController::class, 'clientReservations'])->name('clients.client-reservations');
-
-//         // Client management routes
-//         Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
-//         Route::get('clients/my-approved', [ClientController::class, 'myApprovedClients'])->name('clients.my-approved');
-//         Route::get('clients/all', [ClientController::class, 'allClients'])->name('clients.all');
-//         Route::get('clients/reservations/{id?}', [ClientController::class, 'clientReservations'])->name('clients.reservations');
-
-//         // Client approval/rejection routes
-//         Route::post('clients/{id}/approve', [ClientController::class, 'approveClient'])->name('clients.approve');
-//         Route::post('clients/{id}/reject', [ClientController::class, 'rejectClient'])->name('clients.reject');
-
-//         // Client ban/unban routes
-//         Route::post('clients/{id}/ban', [ClientController::class, 'banClient'])->name('clients.ban');
-//         Route::post('clients/{id}/unban', [ClientController::class, 'unbanClient'])->name('clients.unban');
-
-//         // API endpoint for client approval
-//         Route::post('api/clients/{id}/approve', [ClientController::class, 'approveClientApi'])->name('api.clients.approve');
-
-//         // Admin-only client management routes
-//         Route::middleware('role:admin')->group(function () {
-//             Route::get('clients/create', [ClientController::class, 'create'])->name('clients.create');
-//             Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
-//             Route::get('clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
-//             Route::put('clients/{id}', [ClientController::class, 'update'])->name('clients.update');
-//             Route::delete('clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
-//         });
-//     });
-
-//     Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 
 // Client Routes
-Route::middleware(['auth','CkeckBan' ,'permission:manage reservations'])->prefix('client')->name('client.')->group(function () {
+Route::middleware(['auth','CkeckBan','CkeckApproval' ,'permission:manage reservations'])->prefix('client')->name('client.')->group(function () {
     Route::get('/', [ClientController::class, 'index'])->name('index');
     Route::get('/clientsReservations', [ClientController::class, 'clientsReservations'])->name('clientsReservations');
     Route::get('/approved', [ClientController::class, 'myApproved'])->name('myApproved');
@@ -124,9 +73,6 @@ Route::middleware(['auth','CkeckBan' ,'permission:manage reservations'])->prefix
     Route::patch('/{user}/approve', [ClientController::class, 'approve'])->name('approve');
 });
 
-// Route::middleware(['auth'])
-//     ->get('client/', [ClientController::class, 'index'])
-//     ->name('clients.index');
 
 
 
@@ -134,7 +80,7 @@ Route::middleware(['auth','CkeckBan' ,'permission:manage reservations'])->prefix
 
 
 // Stripe Payment Routes
-Route::middleware(['auth', 'permission:pay for reservations'])->group(function () {
+Route::middleware(['auth','CkeckBan','CkeckApproval', 'permission:pay for reservations'])->group(function () {
     Route::get('/reservations/checkout/{reservation_id}', [StripeController::class, 'checkout'])->name('stripe.checkout');
     Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
     Route::get('/stripe/cancel/{reservation_id?}', [StripeController::class, 'cancel'])->name('stripe.cancel');
@@ -143,7 +89,7 @@ Route::middleware(['auth', 'permission:pay for reservations'])->group(function (
 // Stripe Webhook (no web or csrf middleware to accept post requests from stripe)
 Route::withoutMiddleware(['web', 'csrf'])->post('/webhook/stripe', [StripeController::class, 'handleWebhook'])->name('stripe.webhook');
 
-Route::group(['middleware' => ['auth', 'permission:manage floors']], function () {
+Route::group(['middleware' => ['auth','CkeckBan','CkeckApproval', 'permission:manage floors']], function () {
     Route::get('/floors', [FloorController::class, 'index'])->name('floors.index');
     Route::get('/floors/create', [FloorController::class, 'create'])->name('floors.create');
     Route::post('/floors', [FloorController::class, 'store'])->name('floors.store');
@@ -152,7 +98,7 @@ Route::group(['middleware' => ['auth', 'permission:manage floors']], function ()
     Route::delete('/floors/{floor}', [FloorController::class, 'destroy'])->name('floors.destroy');
 });
 
-Route::group(['middleware' => ['auth', 'permission:manage rooms']], function () {
+Route::group(['middleware' => ['auth','CkeckBan','CkeckApproval', 'permission:manage rooms']], function () {
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
     Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
@@ -162,12 +108,6 @@ Route::group(['middleware' => ['auth', 'permission:manage rooms']], function () 
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 });
 
-// can be remove at deploy
-Route::get('/debug/floors', function() {
-    $floors = Floor::with('manager')->get();
-    $user = auth()->user();
-    return response()->json($user);
-});
 
 
 

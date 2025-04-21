@@ -11,11 +11,12 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Cog\Contracts\Ban\Bannable as BannableInterface;
 use Cog\Laravel\Ban\Traits\Bannable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements BannableInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable, Bannable;
+    use HasFactory, HasRoles, Notifiable, Bannable,HasApiTokens;
 
     /**
      * The attributes that are mass assignable.

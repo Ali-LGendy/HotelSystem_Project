@@ -9,7 +9,8 @@ class WorldSeeder extends Seeder
 {
 	public function run()
 	{
-		(new SeedAction())->seed();
-
+		$this->call([
+			SeedAction::class,
+		]);
 	}
 }

@@ -59,7 +59,7 @@ const footerLinks = {
           <div class="flex items-center">
             <AppLogoIcon class="size-9 text-primary dark:text-primary" />
             <div class="ml-2">
-              <span class="text-xl font-semibold text-black-900 dark:text-white">Four Seasons</span>
+              <span class="text-xl font-semibold text-black-900 dark:text-white">Luna Vista</span>
             </div>
           </div>
 
@@ -124,7 +124,7 @@ const footerLinks = {
 
       <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
         <p class="text-sm text-muted-foreground">
-          © {{ new Date().getFullYear() }} Four Seasons. All rights reserved.
+          © {{ new Date().getFullYear() }} Luna Vista. All rights reserved.
         </p>
         <ul class="flex flex-wrap gap-4">
           <li v-for="link in footerLinks.legal" :key="link.label">

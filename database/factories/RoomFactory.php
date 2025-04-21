@@ -26,9 +26,16 @@ class RoomFactory extends Factory
         return [
             'floor_id' => $floor->id,
             'manager_id' => $floor->manager_id,
+            'image' => $this->faker->randomElement([
+                'storage/assets/rooms/1.jpg',
+                'storage/assets/rooms/2.jpg',
+                'storage/assets/rooms/3.jpg',
+                'storage/assets/rooms/4.jpg',
+                'storage/assets/rooms/5.jpg',
+            ]),
             'room_number' => $roomCount,
             'room_capacity' => $this->faker->numberBetween(1, 6),
-            'price' => $this->faker->numberBetween(1000, 10000),
+            'price' => $this->faker->numberBetween(10, 100) * 100,
             'status' => 'available',
         ];
     }

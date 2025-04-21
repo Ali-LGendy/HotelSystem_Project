@@ -82,7 +82,7 @@ const submitBooking = () => {
 
     <CTAs />
     <main>
-      <div class="relative bg-white dark:bg-black">
+      <div class="relative bg-white dark:bg-black pt-8">
         <div class="container mx-auto px-4">
           <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Our Rooms</h2>
           <div v-if="rooms.length === 0" class="text-center py-8">

@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use Inertia\Inertia;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Notifications\GreetingApprovedClient;
 
 
 class ClientController extends Controller
@@ -127,6 +128,10 @@ class ClientController extends Controller
         $message = $user->is_approved 
             ? 'User approved successfully.' 
             : 'User Unapproved successfully.';
+        // Send notification to the user
+        if ($user->is_approved) {
+            $user->notify(new GreetingApprovedClient($user));
+        }
 
         return redirect()
             ->route('client.index')

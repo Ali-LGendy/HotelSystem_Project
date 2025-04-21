@@ -3,11 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { defineProps } from 'vue';
+import { defineProps,watch } from 'vue';
 import { route } from 'ziggy-js';
+import { useToast } from 'vue-toastification';
+const toast = useToast();
+const page = usePage();
+const flash = page.props?.flash;
+console.log(page.props);
+console.log(flash);
+
 
 function useCurrentUser() {
-    const page = usePage();
     return page.props.auth.user;
 }
 
@@ -51,16 +57,17 @@ const handleImageError = (event, name) => {
 };
 
 const toggleApprove = (id) => {
-    if (confirm('Are you sure you want to change the approvement status of this client?')) {
+    // if (confirm('Are you sure you want to change the approvement status of this client?')) {
         router.patch(route('client.approve', id), {
             onSuccess: () => {
+                toast.success('User approved successfully!');
                 const clienttIndex = props.clients.data.findIndex((m) => m.id === id);
                 if (clienttIndex !== -1) {
                     props.clients.data[clienttIndex].is_approved = !props.clients.data[clienttIndex].is_approved;
                 }
             },
         });
-    }
+    // }
 };
 
 const confirmDelete = (id) => {
@@ -110,7 +117,21 @@ const banManager = (id) => {
             },
         });
     }
-};
+}; 
+
+watch(
+  () => page.props?.flash,
+  (flash) => {
+    if (flash?.success) {
+      toast.success(flash.success);
+    }
+
+    if (flash?.error) {
+      toast.error(flash.error);
+    }
+  },
+  { immediate: true }
+);
 </script>
 <template>
     <div class="min-h-screen bg-background p-8 text-foreground">
@@ -182,13 +203,13 @@ const banManager = (id) => {
                                 </Link>
 
                                 <!-- Approve Button -->
-                                <Button @click="toggleApprove(client.id)" :variant="client.is_approved ? 'secondary' : 'default'">
-                                    {{ client.is_approved ? 'Unapprove' : 'Approve' }}
+                                <Button v-if="!client.is_approved" @click="toggleApprove(client.id)" :variant="client.is_approved ? 'secondary' : 'default'">
+                                    {{'Approve'}}
                                 </Button>
 
                                 <!-- Ban/Unban Button -->
                                 <Button
-                                    v-if="user.roles.some((role) => role.name === 'admin')"
+                                    v-if="user.roles.some((role) => role.name === 'admin') && client.is_approved"
                                     @click="banManager(client.id)"
                                     :variant="client.is_banned ? 'default' : 'destructive'"
                                 >

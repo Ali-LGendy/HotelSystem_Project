@@ -38,11 +38,6 @@ const submitForm = () => {
     formData.append('email', form.email);
     formData.append('national_id', form.national_id);
 
-    // Only append password if it's not empty
-    if (form.password) {
-        formData.append('password', form.password);
-    }
-
     // Handle file upload
     if (form.avatar_img instanceof File) {
         formData.append('avatar_img', form.avatar_img);
@@ -135,14 +130,7 @@ const getInitials = (name) => {
                                 </p>
                             </div>
 
-                            <!-- Password -->
-                            <div>
-                                <Label for="password" class="text-lg">Password</Label>
-                                <Input v-model="form.password" id="password" type="password" placeholder="Set a new password" class="mt-2 h-12" />
-                                <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
-                                    {{ form.errors.password }}
-                                </p>
-                            </div>
+                            
 
                             <!-- National ID -->
                             <div>

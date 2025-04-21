@@ -7,7 +7,8 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import axios from 'axios';
-
+import Toast from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
 // Configure Axios to include CSRF token in all requests
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 const token = document.head.querySelector('meta[name="csrf-token"]');
@@ -43,7 +44,23 @@ createInertiaApp({
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(Toast, {
+                // Optional options
+                position: 'top-right',
+                timeout: 3000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: false,
+                closeButton: 'button',
+                icon: true,
+              })
             .mount(el);
+
+        
     },
     progress: {
         color: '#4B5563',

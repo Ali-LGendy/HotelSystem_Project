@@ -48,6 +48,7 @@ We've created composables to encapsulate business logic and state management:
   </template>
 </ClientTable>
 ```
+damn
 
 ### Example: Using the NavigationButtons Component
 
